@@ -1,0 +1,9 @@
+{
+  "extends": ["next/core-web-vitals", "../../packages/config/eslint/base.js"],
+  "rules": {
+    "no-console": "warn",
+    "import/order": "off",
+    "react/no-unescaped-entities": "off",
+    "@typescript-eslint/no-explicit-any": "warn"
+  }
+}

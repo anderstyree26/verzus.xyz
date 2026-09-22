@@ -1,0 +1,37 @@
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { WalletService } from './wallet.service';
+import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { CurrentUser, type AuthUser } from '../common/decorators/current-user.decorator';
+import type { PayoutMethod } from '@antigravity/core';
+
+@Controller('wallet')
+@UseGuards(SupabaseAuthGuard)
+export class WalletController {
+  constructor(private readonly walletService: WalletService) {}
+
+  @Get('balance')
+  async getBalance(@CurrentUser() user: AuthUser) {
+    return this.walletService.getBalance(user.id);
+  }
+
+  @Get('history')
+  async getHistory(
+    @CurrentUser() user: AuthUser,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.walletService.getHistory(
+      user.id,
+      limit ? parseInt(limit, 10) : 50,
+      offset ? parseInt(offset, 10) : 0,
+    );
+  }
+
+  @Post('payout')
+  async requestPayout(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { amount: number; method: PayoutMethod },
+  ) {
+    return this.walletService.requestPayout(user.id, body.amount, body.method);
+  }
+}
