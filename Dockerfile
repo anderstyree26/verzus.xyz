@@ -14,8 +14,10 @@ COPY apps/api ./apps/api
 COPY apps/web/package.json ./apps/web/package.json
 COPY apps/mobile/package.json ./apps/mobile/package.json
 
-# Install dependencies and build API
+# Install dependencies and build db, core, and API packages
 RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @antigravity/db build
+RUN pnpm --filter @antigravity/core build
 RUN pnpm --filter @antigravity/api build
 
 FROM node:20-alpine AS runner
