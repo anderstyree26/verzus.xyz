@@ -2,13 +2,13 @@
 -- ANTIGRAVITY — Seed Data
 -- ============================================================================
 
--- Official game profiles (one per major type) -------------------------------
+-- Official universal game engine profiles ------------------------------------
 insert into public.game_profiles
   (id, display_name, game_type, platform, roi, constraints, end_keywords, regex_pattern, approved, is_official)
 values
   (
     '11111111-1111-1111-1111-111111111111',
-    'Subway Surfers (High Score)',
+    'High Score (Universal)',
     'HIGH_SCORE',
     'MOBILE',
     '{"x":0.65,"y":0.05,"w":0.3,"h":0.08}'::jsonb,
@@ -20,9 +20,9 @@ values
   ),
   (
     '22222222-2222-2222-2222-222222222222',
-    'TrackMania / Speedrun (Time Trial)',
+    'Time Trial (Universal)',
     'LOW_TIME',
-    'PC',
+    'MOBILE',
     '{"x":0.35,"y":0.05,"w":0.3,"h":0.08}'::jsonb,
     '{"min":0,"max":86400000,"maxJumpPerSec":0}'::jsonb,
     array['Finish','Complete','Results'],
@@ -32,37 +32,13 @@ values
   ),
   (
     '33333333-3333-3333-3333-333333333333',
-    'Street Fighter / Tekken (1v1 Fighter)',
+    'Win/Loss (Universal)',
     'BINARY_RESULT',
-    'CONSOLE',
+    'MOBILE',
     '{"x":0.25,"y":0.35,"w":0.5,"h":0.2}'::jsonb,
     '{}'::jsonb,
-    array['VICTORY','DEFEAT','WIN','LOSE','K.O.'],
+    array['VICTORY','DEFEAT','WIN','LOSE'],
     null,
-    true,
-    true
-  ),
-  (
-    '44444444-4444-4444-4444-444444444444',
-    'Chess.com / Rapid 1v1 (Strategy)',
-    'BINARY_RESULT',
-    'WEB',
-    '{"x":0.2,"y":0.2,"w":0.6,"h":0.3}'::jsonb,
-    '{}'::jsonb,
-    array['Checkmate','Resigned','Time out','Draw'],
-    null,
-    true,
-    true
-  ),
-  (
-    '55555555-5555-5555-5555-555555555555',
-    'Flappy Bird / Endless Runner',
-    'HIGH_SCORE',
-    'MOBILE',
-    '{"x":0.4,"y":0.3,"w":0.2,"h":0.1}'::jsonb,
-    '{"min":0,"max":9999,"maxJumpPerSec":5}'::jsonb,
-    array['Score','Best','Game Over'],
-    '([0-9]+)',
     true,
     true
   )

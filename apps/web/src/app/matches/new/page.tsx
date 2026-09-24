@@ -70,11 +70,15 @@ function NewMatchForm() {
             className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
           >
             <option value="">Select a game archetype...</option>
-            {profiles?.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.displayName} ({p.platform} - {p.gameType})
-              </option>
-            ))}
+            {profiles?.map((p) => {
+              const dName = p.displayName || (p as any).display_name || 'Game';
+              const gType = p.gameType || (p as any).game_type || 'CUSTOM';
+              return (
+                <option key={p.id} value={p.id}>
+                  {dName} ({p.platform || 'UNIVERSAL'} — {gType})
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -96,6 +100,11 @@ function NewMatchForm() {
               </button>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 mt-1.5">
+            {format === 'BO1' && '⚡ Single sudden-death game. First to finish/win takes the match.'}
+            {format === 'BO3' && '⚔️ Best of 3 games. First player to secure 2 game wins claims victory.'}
+            {format === 'BO5' && '🏆 Championship format. First player to secure 3 game wins claims victory.'}
+          </p>
         </div>
 
         <div>
