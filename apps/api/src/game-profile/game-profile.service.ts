@@ -12,6 +12,19 @@ export class GameProfileService {
     this.supabase = createServiceClient(url, key);
   }
 
+  private mapProfile(p: any) {
+    if (!p) return null;
+    return {
+      ...p,
+      displayName: p.display_name ?? p.displayName,
+      gameType: p.game_type ?? p.gameType,
+      isOfficial: p.is_official ?? p.isOfficial ?? false,
+      playCount: p.play_count ?? p.playCount ?? 0,
+      endKeywords: p.end_keywords ?? p.endKeywords ?? [],
+      regexPattern: p.regex_pattern ?? p.regexPattern,
+    };
+  }
+
   async listApproved() {
     const { data, error } = await this.supabase
       .from('game_profiles')
@@ -20,7 +33,7 @@ export class GameProfileService {
       .order('play_count', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data;
+    return (data || []).map((p) => this.mapProfile(p));
   }
 
   async getById(id: string) {
@@ -31,7 +44,7 @@ export class GameProfileService {
       .maybeSingle();
 
     if (error || !data) throw new NotFoundException('Game profile not found');
-    return data;
+    return this.mapProfile(data);
   }
 
   async submitProfile(

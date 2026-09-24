@@ -27,8 +27,8 @@ export default function GameProfileDetailPage() {
     <div className="max-w-3xl mx-auto my-8 p-8 bg-surface-elevated border border-surface-border rounded-xl text-white flex flex-col gap-6">
       <div className="flex justify-between items-start">
         <div>
-          <span className="text-xs text-accent font-bold uppercase">{profile.platform} · {profile.gameType}</span>
-          <h1 className="text-3xl font-extrabold mt-1">{profile.displayName}</h1>
+          <span className="text-xs text-accent font-bold uppercase">{profile.platform || 'UNIVERSAL'} · {profile.gameType || (profile as any).game_type}</span>
+          <h1 className="text-3xl font-extrabold mt-1">{profile.displayName || (profile as any).display_name || 'Game Profile'}</h1>
           <p className="text-xs text-gray-400 mt-1">Profile ID: {profile.id}</p>
         </div>
 

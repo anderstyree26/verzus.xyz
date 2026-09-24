@@ -38,10 +38,10 @@ export default function GamesPage() {
             <GameProfileCard
               key={g.id}
               id={g.id}
-              displayName={g.displayName}
-              gameType={g.gameType}
-              platform={g.platform}
-              isOfficial={g.isOfficial}
+              displayName={(g as any).displayName || (g as any).display_name || 'Untitled Game'}
+              gameType={(g as any).gameType || (g as any).game_type || 'CUSTOM'}
+              platform={(g as any).platform || 'MOBILE'}
+              isOfficial={(g as any).isOfficial ?? (g as any).is_official ?? false}
             />
           ))}
         </div>
