@@ -41,6 +41,7 @@ export default function GamesPage() {
               displayName={(g as any).displayName || (g as any).display_name || 'Untitled Game'}
               gameType={(g as any).gameType || (g as any).game_type || 'CUSTOM'}
               platform={(g as any).platform || 'MOBILE'}
+              platforms={(g as any).constraints?.platforms}
               isOfficial={(g as any).isOfficial ?? (g as any).is_official ?? false}
             />
           ))}

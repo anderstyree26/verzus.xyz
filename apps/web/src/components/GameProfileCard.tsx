@@ -7,6 +7,7 @@ interface GameProfileCardProps {
   displayName: string;
   gameType: string;
   platform: string;
+  platforms?: string[];
   isOfficial?: boolean;
 }
 
@@ -15,13 +16,16 @@ export function GameProfileCard({
   displayName,
   gameType,
   platform,
+  platforms,
   isOfficial,
 }: GameProfileCardProps) {
+  const platformDisplay = platforms && platforms.length > 0 ? platforms.join(' · ') : platform;
+
   return (
     <div className="p-5 bg-surface-elevated border border-surface-border rounded-lg flex flex-col justify-between gap-4 text-white hover:border-accent/40 transition">
       <div>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-accent font-semibold uppercase">{platform}</span>
+          <span className="text-xs text-accent font-semibold uppercase">{platformDisplay}</span>
           {isOfficial && (
             <span className="px-2 py-0.5 bg-accent/20 text-accent font-bold text-[10px] rounded">
               OFFICIAL

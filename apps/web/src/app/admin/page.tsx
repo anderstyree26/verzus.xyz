@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
         <p className="text-sm text-gray-400">Platform operations, moderation, and review queues.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 bg-surface-elevated border border-surface-border rounded-lg text-center">
           <span className="text-xs uppercase text-gray-400">Total Users</span>
           <div className="text-3xl font-bold font-mono text-accent mt-1">{stats?.users ?? 0}</div>
@@ -42,11 +42,17 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
         <Link
-          href="/admin/review"
-          className="p-5 bg-surface-elevated border border-surface-border rounded-lg hover:border-accent/40 transition"
+          href="/games/new"
+          className="p-5 bg-accent/15 border border-accent/40 rounded-lg hover:bg-accent/25 transition flex flex-col justify-between"
         >
-          <h3 className="font-bold text-white text-base">HITL Review Queue</h3>
-          <p className="text-xs text-gray-400 mt-1">Audit low-confidence OCR reads and dispute flags.</p>
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-white text-base">New Game Profile</h3>
+              <span className="px-2 py-0.5 bg-accent text-white font-bold text-[10px] rounded">AUTO-CALIBRATE</span>
+            </div>
+            <p className="text-xs text-gray-300 mt-1">Upload reference screenshots to auto-calibrate OCR and publish games.</p>
+          </div>
+          <span className="text-xs font-bold text-accent mt-3">Launch Auto-Calibrator →</span>
         </Link>
 
         <Link
@@ -55,6 +61,14 @@ export default function AdminDashboardPage() {
         >
           <h3 className="font-bold text-white text-base">Approve Game Profiles</h3>
           <p className="text-xs text-gray-400 mt-1">Review user-submitted archetypes and ROI calibrations.</p>
+        </Link>
+
+        <Link
+          href="/admin/review"
+          className="p-5 bg-surface-elevated border border-surface-border rounded-lg hover:border-accent/40 transition"
+        >
+          <h3 className="font-bold text-white text-base">HITL Review Queue</h3>
+          <p className="text-xs text-gray-400 mt-1">Audit low-confidence OCR reads and dispute flags.</p>
         </Link>
 
         <Link

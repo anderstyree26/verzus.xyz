@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api';
 import type { GameProfile } from '@antigravity/core';
@@ -23,9 +24,19 @@ export default function AdminProfilesPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Approve Game Profiles</h1>
-        <p className="text-sm text-gray-400">Review game archetypes and calibrations submitted by the community.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Approve Game Profiles</h1>
+          <p className="text-sm text-gray-400">Review game archetypes and calibrations submitted by the community.</p>
+        </div>
+
+        <Link
+          href="/games/new"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-600 font-bold text-xs rounded-md text-white transition shadow-sm"
+        >
+          <span>⚡</span>
+          <span>Auto-Calibrate New Game</span>
+        </Link>
       </div>
 
       <div className="divide-y divide-surface-border bg-surface-elevated border border-surface-border rounded-lg">
