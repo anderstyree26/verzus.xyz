@@ -4,7 +4,7 @@ import { Providers } from './providers';
 import { Navbar } from '../components/Navbar';
 
 export const metadata: Metadata = {
-  title: 'Antigravity — Universal Esports Platform',
+  title: 'VerzusXYZ — Universal Esports Platform',
   description: 'Skill-based esports matches and tournaments for any game verified by OCR and computer vision.',
 };
 
@@ -22,7 +22,7 @@ export default function RootLayout({
             {children}
           </main>
           <footer className="border-t border-surface-border py-8 text-center text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Antigravity Esports. Free-tier open architecture. Zero paid game APIs required.</p>
+            <p>© {new Date().getFullYear()} VerzusXYZ Esports. Free-tier open architecture. Zero paid game APIs required.</p>
           </footer>
         </Providers>
       </body>

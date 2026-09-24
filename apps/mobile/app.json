@@ -1,20 +1,20 @@
 {
   "expo": {
-    "name": "Antigravity",
-    "slug": "antigravity",
+    "name": "VerzusXYZ",
+    "slug": "verzusxyz",
     "version": "0.1.0",
     "orientation": "portrait",
-    "scheme": "antigravity",
+    "scheme": "verzusxyz",
     "userInterfaceStyle": "dark",
     "splash": {
       "backgroundColor": "#0A0A0F"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.antigravity.app"
+      "bundleIdentifier": "xyz.verzus.app"
     },
     "android": {
-      "package": "com.antigravity.app"
+      "package": "xyz.verzus.app"
     },
     "plugins": ["expo-router", "expo-secure-store"],
     "experiments": {

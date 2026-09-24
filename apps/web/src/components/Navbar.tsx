@@ -10,10 +10,10 @@ export function Navbar() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center font-extrabold text-white text-sm shadow-[0_0_12px_rgba(139,92,246,0.6)]">
-              AG
+              VX
             </span>
             <span className="font-extrabold tracking-tight text-lg text-white">
-              ANTIGRAVITY
+              VERZUSXYZ
             </span>
           </Link>
 

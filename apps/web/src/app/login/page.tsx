@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-surface-elevated border border-surface-border rounded-xl">
-      <h2 className="text-2xl font-bold text-center">Sign In to Antigravity</h2>
+      <h2 className="text-2xl font-bold text-center">Sign In to VerzusXYZ</h2>
       <p className="text-xs text-gray-400 text-center mt-1">Access your esports wallet and challenges</p>
 
       {error && (

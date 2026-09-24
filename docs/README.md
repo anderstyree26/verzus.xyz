@@ -1,8 +1,8 @@
-# Antigravity — Universal Esports Platform
+# VerzusXYZ — Universal Esports Platform
 
 > **Any Game. Any Device. Zero Developer APIs. 100% Free-Tier Infrastructure.**
 
-Antigravity is a globally accessible, skill-based esports infrastructure that enables competitive 1v1 matchmaking and single-elimination bracket tournaments across **any game** (mobile, PC, console, or physical table games) using client-side Optical Character Recognition (OCR), perceptual image hashing, and a human-in-the-loop (HITL) review audit trail.
+VerzusXYZ is a globally accessible, skill-based esports infrastructure that enables competitive 1v1 matchmaking and single-elimination bracket tournaments across **any game** (mobile, PC, console, or physical table games) using client-side Optical Character Recognition (OCR), perceptual image hashing, and a human-in-the-loop (HITL) review audit trail.
 
 ---
 

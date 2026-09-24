@@ -17,7 +17,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  log.info({ port }, 'Antigravity Backend API server listening');
+  log.info({ port }, 'VerzusXYZ Backend API server listening');
 }
 
 void bootstrap();

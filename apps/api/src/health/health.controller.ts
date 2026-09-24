@@ -6,7 +6,7 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
-      service: 'antigravity-api',
+      service: 'verzusxyz-api',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     };

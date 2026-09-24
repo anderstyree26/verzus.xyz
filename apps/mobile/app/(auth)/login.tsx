@@ -41,7 +41,7 @@ export default function LoginScreen() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const randomGuestEmail = `guest_${Math.random().toString(36).substring(7)}@antigravity.demo`;
+      const randomGuestEmail = `guest_${Math.random().toString(36).substring(7)}@verzus.xyz`;
       const randomPassword = `DemoPass_${Math.random().toString(36).substring(7)}!`;
       const { error } = await supabase.auth.signUp({
         email: randomGuestEmail,
@@ -69,7 +69,7 @@ export default function LoginScreen() {
     >
       <View style={styles.inner}>
         <View style={styles.brandContainer}>
-          <Text style={styles.logoTitle}>ANTIGRAVITY</Text>
+          <Text style={styles.logoTitle}>VERZUSXYZ</Text>
           <Text style={styles.logoSubtitle}>Universal Esports Arena</Text>
         </View>
 

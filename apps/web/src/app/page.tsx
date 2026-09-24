@@ -12,7 +12,7 @@ export default function HomePage() {
       </h1>
 
       <p className="mt-4 text-base sm:text-lg text-gray-400 max-w-2xl">
-        Mobile, PC, Console, or Physical. Antigravity uses client-side optical character recognition
+        Mobile, PC, Console, or Physical. VerzusXYZ uses client-side optical character recognition
         and server verification to turn any screen into an esports arena.
       </p>
 
