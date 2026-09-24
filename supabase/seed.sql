@@ -1,5 +1,5 @@
 -- ============================================================================
--- ANTIGRAVITY — Seed Data
+-- VERZUSXYZ — Seed Data
 -- ============================================================================
 
 -- Official universal game engine profiles ------------------------------------
@@ -65,5 +65,5 @@ on conflict do nothing;
 
 -- One demo sponsor ----------------------------------------------------------
 insert into public.sponsors (name, website_url, funded_amount)
-values ('Antigravity Foundation', 'https://antigravity.local', 100000)
+values ('VerzusXYZ Foundation', 'https://verzus-xyz.vercel.app', 100000)
 on conflict do nothing;
