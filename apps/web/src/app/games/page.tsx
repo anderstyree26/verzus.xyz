@@ -14,19 +14,33 @@ export default function GamesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Game Profiles</h1>
-          <p className="text-sm text-gray-400">
-            Browse official and community-calibrated OCR game archetypes.
-          </p>
+      {/* FACEIT Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#12121A] p-6 border border-[#1E1E2C] rounded-2xl shadow-xl">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-[#1E1E2C] border border-[#262638] flex items-center justify-center text-2xl font-black text-[#FF5500]">
+            🕹️
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-[#FF5500]/15 text-[#FF5500] text-[10px] font-black uppercase tracking-wider rounded">
+                Universal Game Catalog
+              </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white mt-0.5">
+              Esports Titles & Profiles
+            </h1>
+            <p className="text-xs text-gray-400 mt-1">
+              Official and community-calibrated OCR game archetypes across PC, Console, and Mobile.
+            </p>
+          </div>
         </div>
 
         <Link
           href="/games/new"
-          className="px-5 py-2.5 bg-[#FF5500] hover:bg-[#FF661A] text-black font-black text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#FF5500]/20"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#FF5500] hover:bg-[#FF661A] text-black font-extrabold text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#FF5500]/25"
         >
-          + Calibrate New Title
+          <span>+</span>
+          <span>Calibrate New Title</span>
         </Link>
       </div>
 
