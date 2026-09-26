@@ -17,8 +17,13 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.r2.dev' },
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, '');
+        })
+      );
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -27,6 +32,11 @@ const nextConfig = {
         events: false,
         stream: false,
         path: false,
+        os: false,
+      };
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        sharp: false,
       };
     }
     return config;
