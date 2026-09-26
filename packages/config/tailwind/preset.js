@@ -5,18 +5,20 @@ module.exports = {
     extend: {
       colors: {
         accent: {
-          DEFAULT: '#8B5CF6',
-          foreground: '#FFFFFF',
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
+          DEFAULT: '#FF5500',
+          foreground: '#000000',
+          50: '#FFF2EB',
+          100: '#FFE2D1',
+          400: '#FF6A1A',
+          500: '#FF5500',
+          600: '#E64D00',
+          700: '#CC4400',
         },
         surface: {
-          DEFAULT: '#0A0A0F',
+          DEFAULT: '#0C0C12',
           elevated: '#12121A',
-          border: '#1F1F2E',
+          card: '#161622',
+          border: '#1E1E2C',
         },
       },
       fontFamily: {
