@@ -31,8 +31,8 @@ export default function AdminProfilesPage() {
         </div>
 
         <Link
-          href="/games/new"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-600 font-bold text-xs rounded-md text-white transition shadow-sm"
+          href="/games/new?mode=admin"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FF5500] hover:bg-[#FF661A] font-bold text-xs rounded-xl text-black uppercase tracking-wider transition shadow-md shadow-[#FF5500]/20"
         >
           <span>⚡</span>
           <span>Auto-Calibrate New Game</span>

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { MatchService } from './match.service';
 import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
 import { CurrentUser, type AuthUser } from '../common/decorators/current-user.decorator';
@@ -14,12 +14,17 @@ export class MatchController {
     return this.matchService.getMyMatches(user.id);
   }
 
+  @Get('open')
+  async getOpen(@Query('profileId') profileId?: string) {
+    return this.matchService.getOpenMatches(profileId);
+  }
+
   @Post()
   async create(
     @CurrentUser() user: AuthUser,
-    @Body() body: { profileId: string; opponentId?: string; format?: MatchFormat },
+    @Body() body: { profileId: string; opponentId?: string; format?: MatchFormat; entryFee?: number },
   ) {
-    return this.matchService.createMatch(user.id, body.profileId, body.opponentId ?? null, body.format);
+    return this.matchService.createMatch(user.id, body.profileId, body.opponentId ?? null, body.format, body.entryFee);
   }
 
   @Get(':id')

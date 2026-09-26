@@ -24,9 +24,9 @@ export default function GamesPage() {
 
         <Link
           href="/games/new"
-          className="px-4 py-2 bg-accent hover:bg-accent-600 font-bold text-xs rounded-md transition"
+          className="px-5 py-2.5 bg-[#FF5500] hover:bg-[#FF661A] text-black font-black text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#FF5500]/20"
         >
-          Submit New Profile
+          + Calibrate New Title
         </Link>
       </div>
 

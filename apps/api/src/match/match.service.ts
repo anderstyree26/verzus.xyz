@@ -25,9 +25,41 @@ export class MatchService {
     return data;
   }
 
-  async createMatch(creatorId: string, profileId: string, opponentId: string | null, format: MatchFormat = 'BO1') {
+  async getOpenMatches(profileId?: string) {
+    let query = this.supabase
+      .from('matches')
+      .select('*, game_profiles(display_name, game_type)')
+      .eq('status', 'OPEN')
+      .is('player_b', null)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (profileId) {
+      query = query.eq('profile_id', profileId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      const fallback = await this.supabase
+        .from('matches')
+        .select('*')
+        .eq('status', 'OPEN')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      return fallback.data || [];
+    }
+    return data || [];
+  }
+
+  async createMatch(
+    creatorId: string,
+    profileId: string,
+    opponentId: string | null,
+    format: MatchFormat = 'BO1',
+    entryFee?: number,
+  ) {
     const roomCode = generateRoomCode();
-    return this.coreMatchService.create({
+    const match = await this.coreMatchService.create({
       creatorId,
       profileId,
       playerA: creatorId,
@@ -35,6 +67,12 @@ export class MatchService {
       format,
       roomCode,
     });
+
+    if (entryFee && entryFee > 0 && match?.id) {
+      await this.supabase.from('matches').update({ entry_fee: entryFee }).eq('id', match.id);
+    }
+
+    return match;
   }
 
   async getMatch(matchId: string) {

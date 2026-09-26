@@ -28,7 +28,13 @@ export default function ChallengesPage() {
 
   const { data: challenges, refetch, isLoading } = useQuery<ChallengeItem[]>({
     queryKey: ['open-challenges'],
-    queryFn: () => apiClient<ChallengeItem[]>('/matches/mine'), // matches list
+    queryFn: async () => {
+      try {
+        return await apiClient<ChallengeItem[]>('/matches/open');
+      } catch {
+        return await apiClient<ChallengeItem[]>('/matches/mine');
+      }
+    },
   });
 
   const handleAccept = async (matchId: string) => {
