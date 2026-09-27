@@ -57,7 +57,7 @@ export function CountrySelect({
     <div className={`relative flex flex-col gap-1 text-white ${className}`} ref={dropdownRef}>
       {label && (
         <label className="block text-xs font-semibold text-gray-300">
-          {label} {required && <span className="text-[#FF5500]">*</span>}
+          {label} {required && <span className="text-[#C86228]">*</span>}
         </label>
       )}
 
@@ -65,7 +65,7 @@ export function CountrySelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3 py-2.5 bg-surface border border-surface-border rounded-lg text-sm text-left flex items-center justify-between hover:border-gray-500 focus:outline-none focus:border-[#FF5500] transition"
+        className="w-full px-3 py-2.5 bg-surface border border-surface-border rounded-lg text-sm text-left flex items-center justify-between hover:border-gray-500 focus:outline-none focus:border-[#C86228] transition"
       >
         <span className="flex items-center gap-2.5 truncate">
           {selectedCountry ? (
@@ -90,7 +90,7 @@ export function CountrySelect({
 
       {/* Expandable Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-[#12121A] border border-surface-border rounded-xl shadow-2xl p-3 flex flex-col gap-2 max-h-96">
+        <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-[#111319] border border-surface-border rounded-xl shadow-2xl p-3 flex flex-col gap-2 max-h-96">
           {/* Search Input */}
           <div className="relative">
             <input
@@ -99,7 +99,7 @@ export function CountrySelect({
               placeholder="Type to filter 249+ countries..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FF5500]"
+              className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#C86228]"
             />
             {query && (
               <button
@@ -119,7 +119,7 @@ export function CountrySelect({
               onClick={() => setActiveRegion('All')}
               className={`px-2 py-0.5 rounded font-semibold whitespace-nowrap transition ${
                 activeRegion === 'All'
-                  ? 'bg-[#FF5500] text-white'
+                  ? 'bg-[#C86228] text-white'
                   : 'bg-surface text-gray-400 hover:text-white'
               }`}
             >
@@ -132,7 +132,7 @@ export function CountrySelect({
                 onClick={() => setActiveRegion(region)}
                 className={`px-2 py-0.5 rounded font-semibold whitespace-nowrap transition ${
                   activeRegion === region
-                    ? 'bg-[#FF5500] text-white'
+                    ? 'bg-[#C86228] text-white'
                     : 'bg-surface text-gray-400 hover:text-white'
                 }`}
               >
@@ -153,7 +153,7 @@ export function CountrySelect({
                     onClick={() => handleSelect(c)}
                     className={`w-full px-2.5 py-2 text-left rounded-md flex items-center justify-between text-xs transition ${
                       isSelected
-                        ? 'bg-[#FF5500]/20 text-[#FF5500] font-bold'
+                        ? 'bg-[#C86228]/20 text-[#D97736] font-bold'
                         : 'hover:bg-surface text-gray-200'
                     }`}
                   >

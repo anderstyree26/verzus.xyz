@@ -68,14 +68,14 @@ export default function ChallengesPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Top Banner & Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#12121A] p-6 border border-[#1E1E2C] rounded-2xl shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111319] p-6 border border-[#202430] rounded-2xl shadow-xl">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-[#1E1E2C] border border-[#262638] flex items-center justify-center text-2xl font-black text-[#FF5500]">
-            VS
+          <div className="w-14 h-14 rounded-xl bg-[#161922] border border-[#202430] flex items-center justify-center text-2xl font-black text-[#D97736]">
+            ⚔️
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-[#FF5500]/15 text-[#FF5500] text-[10px] font-black uppercase tracking-wider rounded">
+              <span className="px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 text-[10px] font-bold uppercase tracking-wider rounded">
                 Live Open Board
               </span>
               {activeGame && (
@@ -85,7 +85,7 @@ export default function ChallengesPage() {
               )}
             </div>
             <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white mt-0.5">
-              VS Play Queue & Duels
+              Duel Matchmaking Queue
             </h1>
             <p className="text-xs text-gray-400 mt-1">
               Challenge peers in instant 1v1 duels or Party matches. All results verified by client-side OCR.
@@ -95,39 +95,39 @@ export default function ChallengesPage() {
 
         <Link
           href={activeGame ? `/matches/new?profileId=${activeGame.id}` : '/matches/new'}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#FF5500] hover:bg-[#FF661A] text-black font-extrabold text-sm uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-[#FF5500]/25"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
           </svg>
-          Create VS Match
+          Create Duel
         </Link>
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#0C0C12] border border-[#1E1E2C] rounded-xl text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#111319] border border-[#202430] rounded-xl text-xs">
         <div className="flex items-center gap-2">
           {activeGame && (
             <button
               onClick={() => setFilterGameOnly(!filterGameOnly)}
               className={`px-3 py-1.5 rounded-lg font-bold border transition ${
                 filterGameOnly
-                  ? 'bg-[#FF5500]/20 border-[#FF5500] text-[#FF5500]'
-                  : 'bg-[#161622] border-[#262638] text-gray-400 hover:text-white'
+                  ? 'bg-[#C86228]/20 border-[#C86228] text-white'
+                  : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
               }`}
             >
               🎮 {activeGame.displayName} Only
             </button>
           )}
 
-          <div className="flex items-center bg-[#161622] border border-[#262638] rounded-lg p-0.5">
+          <div className="flex items-center bg-[#161922] border border-[#202430] rounded-lg p-0.5">
             {(['ALL', 'FREE', 'CASH'] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setFeeFilter(mode)}
                 className={`px-3 py-1 rounded-md font-bold transition ${
                   feeFilter === mode
-                    ? 'bg-[#FF5500] text-black'
+                    ? 'bg-[#C86228] text-white shadow-sm'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -142,7 +142,7 @@ export default function ChallengesPage() {
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            className="px-2.5 py-1.5 bg-[#161622] border border-[#262638] text-white rounded-lg text-xs focus:outline-none focus:border-[#FF5500]"
+            className="px-2.5 py-1.5 bg-[#161922] border border-[#202430] text-white rounded-lg text-xs focus:outline-none focus:border-[#C86228]"
           >
             <option value="All">Global (All Regions)</option>
             {GLOBAL_REGIONS.map((r) => (
@@ -157,7 +157,7 @@ export default function ChallengesPage() {
       {/* Challenge Grid */}
       {isLoading ? (
         <div className="p-16 text-center text-gray-400 font-mono text-sm animate-pulse">
-          Fetching live VS board...
+          Fetching live matchmaking board...
         </div>
       ) : filteredChallenges.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -178,7 +178,7 @@ export default function ChallengesPage() {
           ))}
         </div>
       ) : (
-        <div className="p-16 text-center bg-[#12121A] border border-[#1E1E2C] rounded-2xl">
+        <div className="p-16 text-center bg-[#111319] border border-[#202430] rounded-2xl">
           <div className="text-3xl mb-2">⚔️</div>
           <h3 className="text-lg font-bold text-white">No Open Duels in this Queue</h3>
           <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
@@ -190,16 +190,16 @@ export default function ChallengesPage() {
             {filterGameOnly && (
               <button
                 onClick={() => setFilterGameOnly(false)}
-                className="px-4 py-2 bg-[#1E1E2C] hover:bg-[#262638] text-white text-xs font-bold rounded-lg transition"
+                className="px-4 py-2 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-white text-xs font-bold rounded-lg transition"
               >
                 View All Games
               </button>
             )}
             <Link
               href={activeGame ? `/matches/new?profileId=${activeGame.id}` : '/matches/new'}
-              className="px-5 py-2 bg-[#FF5500] hover:bg-[#FF661A] text-black text-xs font-black uppercase tracking-wider rounded-lg transition"
+              className="px-5 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition"
             >
-              Post a VS Match
+              Post a Match
             </Link>
           </div>
         </div>

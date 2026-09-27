@@ -48,9 +48,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto my-8 p-6 sm:p-8 bg-[#12121A] border border-[#1E1E2C] rounded-2xl text-white shadow-2xl">
-      <div className="flex items-center gap-3 pb-5 border-b border-[#1E1E2C]">
-        <div className="w-10 h-10 rounded-xl bg-[#FF5500] flex items-center justify-center font-black text-black text-lg">
+    <div className="max-w-xl mx-auto my-8 p-6 sm:p-8 bg-[#111319] border border-[#202430] rounded-2xl text-white shadow-2xl">
+      <div className="flex items-center gap-3 pb-5 border-b border-[#202430]">
+        <div className="w-10 h-10 rounded-xl bg-[#C86228] flex items-center justify-center font-black text-white text-lg shadow-sm">
           ⚙️
         </div>
         <div>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full px-4 py-2.5 bg-[#0C0C12] border border-[#262638] rounded-xl text-sm text-white focus:outline-none focus:border-[#FF5500]"
+            className="w-full px-4 py-2.5 bg-[#161922] border border-[#202430] rounded-xl text-sm text-white focus:outline-none focus:border-[#C86228]"
           />
         </div>
 
@@ -96,13 +96,13 @@ export default function SettingsPage() {
             placeholder="+1 555 123 4567 or +44 7911 123456"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-4 py-2.5 bg-[#0C0C12] border border-[#262638] rounded-xl text-sm text-white focus:outline-none focus:border-[#FF5500]"
+            className="w-full px-4 py-2.5 bg-[#161922] border border-[#202430] rounded-xl text-sm text-white focus:outline-none focus:border-[#C86228]"
           />
         </div>
 
         <button
           type="submit"
-          className="mt-3 w-full py-3 bg-[#FF5500] hover:bg-[#FF661A] text-black font-black text-sm uppercase tracking-wider rounded-xl transition shadow-lg shadow-[#FF5500]/20"
+          className="mt-3 w-full py-3 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-sm uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20"
         >
           Save Profile Settings
         </button>

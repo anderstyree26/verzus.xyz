@@ -33,16 +33,16 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0C0C12]/95 backdrop-blur-md border-b border-[#1E1E2C]">
+    <header className="sticky top-0 z-50 bg-[#0B0C10]/95 backdrop-blur-md border-b border-[#202430]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand & Game Switcher */}
         <div className="flex items-center gap-3 sm:gap-6">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0" onClick={() => setIsOpen(false)}>
-            <span className="w-8 h-8 rounded-lg bg-[#FF5500] flex items-center justify-center font-black text-white text-base shadow-[0_0_15px_rgba(255,85,0,0.6)]">
+            <span className="w-8 h-8 rounded-lg bg-[#C86228] flex items-center justify-center font-black text-white text-base shadow-sm">
               VX
             </span>
             <span className="font-black tracking-tight text-lg text-white hidden sm:inline">
-              VERZUS<span className="text-[#FF5500]">XYZ</span>
+              VERZUS<span className="text-[#D97736]">XYZ</span>
             </span>
           </Link>
 
@@ -58,7 +58,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`transition hover:text-white ${
-                  pathname.startsWith(link.href) ? 'text-[#FF5500] border-b-2 border-[#FF5500] pb-1' : 'text-gray-300'
+                  pathname.startsWith(link.href) ? 'text-[#D97736] border-b-2 border-[#C86228] pb-1' : 'text-gray-300'
                 }`}
               >
                 {link.label}
@@ -72,10 +72,10 @@ export function Navbar() {
           {/* Level & Elo Badge */}
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#161622] hover:bg-[#1C1C2C] border border-[#262638] rounded-lg transition"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] rounded-lg transition"
             title="Your Competitive Elo & Level"
           >
-            <span className="w-5 h-5 rounded bg-[#FF5500] flex items-center justify-center text-[10px] font-black text-white font-mono shadow">
+            <span className="w-5 h-5 rounded bg-[#C86228] flex items-center justify-center text-[10px] font-black text-white font-mono shadow">
               7
             </span>
             <div className="flex flex-col text-left">
@@ -99,10 +99,10 @@ export function Navbar() {
 
           <Link
             href="/matches/new"
-            className="px-4 py-2 bg-[#FF5500] hover:bg-[#FF4400] font-black text-xs rounded-lg text-white transition shadow-[0_0_15px_rgba(255,85,0,0.4)] flex items-center gap-1.5 tracking-wider uppercase"
+            className="px-4 py-2 bg-[#C86228] hover:bg-[#D97736] font-bold text-xs rounded-lg text-white transition shadow-sm flex items-center gap-1.5 tracking-wider uppercase"
           >
             <span>⚔️</span>
-            <span>Play VS</span>
+            <span>Play Duel</span>
           </Link>
 
           <Link
@@ -125,7 +125,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-gray-300 hover:text-white hover:bg-surface-elevated rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF5500]"
+            className="p-2 text-gray-300 hover:text-white hover:bg-surface-elevated rounded-md focus:outline-none focus:ring-2 focus:ring-[#C86228]"
             aria-label="Toggle navigation menu"
             aria-expanded={isOpen}
           >
@@ -144,11 +144,11 @@ export function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {isOpen && (
-        <div className="md:hidden border-b border-[#1E1E2C] bg-[#0C0C12]/98 backdrop-blur-xl px-4 pt-3 pb-6 transition-all duration-200 text-white">
+        <div className="md:hidden border-b border-[#202430] bg-[#0B0C10]/98 backdrop-blur-xl px-4 pt-3 pb-6 transition-all duration-200 text-white">
           {/* User Rank & Wallet Overview */}
-          <div className="p-3 mb-3 bg-[#161622] rounded-xl border border-[#262638] flex items-center justify-between">
+          <div className="p-3 mb-3 bg-[#161922] rounded-xl border border-[#202430] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded bg-[#FF5500] flex items-center justify-center text-xs font-black font-mono">
+              <span className="w-6 h-6 rounded bg-[#C86228] flex items-center justify-center text-xs font-black font-mono">
                 7
               </span>
               <div>
@@ -171,7 +171,7 @@ export function Navbar() {
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition ${
                   pathname.startsWith(link.href)
-                    ? 'bg-[#FF5500]/15 text-[#FF5500]'
+                    ? 'bg-[#C86228]/15 text-[#D97736]'
                     : 'text-gray-200 hover:bg-surface hover:text-white'
                 }`}
               >
@@ -185,10 +185,10 @@ export function Navbar() {
             <Link
               href="/matches/new"
               onClick={() => setIsOpen(false)}
-              className="w-full py-2.5 bg-[#FF5500] hover:bg-[#FF4400] font-black text-xs rounded-lg text-white transition text-center shadow-md flex items-center justify-center gap-2 uppercase tracking-wider"
+              className="w-full py-2.5 bg-[#C86228] hover:bg-[#D97736] font-bold text-xs rounded-lg text-white transition text-center shadow-md flex items-center justify-center gap-2 uppercase tracking-wider"
             >
               <span>⚔️</span>
-              <span>Play VS (Quick Match)</span>
+              <span>Play Duel</span>
             </Link>
             <Link
               href="/login"

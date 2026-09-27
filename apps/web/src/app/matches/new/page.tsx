@@ -88,14 +88,14 @@ function NewMatchForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto my-6 p-6 sm:p-8 bg-[#12121A] border border-[#1E1E2C] rounded-2xl text-white shadow-2xl">
+    <div className="max-w-2xl mx-auto my-6 p-6 sm:p-8 bg-[#111319] border border-[#202430] rounded-2xl text-white shadow-2xl">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-6 border-b border-[#1E1E2C]">
-        <div className="w-12 h-12 rounded-xl bg-[#FF5500] flex items-center justify-center font-black text-black text-xl">
-          VS
+      <div className="flex items-center gap-3 pb-6 border-b border-[#202430]">
+        <div className="w-12 h-12 rounded-xl bg-[#C86228] flex items-center justify-center font-black text-white text-lg shadow-sm">
+          VX
         </div>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-white">Create VS Matchroom</h1>
+          <h1 className="text-2xl font-black tracking-tight text-white">Create Arena Duel</h1>
           <p className="text-xs text-gray-400 mt-0.5">
             Host a competitive duel or challenge with client-side OCR score validation.
           </p>
@@ -112,12 +112,12 @@ function NewMatchForm() {
         {/* Game Archetype Picker */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
-            1. Select Esports Title <span className="text-[#FF5500]">*</span>
+            1. Select Esports Title <span className="text-[#C86228]">*</span>
           </label>
           <select
             value={profileId}
             onChange={(e) => handleGameSelect(e.target.value)}
-            className="w-full px-4 py-3 bg-[#0C0C12] border border-[#262638] rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-[#FF5500] transition"
+            className="w-full px-4 py-3 bg-[#161922] border border-[#202430] rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-[#C86228] transition"
           >
             <option value="">Select a competitive game...</option>
             {profiles?.map((p) => {
@@ -143,8 +143,8 @@ function NewMatchForm() {
               onClick={() => setMode('1v1')}
               className={`p-3 rounded-xl border text-left transition ${
                 mode === '1v1'
-                  ? 'bg-[#FF5500]/15 border-[#FF5500] text-white'
-                  : 'bg-[#0C0C12] border-[#262638] text-gray-400 hover:text-white'
+                  ? 'bg-[#C86228]/15 border-[#C86228] text-white'
+                  : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
               }`}
             >
               <div className="text-sm font-bold">1v1 Solo Duel</div>
@@ -156,14 +156,14 @@ function NewMatchForm() {
               onClick={() => setMode('PARTY')}
               className={`p-3 rounded-xl border text-left transition ${
                 mode === 'PARTY'
-                  ? 'bg-[#FF5500]/15 border-[#FF5500] text-white'
-                  : 'bg-[#0C0C12] border-[#262638] text-gray-400 hover:text-white'
+                  ? 'bg-[#C86228]/15 border-[#C86228] text-white'
+                  : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
               }`}
             >
               <div className="text-sm font-bold flex items-center gap-1.5">
                 Party vs Party
                 {members.length > 1 && (
-                  <span className="px-1.5 py-0.2 bg-[#FF5500] text-black text-[10px] font-black rounded">
+                  <span className="px-1.5 py-0.2 bg-[#C86228] text-white text-[10px] font-bold rounded">
                     {members.length} Squad
                   </span>
                 )}
@@ -184,10 +184,10 @@ function NewMatchForm() {
                 key={f}
                 type="button"
                 onClick={() => setFormat(f)}
-                className={`py-2.5 text-xs font-black uppercase tracking-wider rounded-xl border transition ${
+                className={`py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition ${
                   format === f
-                    ? 'bg-[#FF5500] border-[#FF5500] text-black'
-                    : 'bg-[#0C0C12] border-[#262638] text-gray-400 hover:text-white'
+                    ? 'bg-[#C86228] border-[#C86228] text-white shadow-sm'
+                    : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
                 }`}
               >
                 Best of {f.replace('BO', '')}
@@ -208,7 +208,7 @@ function NewMatchForm() {
               4. Entry Stake (Euros €)
             </label>
             <span className="text-xs text-gray-400">
-              Guaranteed Prize: <strong className="text-[#FF5500] font-mono">{prizePool > 0 ? formatEUR(prizePool) : 'Free Glory'}</strong>
+              Guaranteed Prize: <strong className="text-[#D97736] font-mono">{prizePool > 0 ? formatEUR(prizePool) : 'Free Glory'}</strong>
             </span>
           </div>
 
@@ -221,10 +221,10 @@ function NewMatchForm() {
                   setEntryFee(fee);
                   setCustomFee('');
                 }}
-                className={`py-2 text-xs font-black rounded-lg border transition ${
+                className={`py-2 text-xs font-bold rounded-lg border transition ${
                   entryFee === fee && customFee === ''
-                    ? 'bg-[#FF5500] border-[#FF5500] text-black'
-                    : 'bg-[#0C0C12] border-[#262638] text-gray-300 hover:border-gray-500'
+                    ? 'bg-[#C86228] border-[#C86228] text-white shadow-sm'
+                    : 'bg-[#161922] border-[#202430] text-gray-300 hover:border-gray-500'
                 }`}
               >
                 {fee === 0 ? 'FREE' : formatEUR(fee)}
@@ -233,8 +233,8 @@ function NewMatchForm() {
           </div>
 
           {/* Legal / Fair Play Disclaimer */}
-          <div className="mt-3 p-3 bg-[#0C0C12] border border-[#1E1E2C] rounded-lg flex items-start gap-2.5 text-[11px] text-gray-400">
-            <span className="text-[#FF5500] text-base leading-none">⚖️</span>
+          <div className="mt-3 p-3 bg-[#0B0C10] border border-[#202430] rounded-lg flex items-start gap-2.5 text-[11px] text-gray-400">
+            <span className="text-[#D97736] text-base leading-none">⚖️</span>
             <span>
               <strong>Skill-Based Peer-to-Peer Competition:</strong> Entry stakes are held in escrow. The winner claims the pre-determined guaranteed prize pool. 10% platform fee is deducted for hosting & anti-cheat OCR verification.
             </span>
@@ -250,7 +250,7 @@ function NewMatchForm() {
             <button
               type="button"
               onClick={() => setIsCountryRestricted(!isCountryRestricted)}
-              className="text-xs text-[#FF5500] hover:underline font-semibold"
+              className="text-xs text-[#D97736] hover:underline font-semibold"
             >
               {isCountryRestricted ? 'Switch to Worldwide' : '+ Restrict to Specific Country'}
             </button>
@@ -264,7 +264,7 @@ function NewMatchForm() {
               placeholder="Select country eligible for this duel..."
             />
           ) : (
-            <div className="p-3 bg-[#0C0C12] border border-[#262638] rounded-xl text-xs text-gray-300 flex items-center gap-2">
+            <div className="p-3 bg-[#161922] border border-[#202430] rounded-xl text-xs text-gray-300 flex items-center gap-2">
               <span className="text-base">🌍</span>
               <span><strong>Worldwide Open:</strong> Players from all 249 recognized territories can join.</span>
             </div>
@@ -278,10 +278,10 @@ function NewMatchForm() {
           </label>
           <input
             type="text"
-            placeholder="Friend UUID or leave empty to list on Public VS Board"
+            placeholder="Friend UUID or leave empty to list on Public Duel Board"
             value={opponentId}
             onChange={(e) => setOpponentId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-[#0C0C12] border border-[#262638] rounded-xl text-sm text-white focus:outline-none focus:border-[#FF5500]"
+            className="w-full px-4 py-2.5 bg-[#161922] border border-[#202430] rounded-xl text-sm text-white focus:outline-none focus:border-[#C86228]"
           />
         </div>
 
@@ -289,9 +289,9 @@ function NewMatchForm() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 w-full py-3.5 bg-[#FF5500] hover:bg-[#FF661A] text-black font-black text-sm uppercase tracking-wider rounded-xl transition-all shadow-xl shadow-[#FF5500]/25 disabled:opacity-50"
+          className="mt-2 w-full py-3.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-sm uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20 disabled:opacity-50"
         >
-          {loading ? 'Initializing VS Lobby...' : 'Launch VS Matchroom'}
+          {loading ? 'Initializing Arena Lobby...' : 'Launch Arena Duel'}
         </button>
       </form>
     </div>

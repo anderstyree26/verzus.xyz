@@ -21,17 +21,24 @@ interface MatchItem {
 export default function DashboardPage() {
   const { activeGame } = useGameStore();
 
+  const { data: userProfile } = useQuery<{ rating?: number }>({
+    queryKey: ['dashboard-profile'],
+    queryFn: () => apiClient<{ rating?: number }>('/profile/me').catch(() => ({ rating: 1000 })),
+  });
+
   const { data: matches, isLoading } = useQuery<MatchItem[]>({
     queryKey: ['my-matches'],
     queryFn: () => apiClient<MatchItem[]>('/matches/mine'),
   });
 
+  const elo = userProfile?.rating ?? 1000;
+
   return (
     <div className="flex flex-col gap-8">
       {/* Player Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-[#12121A] border border-[#1E1E2C] rounded-2xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#FF5500] text-black font-black text-2xl flex items-center justify-center shadow-lg shadow-[#FF5500]/20">
+          <div className="w-14 h-14 rounded-2xl bg-[#C86228] text-white font-black text-2xl flex items-center justify-center shadow-md shadow-[#C86228]/20">
             VX
           </div>
           <div>
@@ -40,7 +47,7 @@ export default function DashboardPage() {
                 Competitive Dashboard
               </span>
               {activeGame && (
-                <span className="text-xs px-2 py-0.5 bg-[#FF5500]/15 text-[#FF5500] font-black rounded">
+                <span className="text-xs px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 font-bold rounded">
                   🎮 {activeGame.displayName}
                 </span>
               )}
@@ -49,7 +56,7 @@ export default function DashboardPage() {
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
                 Player Command Center
               </h1>
-              <EloBadge elo={1650} size="md" showLabel />
+              <EloBadge elo={elo} size="md" showLabel />
             </div>
           </div>
         </div>
@@ -57,13 +64,13 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2.5">
           <Link
             href="/matches/new"
-            className="px-5 py-2.5 bg-[#FF5500] hover:bg-[#FF661A] text-black font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#FF5500]/20"
+            className="px-5 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20"
           >
-            ⚔️ Host VS Match
+            ⚔️ Host Duel
           </Link>
           <Link
             href="/challenges"
-            className="px-5 py-2.5 bg-[#161622] hover:bg-[#1E1E2C] border border-[#262638] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition"
+            className="px-5 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition"
           >
             Find Duels
           </Link>
@@ -76,8 +83,8 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="p-6 bg-[#12121A] border border-[#1E1E2C] rounded-2xl shadow-xl">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1E1E2C]">
+          <div className="p-6 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#202430]">
               <div>
                 <h3 className="font-black text-lg text-white">Recent Match History</h3>
                 <p className="text-xs text-gray-400">Head-to-head duels and tournament matches</p>
@@ -90,21 +97,21 @@ export default function DashboardPage() {
             {isLoading ? (
               <p className="text-sm text-gray-400 py-6 text-center font-mono animate-pulse">Loading match record...</p>
             ) : matches && matches.length > 0 ? (
-              <div className="divide-y divide-[#1E1E2C]">
+              <div className="divide-y divide-[#202430]">
                 {matches.map((m) => (
                   <div key={m.id} className="py-3.5 flex items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">VS Match #{m.id.slice(0, 8)}</span>
+                        <span className="font-bold text-sm text-white">Match #{m.id.slice(0, 8)}</span>
                         {m.room_code && (
-                          <span className="px-1.5 py-0.2 bg-[#161622] text-gray-400 font-mono text-[10px] rounded">
+                          <span className="px-1.5 py-0.2 bg-[#161922] text-gray-400 font-mono text-[10px] rounded">
                             {m.room_code}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-gray-400 font-mono mt-0.5">
                         Format: <strong className="text-gray-200">{m.format}</strong> · Prize:{' '}
-                        <strong className="text-[#FF5500]">
+                        <strong className="text-[#D97736]">
                           {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Glory & Elo'}
                         </strong>
                       </p>
@@ -124,7 +131,7 @@ export default function DashboardPage() {
                       </span>
                       <Link
                         href={`/matches/${m.id}`}
-                        className="px-3 py-1.5 bg-[#1E1E2C] hover:bg-[#262638] text-xs rounded-lg font-bold text-white transition"
+                        className="px-3 py-1.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-xs rounded-lg font-bold text-white transition"
                       >
                         Matchroom →
                       </Link>
@@ -136,7 +143,7 @@ export default function DashboardPage() {
               <div className="py-12 text-center text-gray-500">
                 <div className="text-2xl mb-1">🎮</div>
                 <p className="text-sm font-semibold text-gray-400">No match records yet.</p>
-                <p className="text-xs text-gray-500 mt-1">Host or join a VS duel to start climbing the ladder!</p>
+                <p className="text-xs text-gray-500 mt-1">Host or join a duel to start climbing the ladder!</p>
               </div>
             )}
           </div>

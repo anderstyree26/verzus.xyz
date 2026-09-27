@@ -39,7 +39,7 @@ export function GameSwitcher() {
               onClick={() => setActiveGame(game)}
               className={`relative px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 select-none ${
                 isActive
-                  ? 'bg-[#FF5500] text-white shadow-[0_0_12px_rgba(255,85,0,0.5)]'
+                  ? 'bg-[#C86228] text-white shadow-sm'
                   : 'bg-surface hover:bg-surface-elevated text-gray-400 hover:text-white border border-surface-border'
               }`}
               title={`${game.displayName} (${game.gameType})`}
@@ -61,7 +61,7 @@ export function GameSwitcher() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="px-2 py-1.5 bg-surface hover:bg-surface-elevated border border-dashed border-gray-600 hover:border-[#FF5500] text-gray-400 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1"
+          className="px-2 py-1.5 bg-surface hover:bg-surface-elevated border border-dashed border-gray-600 hover:border-[#C86228] text-gray-400 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1"
           title="Browse all games or calibrate new"
         >
           <span>🎮</span>
@@ -72,7 +72,7 @@ export function GameSwitcher() {
       {/* Modal: Game Directory */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-[#12121A] border border-surface-border rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4">
+          <div className="w-full max-w-lg bg-[#111319] border border-surface-border rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-surface-border pb-3">
               <div>
                 <h3 className="text-lg font-bold">Select Active Game Context</h3>
@@ -102,7 +102,7 @@ export function GameSwitcher() {
                     }}
                     className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition ${
                       isSelected
-                        ? 'bg-[#FF5500]/15 border-[#FF5500] text-white shadow'
+                        ? 'bg-[#C86228]/15 border-[#C86228] text-white shadow'
                         : 'bg-surface border-surface-border hover:border-gray-500 text-gray-300'
                     }`}
                   >
@@ -110,7 +110,7 @@ export function GameSwitcher() {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-white">{g.displayName}</span>
                         {g.isOfficial && (
-                          <span className="px-1.5 py-0.5 bg-[#FF5500]/20 text-[#FF5500] text-[9px] font-bold rounded">
+                          <span className="px-1.5 py-0.5 bg-[#C86228]/20 text-[#D97736] text-[9px] font-bold rounded">
                             OFFICIAL
                           </span>
                         )}
@@ -121,7 +121,7 @@ export function GameSwitcher() {
                     </div>
 
                     {isSelected && (
-                      <span className="text-[#FF5500] font-extrabold text-sm">ACTIVE ✓</span>
+                      <span className="text-[#D97736] font-extrabold text-sm">ACTIVE ✓</span>
                     )}
                   </button>
                 );
@@ -132,7 +132,7 @@ export function GameSwitcher() {
               <Link
                 href="/games/new"
                 onClick={() => setModalOpen(false)}
-                className="text-[#FF5500] hover:underline font-bold flex items-center gap-1"
+                className="text-[#D97736] hover:underline font-bold flex items-center gap-1"
               >
                 <span>⚡ Calibrate New Game Profile →</span>
               </Link>

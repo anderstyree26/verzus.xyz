@@ -5,20 +5,20 @@ module.exports = {
     extend: {
       colors: {
         accent: {
-          DEFAULT: '#FF5500',
-          foreground: '#000000',
-          50: '#FFF2EB',
-          100: '#FFE2D1',
-          400: '#FF6A1A',
-          500: '#FF5500',
-          600: '#E64D00',
-          700: '#CC4400',
+          DEFAULT: '#C86228',
+          foreground: '#FFFFFF',
+          50: '#FAF2ED',
+          100: '#F2DFD4',
+          400: '#D97736',
+          500: '#C86228', // Faded, elegant warm copper
+          600: '#AF4F1A',
+          700: '#8E3C10',
         },
         surface: {
-          DEFAULT: '#0C0C12',
-          elevated: '#12121A',
-          card: '#161622',
-          border: '#1E1E2C',
+          DEFAULT: '#0B0C10',
+          elevated: '#111319',
+          card: '#161922',
+          border: '#202430',
         },
       },
       fontFamily: {

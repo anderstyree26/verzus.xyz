@@ -17,14 +17,14 @@ export default function LeaderboardsIndexPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* VX Ladders Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#12121A] p-6 border border-[#1E1E2C] rounded-2xl shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111319] p-6 border border-[#202430] rounded-2xl shadow-xl">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-[#1E1E2C] border border-[#262638] flex items-center justify-center text-2xl font-black text-[#FF5500]">
+          <div className="w-14 h-14 rounded-xl bg-[#161922] border border-[#202430] flex items-center justify-center text-2xl font-black text-[#D97736]">
             🥇
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-[#FF5500]/15 text-[#FF5500] text-[10px] font-black uppercase tracking-wider rounded">
+              <span className="px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 text-[10px] font-bold uppercase tracking-wider rounded">
                 Competitive Elo Ladders
               </span>
             </div>
@@ -43,14 +43,14 @@ export default function LeaderboardsIndexPage() {
           <Link
             key={arch.type}
             href={`/leaderboards/${arch.type}`}
-            className="p-5 bg-[#12121A] border border-[#1E1E2C] hover:border-[#FF5500]/60 rounded-xl transition-all group flex flex-col justify-between h-40 shadow-lg"
+            className="p-5 bg-[#111319] border border-[#202430] hover:border-[#C86228]/60 rounded-xl transition-all group flex flex-col justify-between h-40 shadow-lg"
           >
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl">{arch.icon}</span>
-                <span className="text-[10px] font-mono text-[#FF5500] font-black uppercase">VX ELO</span>
+                <span className="text-[10px] font-mono text-[#D97736] font-bold uppercase">VX ELO</span>
               </div>
-              <h3 className="text-base font-black text-white group-hover:text-[#FF5500] transition-colors leading-tight">
+              <h3 className="text-base font-black text-white group-hover:text-[#D97736] transition-colors leading-tight">
                 {arch.name}
               </h3>
               <p className="text-[11px] text-gray-400 mt-1 line-clamp-2">

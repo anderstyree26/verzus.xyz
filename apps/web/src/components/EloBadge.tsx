@@ -31,27 +31,27 @@ export function getEloLevel(elo: number): LevelInfo {
     return {
       level: 8,
       label: 'Level 8',
-      bgColor: 'bg-[#FF3300]',
+      bgColor: 'bg-[#AF4F1A]',
       textColor: 'text-white',
-      borderColor: 'border-[#FF5500]',
+      borderColor: 'border-[#C86228]',
     };
   }
   if (elo >= 1551) {
     return {
       level: 7,
       label: 'Level 7',
-      bgColor: 'bg-[#FF5500]',
-      textColor: 'text-black',
-      borderColor: 'border-amber-400',
+      bgColor: 'bg-[#C86228]',
+      textColor: 'text-white',
+      borderColor: 'border-[#D97736]',
     };
   }
   if (elo >= 1401) {
     return {
       level: 6,
       label: 'Level 6',
-      bgColor: 'bg-[#FF8800]',
-      textColor: 'text-black',
-      borderColor: 'border-yellow-400',
+      bgColor: 'bg-amber-600',
+      textColor: 'text-white',
+      borderColor: 'border-amber-400',
     };
   }
   if (elo >= 1251) {

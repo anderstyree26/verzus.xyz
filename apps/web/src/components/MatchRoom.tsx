@@ -63,50 +63,50 @@ export function MatchRoom({
   return (
     <div className="flex flex-col gap-6 max-w-5xl mx-auto p-4 text-white">
       {/* Top Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#12121A] p-6 border border-[#1E1E2C] rounded-2xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#111319] p-6 border border-[#202430] rounded-2xl shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#FF5500] flex items-center justify-center font-black text-black text-xl">
-            VS
+          <div className="w-12 h-12 rounded-xl bg-[#C86228] flex items-center justify-center font-black text-white text-lg shadow-sm">
+            VX
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-[#FF5500]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#D97736]">
                 {profile.displayName}
               </span>
               <span className="text-xs text-gray-500 font-mono">({profile.platform || 'UNIVERSAL'})</span>
             </div>
             <h1 className="text-2xl font-black tracking-tight text-white mt-0.5">
-              VS Matchroom #{matchId.slice(0, 8)}
+              Arena Matchroom #{matchId.slice(0, 8)}
             </h1>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           {roomCode && (
-            <div className="flex items-center gap-2 bg-[#0C0C12] border border-[#262638] px-3 py-1.5 rounded-xl">
+            <div className="flex items-center gap-2 bg-[#161922] border border-[#202430] px-3 py-1.5 rounded-xl">
               <span className="text-[11px] text-gray-400 font-semibold uppercase">Code:</span>
               <span className="font-mono text-sm font-black text-white">{roomCode}</span>
               <button
                 onClick={handleCopyLink}
-                className="ml-1 text-[11px] text-[#FF5500] hover:underline font-bold"
+                className="ml-1 text-[11px] text-[#D97736] hover:underline font-bold"
               >
                 {copied ? '✓ Copied' : 'Copy'}
               </button>
             </div>
           )}
 
-          <div className="px-3.5 py-1.5 bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-black text-xs uppercase tracking-wider rounded-xl">
+          <div className="px-3.5 py-1.5 bg-[#C86228]/15 border border-[#C86228]/30 text-[#D97736] font-bold text-xs uppercase tracking-wider rounded-xl">
             {capture.status !== 'IDLE' ? capture.status : status}
           </div>
         </div>
       </div>
 
       {/* VX Head-to-Head Roster Display */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-[#0C0C12] border border-[#1E1E2C] p-6 rounded-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-[#0B0C10] border border-[#202430] p-6 rounded-2xl">
         {/* Side A */}
-        <div className="flex flex-col items-center md:items-start p-4 bg-[#12121A] border border-[#1E1E2C] rounded-xl">
+        <div className="flex flex-col items-center md:items-start p-4 bg-[#111319] border border-[#202430] rounded-xl">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-6 h-6 rounded bg-[#FF5500] text-black font-black text-xs flex items-center justify-center">
+            <span className="w-6 h-6 rounded bg-[#C86228] text-white font-black text-xs flex items-center justify-center">
               A
             </span>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Host / Challenger</span>
@@ -125,7 +125,7 @@ export function MatchRoom({
               {isReadyA ? '✓ READY' : '⏳ NOT READY'}
             </span>
             {coinResult === 'A' && (
-              <span className="px-2 py-0.5 bg-[#FF5500] text-black text-[10px] font-black rounded uppercase">
+              <span className="px-2 py-0.5 bg-[#C86228] text-white text-[10px] font-bold rounded uppercase">
                 Coin Winner
               </span>
             )}
@@ -134,7 +134,7 @@ export function MatchRoom({
 
         {/* Center VS & Controls */}
         <div className="flex flex-col items-center justify-center text-center p-2">
-          <div className="text-3xl font-black tracking-tighter text-[#FF5500] drop-shadow-[0_0_12px_rgba(255,85,0,0.5)]">
+          <div className="text-3xl font-black tracking-tighter text-[#D97736]">
             VS
           </div>
           <div className="text-xs text-gray-400 font-mono mt-1">BEST OF 1</div>
@@ -144,10 +144,10 @@ export function MatchRoom({
             <div className="mt-4 flex flex-col gap-2 w-full max-w-[220px]">
               <button
                 onClick={toggleReady}
-                className={`py-2 px-4 rounded-xl font-black text-xs uppercase tracking-wider transition ${
+                className={`py-2 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition ${
                   (isPlayerA ? isReadyA : isReadyB)
                     ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-[#FF5500] hover:bg-[#FF661A] text-black'
+                    : 'bg-[#C86228] hover:bg-[#D97736] text-white shadow-sm'
                 }`}
               >
                 {(isPlayerA ? isReadyA : isReadyB) ? 'Ready Confirmed' : 'Mark Ready'}
@@ -156,7 +156,7 @@ export function MatchRoom({
               <button
                 onClick={handleFlipCoin}
                 disabled={isFlipping}
-                className="py-1.5 px-3 bg-[#1E1E2C] hover:bg-[#262638] text-gray-300 hover:text-white rounded-lg text-[11px] font-bold transition disabled:opacity-50"
+                className="py-1.5 px-3 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white rounded-lg text-[11px] font-bold transition disabled:opacity-50"
               >
                 {isFlipping ? 'Flipping...' : '🪙 Flip Coin for Side/Host'}
               </button>
@@ -165,7 +165,7 @@ export function MatchRoom({
         </div>
 
         {/* Side B */}
-        <div className="flex flex-col items-center md:items-end p-4 bg-[#12121A] border border-[#1E1E2C] rounded-xl text-right">
+        <div className="flex flex-col items-center md:items-end p-4 bg-[#111319] border border-[#202430] rounded-xl text-right">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Opponent / Squad</span>
             <span className="w-6 h-6 rounded bg-white/20 text-white font-black text-xs flex items-center justify-center">
@@ -177,7 +177,7 @@ export function MatchRoom({
           </div>
           <div className="mt-3 flex items-center gap-2">
             {coinResult === 'B' && (
-              <span className="px-2 py-0.5 bg-[#FF5500] text-black text-[10px] font-black rounded uppercase">
+              <span className="px-2 py-0.5 bg-[#C86228] text-white text-[10px] font-bold rounded uppercase">
                 Coin Winner
               </span>
             )}
@@ -199,11 +199,11 @@ export function MatchRoom({
 
       {/* Capture Control & Anti-Cheat OCR Pipeline */}
       {isParticipant && (
-        <div className="p-6 bg-[#12121A] border border-[#1E1E2C] rounded-2xl flex flex-col gap-4 shadow-xl">
+        <div className="p-6 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col gap-4 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500] animate-ping" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#C86228] animate-ping" />
                 <h3 className="text-lg font-black tracking-tight text-white">Client-Side OCR Verification</h3>
               </div>
               <p className="text-xs text-gray-400 mt-0.5">
@@ -214,7 +214,7 @@ export function MatchRoom({
             <div className="flex items-center gap-2.5">
               <button
                 onClick={() => setShowCalibration(!showCalibration)}
-                className="px-3 py-2 bg-[#161622] hover:bg-[#1E1E2C] text-xs font-bold rounded-xl border border-[#262638] text-gray-300 hover:text-white transition"
+                className="px-3 py-2 bg-[#161922] hover:bg-[#202430] text-xs font-bold rounded-xl border border-[#202430] text-gray-300 hover:text-white transition"
               >
                 {showCalibration ? 'Close Calibration' : '🎯 Calibrate ROI'}
               </button>
@@ -222,14 +222,14 @@ export function MatchRoom({
               {capture.status === 'CAPTURING' ? (
                 <button
                   onClick={capture.stopCapture}
-                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-red-600/20"
+                  className="px-5 py-2.5 bg-red-600 hover:bg-red-700 font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-red-600/20"
                 >
                   Stop & Settle Match
                 </button>
               ) : (
                 <button
                   onClick={capture.startCapture}
-                  className="px-5 py-2.5 bg-[#FF5500] hover:bg-[#FF661A] text-black font-black text-xs uppercase tracking-wider rounded-xl transition shadow-lg shadow-[#FF5500]/25"
+                  className="px-5 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20"
                 >
                   Start Screen Capture
                 </button>
@@ -248,13 +248,13 @@ export function MatchRoom({
           )}
 
           {capture.lastScore && (
-            <div className="flex items-center justify-between p-3.5 bg-[#0C0C12] rounded-xl border border-[#1E1E2C] text-xs font-mono">
+            <div className="flex items-center justify-between p-3.5 bg-[#0B0C10] rounded-xl border border-[#202430] text-xs font-mono">
               <span className="text-gray-400">
                 Latest OCR Outcome: <strong className="text-white text-sm">{capture.lastScore}</strong>
               </span>
               <span className="text-gray-400">
                 Anti-Cheat Confidence:{' '}
-                <strong className="text-[#FF5500]">{(capture.confidence * 100).toFixed(1)}%</strong>
+                <strong className="text-[#D97736]">{(capture.confidence * 100).toFixed(1)}%</strong>
               </span>
             </div>
           )}

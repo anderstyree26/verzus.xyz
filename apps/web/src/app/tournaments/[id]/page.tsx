@@ -100,19 +100,19 @@ export default function TournamentDetailPage() {
 
       {/* Prize Pool breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 bg-[#12121A] border border-[#1E1E2C] rounded-2xl text-center shadow-lg">
+        <div className="p-5 bg-[#111319] border border-[#202430] rounded-2xl text-center shadow-lg">
           <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Prize Pool</span>
-          <div className="text-2xl font-black font-mono text-[#FF5500] mt-1">
+          <div className="text-2xl font-black font-mono text-[#D97736] mt-1">
             {tournament.prize_pool > 0 ? formatEUR(tournament.prize_pool) : 'Glory & Trophies'}
           </div>
         </div>
-        <div className="p-5 bg-[#12121A] border border-[#1E1E2C] rounded-2xl text-center shadow-lg">
+        <div className="p-5 bg-[#111319] border border-[#202430] rounded-2xl text-center shadow-lg">
           <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">🥇 1st Place (50%)</span>
           <div className="text-2xl font-black font-mono text-white mt-1">
             {tournament.prize_pool > 0 ? formatEUR(tournament.prize_pool * 0.5) : 'Gold Trophy'}
           </div>
         </div>
-        <div className="p-5 bg-[#12121A] border border-[#1E1E2C] rounded-2xl text-center shadow-lg">
+        <div className="p-5 bg-[#111319] border border-[#202430] rounded-2xl text-center shadow-lg">
           <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">🥈 2nd Place (30%)</span>
           <div className="text-2xl font-black font-mono text-white mt-1">
             {tournament.prize_pool > 0 ? formatEUR(tournament.prize_pool * 0.3) : 'Silver Trophy'}
@@ -121,13 +121,13 @@ export default function TournamentDetailPage() {
       </div>
 
       {/* Entrants list */}
-      <div className="p-6 bg-[#12121A] border border-[#1E1E2C] rounded-2xl shadow-xl">
+      <div className="p-6 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl">
         <h3 className="font-black text-lg text-white mb-4">Registered Entrants ({entrantsCount})</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {tournament.tournament_entries?.map((entry, idx) => (
             <div
               key={entry.user_id}
-              className="p-3 bg-[#0C0C12] border border-[#262638] rounded-xl text-xs flex items-center justify-between"
+              className="p-3 bg-[#0B0C10] border border-[#202430] rounded-xl text-xs flex items-center justify-between"
             >
               <span className="font-mono text-gray-300">#{idx + 1} Player {entry.user_id.slice(0, 6)}</span>
               {entry.checked_in && <span className="text-green-400 text-[10px] font-black uppercase">✓ READY</span>}

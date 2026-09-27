@@ -57,9 +57,9 @@ export function WalletCard() {
 
   return (
     <>
-      <div className="flex flex-col gap-5 p-6 bg-[#12121A] border border-[#222232] rounded-xl text-white shadow-xl">
+      <div className="flex flex-col gap-5 p-6 bg-[#111319] border border-[#202430] rounded-xl text-white shadow-xl">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222232] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#202430] pb-4">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold tracking-tight">Competitive Ledger Wallet</h2>
@@ -76,7 +76,7 @@ export function WalletCard() {
             <button
               type="button"
               onClick={() => setDepositModalOpen(true)}
-              className="px-3.5 py-1.5 bg-[#FF5500] hover:bg-[#FF4400] text-xs font-bold rounded-lg text-white transition shadow-sm"
+              className="px-3.5 py-1.5 bg-[#C86228] hover:bg-[#D97736] text-xs font-bold rounded-lg text-white transition shadow-sm"
             >
               + Deposit € (Paysafe)
             </button>
@@ -94,7 +94,7 @@ export function WalletCard() {
         {/* Dual Balance Cards: EUR Cash & Non-Fiat Points */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Cash Balance (€ EUR) */}
-          <div className="p-4 bg-[#161622] rounded-xl border border-[#262638] flex flex-col justify-between">
+          <div className="p-4 bg-[#161922] rounded-xl border border-[#202430] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">
@@ -108,28 +108,28 @@ export function WalletCard() {
                 {loadingBalance ? '...' : formatEUR(cashBalance)}
               </div>
             </div>
-            <div className="mt-3 pt-2 border-t border-[#262638] flex items-center justify-between text-xs text-gray-400 font-mono">
+            <div className="mt-3 pt-2 border-t border-[#202430] flex items-center justify-between text-xs text-gray-400 font-mono">
               <span>Locked in Match Escrow:</span>
               <span className="text-white font-bold">{formatEUR(lockedCash)}</span>
             </div>
           </div>
 
           {/* Points Balance (PTS) */}
-          <div className="p-4 bg-[#161622] rounded-xl border border-[#262638] flex flex-col justify-between">
+          <div className="p-4 bg-[#161922] rounded-xl border border-[#202430] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-400 uppercase font-bold tracking-wider">
                   Community Points (PTS)
                 </span>
-                <span className="text-[10px] text-[#FF5500] font-mono font-bold bg-[#FF5500]/15 px-1.5 py-0.5 rounded border border-[#FF5500]/30">
+                <span className="text-[10px] text-[#D97736] font-mono font-bold bg-[#C86228]/15 px-1.5 py-0.5 rounded border border-[#C86228]/30">
                   FREE PLAY
                 </span>
               </div>
-              <div className="text-3xl font-extrabold font-mono text-[#FF5500] mt-2">
+              <div className="text-3xl font-extrabold font-mono text-[#D97736] mt-2">
                 {loadingBalance ? '...' : formatPoints(pointsBalance)}
               </div>
             </div>
-            <div className="mt-3 pt-2 border-t border-[#262638] flex items-center justify-between text-xs text-gray-400 font-mono">
+            <div className="mt-3 pt-2 border-t border-[#202430] flex items-center justify-between text-xs text-gray-400 font-mono">
               <span>Locked in Tournaments:</span>
               <span className="text-white font-bold">{formatPoints(lockedPoints)}</span>
             </div>
@@ -166,7 +166,7 @@ export function WalletCard() {
       {/* Deposit via Paysafe Modal Preview */}
       {depositModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-[#12121A] border border-[#222232] rounded-2xl p-6 text-white flex flex-col gap-4 shadow-2xl">
+          <div className="w-full max-w-md bg-[#111319] border border-[#202430] rounded-2xl p-6 text-white flex flex-col gap-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-surface-border pb-3">
               <div>
                 <h3 className="text-lg font-bold">Deposit Funds (€ EUR)</h3>
@@ -181,14 +181,14 @@ export function WalletCard() {
               </button>
             </div>
 
-            <div className="p-4 bg-[#161622] rounded-xl border border-[#262638] flex flex-col gap-3">
+            <div className="p-4 bg-[#161922] rounded-xl border border-[#202430] flex flex-col gap-3">
               <span className="text-xs text-gray-300 font-semibold">Select Deposit Amount:</span>
               <div className="grid grid-cols-3 gap-2 font-mono text-sm font-bold">
                 {['€5.00', '€15.00', '€25.00', '€50.00', '€100.00', '€250.00'].map((amt) => (
                   <button
                     key={amt}
                     type="button"
-                    className="p-2.5 bg-surface hover:bg-[#FF5500]/20 border border-surface-border hover:border-[#FF5500] rounded-lg transition text-center"
+                    className="p-2.5 bg-surface hover:bg-[#C86228]/20 border border-surface-border hover:border-[#C86228] rounded-lg transition text-center"
                   >
                     {amt}
                   </button>
@@ -217,7 +217,7 @@ export function WalletCard() {
                 alert('Paysafe Gateway integration: Sandbox mode active. To configure live API keys, see Phase 4.');
                 setDepositModalOpen(false);
               }}
-              className="w-full py-3 bg-[#FF5500] hover:bg-[#FF4400] font-bold text-xs rounded-lg text-white transition uppercase tracking-wider shadow"
+              className="w-full py-3 bg-[#C86228] hover:bg-[#D97736] font-bold text-xs rounded-lg text-white transition uppercase tracking-wider shadow-md shadow-[#C86228]/20"
             >
               Continue to Paysafe Checkout →
             </button>
