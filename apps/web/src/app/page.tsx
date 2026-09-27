@@ -43,7 +43,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. FACEIT Hero Game Arena Banner */}
+      {/* 1. VerzusXYZ Game Arena Banner */}
       <div className="relative overflow-hidden rounded-3xl border border-[#1E1E2C] bg-[#101018] p-6 sm:p-10 shadow-2xl">
         {/* Cinematic Backdrop Glow */}
         <div className="absolute -right-20 -top-20 h-96 w-96 rounded-full bg-[#FF5500]/15 blur-3xl pointer-events-none" />
@@ -274,9 +274,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Right Column (1 Col): FACEIT Player Card & Elo Meter */}
+        {/* Right Column (1 Col): VX Player Card & Elo Meter */}
         <div className="flex flex-col gap-6">
-          {/* FACEIT Player Stats Card */}
+          {/* VX Player Stats Card */}
           <div className="p-6 bg-[#12121A] border border-[#1E1E2C] rounded-2xl shadow-xl flex flex-col gap-5">
             {/* Header: Avatar, Name & Level Badge */}
             <div className="flex items-center justify-between pb-4 border-b border-[#1E1E2C]">
@@ -334,7 +334,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Recent Match Form Dots (FACEIT Signature) */}
+            {/* Recent Match Form Dots */}
             <div>
               <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block mb-2">
                 Recent 5 Matches Form

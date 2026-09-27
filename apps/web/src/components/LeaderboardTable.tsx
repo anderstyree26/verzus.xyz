@@ -27,7 +27,7 @@ export function LeaderboardTable({ entries, gameType }: LeaderboardTableProps) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] px-2.5 py-1 bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-black uppercase tracking-wider rounded-lg font-mono">
-            FACEIT ELO (K=32)
+            VX ELO (K=32)
           </span>
         </div>
       </div>

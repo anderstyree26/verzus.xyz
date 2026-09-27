@@ -6,7 +6,7 @@ import { TopHeader } from '../components/TopHeader';
 import { PartyBar } from '../components/PartyBar';
 
 export const metadata: Metadata = {
-  title: 'VerzusXYZ — Universal Esports & FACEIT Arena',
+  title: 'VerzusXYZ — Universal Esports Arena',
   description: 'Skill-based esports matchmaking, party duels, and tournaments for any game verified by client-side OCR.',
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="min-h-screen bg-[#08080C] text-white antialiased flex font-sans selection:bg-[#FF5500] selection:text-white overflow-x-hidden">
         <Providers>
-          {/* Vertical Game Rail (FACEIT Left Rail) */}
+          {/* Vertical Game Rail (VX Left Rail) */}
           <GameRail />
 
           {/* Main App Workspace */}

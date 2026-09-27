@@ -40,7 +40,7 @@ export function TopHeader() {
           </div>
         </div>
 
-        {/* Navigation Tabs (FACEIT Style) */}
+        {/* Navigation Tabs */}
         <nav className="hidden md:flex items-center gap-1">
           {navTabs.map((tab) => {
             const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
@@ -76,7 +76,7 @@ export function TopHeader() {
 
       {/* Right: Level 1-10 Elo Badge, EUR Wallet & Controls */}
       <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
-        {/* FACEIT Elo Level Badge Widget */}
+        {/* VX Elo Level Badge Widget */}
         <Link
           href="/dashboard"
           className="flex items-center gap-2 px-2.5 py-1 bg-[#12121A] hover:bg-[#181824] border border-[#1E1E2C] rounded-xl transition"
@@ -84,7 +84,7 @@ export function TopHeader() {
         >
           <EloBadge elo={1650} size="sm" />
           <div className="hidden sm:flex flex-col text-left">
-            <span className="text-[9px] text-gray-400 font-mono leading-none">FACEIT ELO</span>
+            <span className="text-[9px] text-gray-400 font-mono leading-none">VX ELO</span>
             <span className="text-xs font-black text-white font-mono leading-tight">1,650</span>
           </div>
         </Link>

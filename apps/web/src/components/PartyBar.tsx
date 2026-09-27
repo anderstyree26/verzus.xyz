@@ -202,7 +202,7 @@ export function PartyBar() {
             <span className="hidden sm:inline">{me?.isReady ? 'READY' : 'NOT READY'}</span>
           </button>
 
-          {/* Master "PLAY VS" Button (Signature FACEIT Orange) */}
+          {/* Master "PLAY VS" Button */}
           <button
             type="button"
             onClick={handleActionClick}

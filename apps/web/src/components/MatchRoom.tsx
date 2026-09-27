@@ -101,7 +101,7 @@ export function MatchRoom({
         </div>
       </div>
 
-      {/* FACEIT Head-to-Head Roster Display */}
+      {/* VX Head-to-Head Roster Display */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-[#0C0C12] border border-[#1E1E2C] p-6 rounded-2xl">
         {/* Side A */}
         <div className="flex flex-col items-center md:items-start p-4 bg-[#12121A] border border-[#1E1E2C] rounded-xl">

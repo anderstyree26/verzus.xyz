@@ -16,7 +16,7 @@ const GAME_ARCHETYPES = [
 export default function LeaderboardsIndexPage() {
   return (
     <div className="flex flex-col gap-6">
-      {/* FACEIT Header */}
+      {/* VX Ladders Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#12121A] p-6 border border-[#1E1E2C] rounded-2xl shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-[#1E1E2C] border border-[#262638] flex items-center justify-center text-2xl font-black text-[#FF5500]">
@@ -48,7 +48,7 @@ export default function LeaderboardsIndexPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-2xl">{arch.icon}</span>
-                <span className="text-[10px] font-mono text-[#FF5500] font-black uppercase">FACEIT ELO</span>
+                <span className="text-[10px] font-mono text-[#FF5500] font-black uppercase">VX ELO</span>
               </div>
               <h3 className="text-base font-black text-white group-hover:text-[#FF5500] transition-colors leading-tight">
                 {arch.name}

@@ -6,7 +6,7 @@ export interface PartyMember {
   id: string;
   username: string;
   avatarUrl?: string;
-  level: number; // FACEIT-style Level 1 to 10
+  level: number; // VX Skill Level 1 to 10
   elo: number;
   isLeader: boolean;
   isReady: boolean;

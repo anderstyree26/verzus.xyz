@@ -65,7 +65,7 @@ export function GameRail() {
 
           return (
             <div key={game.id} className="relative group w-full flex items-center justify-center">
-              {/* Active Orange Edge Indicator (FACEIT signature) */}
+              {/* Active Orange Edge Indicator */}
               {isActive && (
                 <span className="absolute left-0 w-1 h-7 bg-[#FF5500] rounded-r-full shadow-[0_0_8px_#FF5500]" />
               )}

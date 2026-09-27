@@ -54,7 +54,7 @@ export default function TournamentsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* FACEIT Carbon Tournament Hero */}
+      {/* VX Tournament Hero */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#12121A] p-6 border border-[#1E1E2C] rounded-2xl shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-[#1E1E2C] border border-[#262638] flex items-center justify-center text-2xl font-black text-[#FF5500]">

@@ -69,7 +69,7 @@ export function Navbar() {
 
         {/* Right: Elo Badge, EUR Wallet & Quick Play Actions */}
         <div className="hidden md:flex items-center gap-3">
-          {/* Level & Elo Badge (FACEIT Style) */}
+          {/* Level & Elo Badge */}
           <Link
             href="/dashboard"
             className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#161622] hover:bg-[#1C1C2C] border border-[#262638] rounded-lg transition"
