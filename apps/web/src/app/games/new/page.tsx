@@ -198,7 +198,7 @@ function NewGameProfileForm() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-gray-400 mt-1">
-            Register game details, upload screenshots for automated detection, and fine-tune OCR boundaries.
+            Register game details, upload screenshots for automated detection, and fine-tune score boundaries.
           </p>
         </div>
 
@@ -344,7 +344,7 @@ function NewGameProfileForm() {
           {analyzing && (
             <div className="p-3 bg-accent/15 border border-accent/40 rounded text-xs text-accent flex items-center gap-2">
               <span className="animate-spin text-base">⏳</span>
-              <span>Scanning screenshots with client-side OCR and calculating optimal score bounding boxes...</span>
+              <span>Scanning screenshots with client-side detection and calculating optimal score bounding boxes...</span>
             </div>
           )}
 
@@ -359,7 +359,7 @@ function NewGameProfileForm() {
         <div className="flex flex-col gap-5 pt-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-gray-200">
-              Game Engine & OCR Verification Rules (Adjust anytime)
+              Game Engine & Automated Verification Rules (Adjust anytime)
             </h2>
             <span className="text-[11px] text-gray-400">All fields editable</span>
           </div>
@@ -367,7 +367,7 @@ function NewGameProfileForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-300 mb-1">
-                Score Extraction Rule (OCR)
+                Score Extraction Rule
               </label>
               <select
                 value={gameType}

@@ -144,7 +144,7 @@ export default function MatchArenaScreen() {
           onPress={() => router.push({ pathname: '/match/capture', params: { matchId: id } })}
         >
           <Text style={styles.captureIcon}>📸</Text>
-          <Text style={styles.actionText}>Capture Game-Over Screen (OCR)</Text>
+          <Text style={styles.actionText}>Capture Game-Over Screen (Instant Sync)</Text>
         </TouchableOpacity>
       )}
 
@@ -161,7 +161,7 @@ export default function MatchArenaScreen() {
         <View style={styles.disputeBox}>
           <Text style={styles.disputeTitle}>⚠️ Under HITL Review</Text>
           <Text style={styles.disputeDesc}>
-            OCR verification confidence fell below threshold or players submitted conflicting scores.
+            Score verification confidence fell below threshold or players submitted conflicting scores.
             Human reviewers are auditing evidence hashes.
           </Text>
         </View>

@@ -91,7 +91,7 @@ export function MatchRoom({
     prevPlayerB.current = playerBId;
   }, [playerBId]);
 
-  // 2. Notify on Screen Connected & Background OCR Active
+  // 2. Notify on Screen Connected & Background Verification Active
   useEffect(() => {
     if (prevCaptureStatus.current !== 'CAPTURING' && capture.status === 'CAPTURING') {
       notifyUser('Game Window Connected!', {

@@ -46,7 +46,7 @@ export default function MobileCaptureScreen() {
         }),
       });
 
-      Alert.alert('Score Submitted', 'Your OCR verification evidence has been logged.', [
+      Alert.alert('Score Submitted', 'Your match verification evidence has been logged.', [
         {
           text: 'Return to Match',
           onPress: () => router.back(),
@@ -65,7 +65,7 @@ export default function MobileCaptureScreen() {
       <View style={styles.card}>
         <Text style={styles.title}>Game-Over Screen Capture</Text>
         <Text style={styles.subtitle}>
-          Capture or input your final game-over screen score. The server validates OCR hashes
+          Capture or input your final game-over screen score. The server validates match hashes
           against the game profile template.
         </Text>
 
@@ -91,7 +91,7 @@ export default function MobileCaptureScreen() {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>OCR Raw String / Screen Text</Text>
+          <Text style={styles.label}>Final Screen Text / Score</Text>
           <TextInput
             style={styles.input}
             placeholder="e.g. FINAL SCORE: 14520 LEVEL 12"

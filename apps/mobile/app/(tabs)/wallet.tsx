@@ -86,7 +86,7 @@ export default function MobileWalletScreen() {
         <Text style={styles.noticeTitle}>⚖️ Compliance & Skill-Based Rules</Text>
         <Text style={styles.noticeDesc}>
           Points hold no real cash value and cannot be redeemed for fiat currency. Wagers are escrowed
-          during active matches and resolved instantly upon OCR score verification.
+          during active matches and resolved instantly upon automated score verification.
         </Text>
       </View>
 
