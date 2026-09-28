@@ -8,6 +8,9 @@ import { useGameStore } from '../lib/gameStore';
 import { apiClient } from '../lib/api';
 import type { GameProfile } from '@antigravity/core';
 import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
+import { GamePoster } from './GamePoster';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 export function GameRail() {
   const pathname = usePathname();
@@ -27,7 +30,7 @@ export function GameRail() {
 
   const activeCatalogGame = getGameById(activeGame?.id);
 
-  // Top 3 pinned games for quick switching (decluttered - not all 8+ games in an endless column)
+  // Top 3 pinned games for quick switching
   const pinnedGames = OFFICIAL_GAMES.slice(0, 3);
 
   const navItems = [
@@ -39,8 +42,8 @@ export function GameRail() {
 
   return (
     <>
-      <aside className="hidden lg:flex w-60 flex-shrink-0 bg-[#0B0C10] border-r border-[#202430] flex-col justify-between py-4 px-3.5 z-40 select-none">
-        <div className="flex flex-col gap-5">
+      <aside className="hidden lg:flex w-60 flex-shrink-0 bg-[#0B0C10] border-r border-[#202430] flex-col justify-between py-4 px-3.5 select-none h-screen sticky top-0 overflow-y-auto scrollbar-none z-30 pb-24">
+        <div className="flex flex-col gap-4">
           {/* Brand Logo & Name */}
           <Link
             href="/"
@@ -55,24 +58,28 @@ export function GameRail() {
             </div>
           </Link>
 
-          {/* Active Game Card with Quick-Switch Modal Trigger */}
-          <div className="p-3 bg-[#111319] border border-[#202430] rounded-xl flex flex-col gap-2 shadow-sm">
+          {/* Active Game Card with Poster Thumbnail */}
+          <div className="p-2.5 bg-[#111319] border border-[#202430] rounded-xl flex flex-col gap-2 shadow-sm">
             <span className="text-[9px] uppercase font-bold text-gray-500 font-mono tracking-wider">
-              Selected Arena
+              Active Arena
             </span>
             <button
               type="button"
               onClick={() => setGameModalOpen(true)}
-              className="flex items-center justify-between p-2 rounded-lg bg-[#161922] hover:bg-[#202430] border border-[#202430] hover:border-[#C86228]/50 transition group text-left"
+              className="flex items-center justify-between p-1.5 rounded-lg bg-[#161922] hover:bg-[#202430] border border-[#202430] hover:border-[#C86228]/50 transition group text-left w-full"
               title="Click to switch game"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-xl select-none flex-shrink-0">{activeCatalogGame.icon}</span>
-                <div className="min-w-0">
+                <GamePoster
+                  game={activeCatalogGame}
+                  aspect="thumb"
+                  className="w-9 h-12 rounded-lg flex-shrink-0"
+                />
+                <div className="min-w-0 flex-1">
                   <span className="text-xs font-black text-white truncate block group-hover:text-[#D97736] transition-colors">
                     {activeCatalogGame.displayName}
                   </span>
-                  <span className="text-[9px] text-gray-400 font-mono block">
+                  <span className="text-[9px] text-gray-400 font-mono block mt-0.5">
                     {activeCatalogGame.platform} · {activeCatalogGame.shortName}
                   </span>
                 </div>
@@ -83,7 +90,7 @@ export function GameRail() {
 
           {/* Primary Navigation Links */}
           <nav className="flex flex-col gap-1">
-            <span className="text-[9px] uppercase font-bold text-gray-500 font-mono tracking-wider px-2 mb-1">
+            <span className="text-[9px] uppercase font-bold text-gray-500 font-mono tracking-wider px-2 mb-0.5">
               Arena Navigation
             </span>
             {navItems.map((item) => {
@@ -92,7 +99,7 @@ export function GameRail() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                     isActive
                       ? 'bg-[#C86228] text-white shadow-md shadow-[#C86228]/20'
                       : 'text-gray-400 hover:text-white hover:bg-[#161922]'
@@ -105,9 +112,9 @@ export function GameRail() {
             })}
           </nav>
 
-          <div className="h-px bg-[#202430] my-1" />
+          <div className="h-px bg-[#202430] my-0.5" />
 
-          {/* Pinned Favorite Games (Compact - 3 games max, not 15) */}
+          {/* Pinned Favorite Games with Mini Posters */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between px-2">
               <span className="text-[9px] uppercase font-bold text-gray-500 font-mono tracking-wider">
@@ -118,7 +125,7 @@ export function GameRail() {
                 onClick={() => setGameModalOpen(true)}
                 className="text-[10px] text-[#D97736] hover:underline font-bold"
               >
-                All (8)
+                All ({OFFICIAL_GAMES.length})
               </button>
             </div>
 
@@ -130,18 +137,22 @@ export function GameRail() {
                     key={game.id}
                     type="button"
                     onClick={() => setActiveGame(game)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition border text-left ${
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition border text-left ${
                       isSelected
                         ? 'bg-[#161922] border-[#C86228] text-white font-bold'
                         : 'bg-[#0B0C10] hover:bg-[#161922] border-transparent text-gray-400 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <span className="text-sm select-none">{game.icon}</span>
-                      <span className="truncate">{game.displayName}</span>
+                      <GamePoster
+                        game={game}
+                        aspect="mini"
+                        className="w-5 h-7 rounded flex-shrink-0"
+                      />
+                      <span className="truncate text-xs">{game.displayName}</span>
                     </div>
                     {isSelected && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C86228]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C86228] flex-shrink-0" />
                     )}
                   </button>
                 );
@@ -173,15 +184,15 @@ export function GameRail() {
         </div>
       </aside>
 
-      {/* Game Selection Modal (when clicking switch game) */}
+      {/* FACEIT-Style Game Poster Selection Modal */}
       {gameModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-lg bg-[#111319] border border-[#202430] rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4">
+          <div className="w-full max-w-3xl bg-[#111319] border border-[#202430] rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4 max-h-[85vh] overflow-hidden">
             <div className="flex items-center justify-between border-b border-[#202430] pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Switch Esports Arena</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">Select Esports Arena</h3>
                 <p className="text-xs text-gray-400">
-                  Select a title to pivot duels, tournaments, and rankings to that game.
+                  Switching titles filters duels, tournaments, and rankings to your selected game.
                 </p>
               </div>
               <button
@@ -193,7 +204,8 @@ export function GameRail() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1 custom-scroll">
+            {/* Poster Cards Grid (FACEIT Style) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-y-auto pr-1 scrollbar-thin max-h-[60vh]">
               {OFFICIAL_GAMES.map((g) => {
                 const isSelected = activeCatalogGame.id.toLowerCase() === g.id.toLowerCase();
                 return (
@@ -204,28 +216,38 @@ export function GameRail() {
                       setActiveGame(g);
                       setGameModalOpen(false);
                     }}
-                    className={`w-full p-3.5 rounded-xl border text-left flex items-center justify-between transition ${
+                    className={`relative rounded-xl overflow-hidden border text-left transition-all duration-200 group aspect-[3/4] flex flex-col justify-between p-2.5 ${
                       isSelected
-                        ? 'bg-[#C86228]/15 border-[#C86228] text-white shadow'
-                        : 'bg-[#161922] border-[#202430] hover:border-gray-500 text-gray-300'
+                        ? 'border-[#C86228] ring-2 ring-[#C86228]/40 shadow-lg'
+                        : 'border-[#202430] hover:border-gray-500'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{g.icon}</span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-white">{g.displayName}</span>
-                          <span className="px-1.5 py-0.5 bg-[#C86228]/20 text-[#D97736] text-[9px] font-bold rounded">
-                            {g.platform}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-0.5">{g.tagline}</p>
-                      </div>
+                    <GamePoster
+                      game={g}
+                      aspect="poster"
+                      showOverlay
+                      className="absolute inset-0 w-full h-full"
+                    />
+
+                    <div className="relative z-10 flex items-center justify-between w-full">
+                      <Badge variant="secondary" className="backdrop-blur-md bg-black/70 text-[9px] font-mono">
+                        {g.platform}
+                      </Badge>
+                      {isSelected && (
+                        <span className="px-1.5 py-0.5 rounded bg-[#C86228] text-white text-[9px] font-black">
+                          ACTIVE ✓
+                        </span>
+                      )}
                     </div>
 
-                    {isSelected && (
-                      <span className="text-[#D97736] font-extrabold text-xs">ACTIVE ✓</span>
-                    )}
+                    <div className="relative z-10">
+                      <span className="font-bold text-xs text-white block leading-tight group-hover:text-[#D97736] transition-colors truncate">
+                        {g.displayName}
+                      </span>
+                      <span className="text-[9px] text-gray-400 font-mono block mt-0.5">
+                        {g.gameType.replace('_', ' ')}
+                      </span>
+                    </div>
                   </button>
                 );
               })}
@@ -239,13 +261,13 @@ export function GameRail() {
               >
                 View Full Game Catalog →
               </Link>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setGameModalOpen(false)}
-                className="px-4 py-2 bg-[#161922] hover:bg-[#202430] border border-[#202430] rounded-lg text-white font-semibold"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>

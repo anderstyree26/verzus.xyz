@@ -5,9 +5,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useGameStore } from '../lib/gameStore';
 import { EloBadge } from '../components/EloBadge';
 import { ChallengeCard } from '../components/ChallengeCard';
+import { GamePoster } from '../components/GamePoster';
 import { apiClient } from '../lib/api';
 import { formatEUR } from '../lib/currency';
 import { getGameById } from '../lib/gamesCatalog';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
 interface ChallengeItem {
   id: string;
@@ -43,7 +47,6 @@ export default function HomePage() {
   const gameTitle = catalogGame.displayName;
   const gamePlatform = catalogGame.platform;
   const gameId = catalogGame.id;
-  const gameIcon = catalogGame.icon;
   const gameTagline = catalogGame.tagline;
 
   // 1. Real Open Challenges from Database
@@ -130,53 +133,58 @@ export default function HomePage() {
   const activeOpenCount = activeChallenges.length;
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-      {/* 1. Clean, Spacious Active Game Arena Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#202430] bg-[#111319] p-6 sm:p-8 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#161922] border border-[#202430] flex items-center justify-center text-4xl shadow-inner flex-shrink-0">
-              {gameIcon}
-            </div>
-            <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto min-w-0">
+      {/* 1. Clean, Spacious Active Game Arena Header with Game Poster */}
+      <div className="relative overflow-hidden rounded-3xl border border-[#202430] bg-[#111319] p-6 sm:p-8 shadow-2xl">
+        {/* Background banner art backdrop */}
+        {catalogGame.bannerUrl && (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-15 filter blur-sm pointer-events-none"
+            style={{ backgroundImage: `url(${catalogGame.bannerUrl})` }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0C10] via-[#0B0C10]/90 to-[#0B0C10]/60 pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+            <GamePoster
+              game={catalogGame}
+              aspect="thumb"
+              className="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl shadow-2xl border border-[#202430] flex-shrink-0"
+            />
+            <div className="flex flex-col gap-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-0.5 bg-[#C86228] text-white font-bold text-[10px] uppercase tracking-wider rounded">
-                  Official Arena
-                </span>
-                <span className="px-2.5 py-0.5 bg-[#161922] text-gray-300 font-mono text-[10px] rounded border border-[#202430] flex items-center gap-1.5">
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeOpenCount > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
-                  <span>{activeOpenCount > 0 ? `${activeOpenCount} DUEL${activeOpenCount > 1 ? 'S' : ''} READY` : 'READY TO PLAY'}</span>
-                </span>
-                <span className="px-2 py-0.5 bg-[#161922] text-gray-400 font-mono text-[10px] rounded border border-[#202430]">
+                <Badge variant="copper">Official Arena</Badge>
+                <Badge variant="secondary" className="font-mono text-[10px]">
+                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${activeOpenCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-gray-500'}`} />
+                  {activeOpenCount > 0 ? `${activeOpenCount} DUELS READY` : 'READY TO PLAY'}
+                </Badge>
+                <Badge variant="outline" className="font-mono text-[10px]">
                   {gamePlatform}
-                </span>
+                </Badge>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase mt-0.5">
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase mt-0.5 truncate">
                 {gameTitle}
               </h1>
               <p className="text-xs sm:text-sm text-gray-400">
-                {gameTagline} · Verified in-browser by client-side OCR.
+                {gameTagline} · Automated background score validation.
               </p>
             </div>
           </div>
 
           {/* Primary Action Launchers */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link
-              href={`/matches/new?profileId=${gameId}`}
-              className="px-6 py-3.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20 text-center flex items-center justify-center gap-2"
-            >
-              <span>⚔️</span>
-              <span>HOST 1v1 DUEL</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
+            <Link href={`/matches/new?profileId=${gameId}`}>
+              <Button variant="default" size="lg" className="w-full sm:w-auto">
+                ⚔️ HOST 1v1 DUEL
+              </Button>
             </Link>
 
-            <Link
-              href="/tournaments"
-              className="px-5 py-3.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] hover:border-[#C86228]/40 text-gray-200 hover:text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-xl transition text-center flex items-center justify-center gap-2"
-            >
-              <span>🏆</span>
-              <span>BROWSE CUPS</span>
+            <Link href="/tournaments">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                🏆 BROWSE CUPS
+              </Button>
             </Link>
           </div>
         </div>
@@ -185,15 +193,15 @@ export default function HomePage() {
       {/* 2. Main 2-Column Responsive Hub */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 Cols): Open Matches Board */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
+        <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded bg-[#C86228]" />
-              <h2 className="text-base font-bold tracking-tight text-white uppercase">
+              <span className="w-2 h-2 rounded-full bg-[#C86228]" />
+              <h2 className="text-base font-bold tracking-tight text-white uppercase truncate">
                 {gameTitle} Duels & Challenges
               </h2>
             </div>
-            <Link href="/challenges" className="text-xs text-[#D97736] hover:underline font-bold">
+            <Link href="/challenges" className="text-xs text-[#D97736] hover:underline font-bold flex-shrink-0">
               View All Open ({totalOpenCount}) →
             </Link>
           </div>
@@ -221,134 +229,135 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            /* Clean Empty State */
-            <div className="p-8 sm:p-10 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col items-center justify-center text-center gap-3">
-              <span className="text-4xl">{gameIcon}</span>
+            /* Clean Empty State with Game Poster */
+            <div className="p-8 sm:p-10 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col items-center justify-center text-center gap-4">
+              <GamePoster
+                game={catalogGame}
+                aspect="thumb"
+                className="w-16 h-22 rounded-xl shadow-lg border border-[#202430]"
+              />
               <div>
                 <h3 className="text-base font-bold text-white">No Open {gameTitle} Duels Right Now</h3>
                 <p className="text-xs text-gray-400 mt-1 max-w-md">
-                  Be the first player to host a match in this arena. Set your stake in EUR (€) and other competitors can join instantly.
+                  Be the first player to host a match in this arena. Set your stake in EUR (€) or play for free.
                 </p>
               </div>
-              <Link
-                href={`/matches/new?profileId=${gameId}`}
-                className="mt-2 px-6 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20 flex items-center gap-2"
-              >
-                <span>+</span>
-                <span>Host Open Duel</span>
+              <Link href={`/matches/new?profileId=${gameId}`}>
+                <Button variant="default" size="default">
+                  + Host Open Duel
+                </Button>
               </Link>
             </div>
           )}
         </div>
 
         {/* Right Column (1 Col): Real Competitor Profile Card */}
-        <div className="flex flex-col gap-4">
-          <div className="p-5 sm:p-6 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col gap-4 shadow-xl">
-            {/* Header: User Tag & Level Badge */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-[#202430]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-800 to-[#C86228] flex items-center justify-center font-black text-white text-sm shadow-sm">
-                  {userProfile?.username ? userProfile.username.slice(0, 1).toUpperCase() : 'U'}
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-sm text-white truncate max-w-[140px]">
+        <div className="flex flex-col gap-4 min-w-0">
+          <Card className="flex flex-col gap-4">
+            <CardHeader className="pb-3 border-b border-[#202430]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-stone-800 to-[#C86228] flex items-center justify-center font-black text-white text-sm shadow-sm flex-shrink-0">
+                    {userProfile?.username ? userProfile.username.slice(0, 1).toUpperCase() : 'U'}
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-bold text-sm text-white truncate block">
                       {userProfile?.username ? `@${userProfile.username}` : 'Guest Competitor'}
                     </span>
+                    <span className="text-[10px] text-gray-500 font-mono block">
+                      {userProfile ? 'Verified Player' : 'Sign in to record stats'}
+                    </span>
                   </div>
-                  <span className="text-[10px] text-gray-500 font-mono">
-                    {userProfile ? 'Verified Player' : 'Sign in to record stats'}
+                </div>
+
+                <EloBadge elo={elo} size="md" />
+              </div>
+            </CardHeader>
+
+            <CardContent className="flex flex-col gap-4">
+              {/* Elo Meter */}
+              <div>
+                <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
+                  <span className="text-gray-400 text-[11px]">
+                    Rating: <strong className="text-white">{elo} ELO</strong>
                   </span>
+                  <span className="text-gray-500 text-[11px]">
+                    Next Tier: <strong className="text-[#D97736]">{nextLevelThreshold}</strong>
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-[#0B0C10] border border-[#202430] rounded-full overflow-hidden p-0.5">
+                  <div
+                    className="h-full bg-[#C86228] rounded-full transition-all duration-500"
+                    style={{ width: `${eloProgressPercent}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-gray-500 font-mono mt-1 block text-right">
+                  {eloToNext > 0 ? `${eloToNext} Elo to next level` : 'Top Level reached'}
+                </span>
+              </div>
+
+              {/* Real Match Stats Grid */}
+              <div className="grid grid-cols-3 gap-2 p-3 bg-[#0B0C10] border border-[#202430] rounded-xl text-center text-xs">
+                <div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase block">Win Rate</span>
+                  <span className="font-mono font-bold text-emerald-400 text-xs sm:text-sm">{winRate}%</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase block">Record</span>
+                  <span className="font-mono font-bold text-white text-xs">
+                    {wins}W - {losses}L
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase block">Matches</span>
+                  <span className="font-mono font-bold text-gray-300 text-xs">{totalSettled}</span>
                 </div>
               </div>
 
-              <EloBadge elo={elo} size="md" />
-            </div>
-
-            {/* Elo Meter */}
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
-                <span className="text-gray-400 text-[11px]">
-                  Rating: <strong className="text-white">{elo} ELO</strong>
-                </span>
-                <span className="text-gray-500 text-[11px]">
-                  Next Tier: <strong className="text-[#D97736]">{nextLevelThreshold}</strong>
-                </span>
-              </div>
-              <div className="w-full h-2 bg-[#0B0C10] border border-[#202430] rounded-full overflow-hidden p-0.5">
-                <div
-                  className="h-full bg-[#C86228] rounded-full transition-all duration-500"
-                  style={{ width: `${eloProgressPercent}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-gray-500 font-mono mt-1 block text-right">
-                {eloToNext > 0 ? `${eloToNext} Elo to next level` : 'Top Level reached'}
-              </span>
-            </div>
-
-            {/* Real Match Stats Grid */}
-            <div className="grid grid-cols-3 gap-2 p-3 bg-[#0B0C10] border border-[#202430] rounded-xl text-center text-xs">
+              {/* Recent Match Form Dots */}
               <div>
-                <span className="text-[10px] text-gray-500 font-bold uppercase block">Win Rate</span>
-                <span className="font-mono font-bold text-green-400 text-xs sm:text-sm">{winRate}%</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-gray-500 font-bold uppercase block">Record</span>
-                <span className="font-mono font-bold text-white text-xs">
-                  {wins}W - {losses}L
+                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block mb-2">
+                  Recent Match Form
                 </span>
+                <div className="flex items-center gap-1.5">
+                  {recentForm.length > 0 ? (
+                    recentForm.map((res, i) => (
+                      <div
+                        key={i}
+                        className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[10px] font-mono ${
+                          res === 'W'
+                            ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/40'
+                            : res === 'L'
+                            ? 'bg-red-600/20 text-red-400 border border-red-500/40'
+                            : 'bg-gray-800 text-gray-400'
+                        }`}
+                      >
+                        {res}
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-xs text-gray-500 font-mono">
+                      — — — — — (No matches settled yet)
+                    </span>
+                  )}
+                </div>
               </div>
-              <div>
-                <span className="text-[10px] text-gray-500 font-bold uppercase block">Matches</span>
-                <span className="font-mono font-bold text-gray-300 text-xs">{totalSettled}</span>
-              </div>
-            </div>
 
-            {/* Recent Match Form Dots */}
-            <div>
-              <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block mb-2">
-                Recent Match Form
-              </span>
-              <div className="flex items-center gap-1.5">
-                {recentForm.length > 0 ? (
-                  recentForm.map((res, i) => (
-                    <div
-                      key={i}
-                      className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[10px] font-mono ${
-                        res === 'W'
-                          ? 'bg-green-600/20 text-green-400 border border-green-500/40'
-                          : res === 'L'
-                          ? 'bg-red-600/20 text-red-400 border border-red-500/40'
-                          : 'bg-gray-800 text-gray-400'
-                      }`}
-                    >
-                      {res}
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-xs text-gray-500 font-mono">
-                    — — — — — (No matches settled yet)
-                  </span>
-                )}
+              {/* Action buttons */}
+              <div className="pt-2 border-t border-[#202430] flex gap-2">
+                <Link href="/challenges" className="flex-1">
+                  <Button variant="secondary" size="sm" className="w-full">
+                    Find Duels
+                  </Button>
+                </Link>
+                <Link href="/leaderboards" className="flex-1">
+                  <Button variant="secondary" size="sm" className="w-full">
+                    View Ladders
+                  </Button>
+                </Link>
               </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="pt-2 border-t border-[#202430] flex gap-2">
-              <Link
-                href="/challenges"
-                className="flex-1 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
-              >
-                Find Duels
-              </Link>
-              <Link
-                href="/leaderboards"
-                className="flex-1 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
-              >
-                View Ladders
-              </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

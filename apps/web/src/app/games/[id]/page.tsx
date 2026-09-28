@@ -10,6 +10,10 @@ import { useGameAccountsStore } from '../../../lib/gameAccountsStore';
 import { EloBadge } from '../../../components/EloBadge';
 import { ChallengeCard } from '../../../components/ChallengeCard';
 import { LeaderboardTable } from '../../../components/LeaderboardTable';
+import { GamePoster } from '../../../components/GamePoster';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
 import type { GameProfile } from '@antigravity/core';
 
 interface ChallengeItem {
@@ -46,8 +50,7 @@ export default function GameHubPage() {
 
   const catalogFallback = getGameById(id);
   const resolvedProfile = profile || catalogFallback;
-  const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === resolvedProfile.id.toLowerCase());
-  const icon = catalogItem?.icon || '🎮';
+  const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === resolvedProfile.id.toLowerCase()) || catalogFallback;
   const tagline = catalogItem?.tagline || 'Competitive Matchmaking Arena';
 
   // Gamertag handle integration
@@ -86,9 +89,9 @@ export default function GameHubPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-      {/* 1. Quick-Switch to Other Most Played Games */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto min-w-0">
+      {/* 1. Quick-Switch to Other Most Played Games with Mini Posters */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none max-w-full">
         <span className="text-[11px] uppercase font-bold text-gray-400 tracking-wider flex-shrink-0 mr-1">
           Quick Switch:
         </span>
@@ -99,233 +102,306 @@ export default function GameHubPage() {
               key={g.id}
               type="button"
               onClick={() => handleSelectAnotherGame(g)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+              className={`flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
                 isCurrent
                   ? 'bg-[#C86228] text-white border-[#C86228] shadow-md shadow-[#C86228]/20'
                   : 'bg-[#111319] hover:bg-[#161922] text-gray-400 hover:text-white border-[#202430]'
               }`}
             >
-              <span>{g.icon}</span>
-              <span>{g.shortName}</span>
+              <GamePoster
+                game={g}
+                aspect="mini"
+                className="w-4 h-6 rounded flex-shrink-0"
+              />
+              <span className="truncate">{g.shortName}</span>
             </button>
           );
         })}
       </div>
 
-      {/* 2. Official Game Hub Banner */}
-      <div className="bg-[#111319] border border-[#202430] p-6 sm:p-8 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#161922] border border-[#202430] flex items-center justify-center text-4xl shadow-inner flex-shrink-0">
-            {icon}
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 text-[10px] font-bold uppercase rounded">
-                Official Arena
-              </span>
-              <span className="px-2 py-0.5 bg-[#161922] text-gray-400 font-mono text-[10px] rounded border border-[#202430]">
+      {/* 2. Official Game Hub Hero Banner (FACEIT Style with Poster Cover) */}
+      <div className="relative rounded-3xl overflow-hidden border border-[#202430] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#111319] shadow-2xl">
+        {/* Subtle background poster art backdrop */}
+        {catalogItem.bannerUrl && (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-15 filter blur-sm pointer-events-none"
+            style={{ backgroundImage: `url(${catalogItem.bannerUrl})` }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0C10] via-[#0B0C10]/90 to-[#0B0C10]/60 pointer-events-none" />
+
+        <div className="relative z-10 flex items-center gap-4 sm:gap-6 min-w-0">
+          <GamePoster
+            game={catalogItem}
+            aspect="thumb"
+            className="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl shadow-2xl border border-[#202430] flex-shrink-0"
+          />
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <Badge variant="copper">Official Arena</Badge>
+              <Badge variant="secondary" className="font-mono text-[10px]">
                 {resolvedProfile.platform || 'UNIVERSAL'}
-              </span>
+              </Badge>
               {myGamertag ? (
-                <span className="px-2 py-0.5 bg-green-500/10 border border-green-500/30 text-green-400 font-mono text-[10px] rounded">
-                  {gamertagLabel}: <strong>{myGamertag}</strong>
-                </span>
+                <Badge variant="success" className="font-mono text-[10px]">
+                  {gamertagLabel}: {myGamertag}
+                </Badge>
               ) : (
-                <span className="px-2 py-0.5 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 font-mono text-[10px] rounded">
+                <Badge variant="warning" className="font-mono text-[10px]">
                   ⚠️ {gamertagLabel} Not Linked
-                </span>
+                </Badge>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black mt-1 text-white">
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight truncate">
               {resolvedProfile.displayName} Hub
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-              {tagline} · Client-side automated anti-cheat score validation.
+            <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-xl">
+              {tagline} · Automated background score validation and anti-cheat tracking.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="relative z-10 flex items-center gap-3 flex-shrink-0">
           <Link
             href={`/matches/new?profileId=${resolvedProfile.id}`}
             onClick={() => setActiveGame(resolvedProfile)}
-            className="px-6 py-3 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20 flex items-center gap-2"
           >
-            <span>⚔️</span>
-            <span>Host Duel</span>
+            <Button variant="default" size="lg">
+              ⚔️ Host Duel
+            </Button>
           </Link>
           <Link
             href={`/tournaments/new?profileId=${resolvedProfile.id}`}
             onClick={() => setActiveGame(resolvedProfile)}
-            className="px-5 py-3 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-200 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2"
           >
-            <span>🏆</span>
-            <span>Host Cup</span>
+            <Button variant="secondary" size="lg">
+              🏆 Host Cup
+            </Button>
           </Link>
         </div>
       </div>
 
-      {/* 3. Primary Choices First (FACEIT-Style Progressive Disclosure) */}
+      {/* 3. Primary Choices (Progressive Disclosure) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Choice A: 1v1 & Squad Duels */}
-        <div className="p-6 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col justify-between gap-4">
-          <div>
+        <Card className="flex flex-col justify-between">
+          <CardHeader>
             <div className="flex items-center gap-2">
               <span className="text-2xl">⚔️</span>
               <div>
-                <h3 className="text-lg font-bold text-white">Duel Matchmaking</h3>
-                <p className="text-xs text-gray-400">Head-to-head cash duels and free practice matches</p>
+                <CardTitle>Duel Matchmaking</CardTitle>
+                <p className="text-xs text-gray-400 mt-0.5">Head-to-head cash duels and free practice matches</p>
               </div>
             </div>
 
             <div className="mt-4 flex flex-col gap-2 text-xs text-gray-300">
-              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-lg border border-[#202430]">
-                <span>Series Options:</span>
+              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-xl border border-[#202430]">
+                <span className="text-gray-400 font-mono">Series Options:</span>
                 <span className="font-bold text-white">BO1, BO3, BO5</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-lg border border-[#202430]">
-                <span>Stake Modes:</span>
+              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-xl border border-[#202430]">
+                <span className="text-gray-400 font-mono">Stake Modes:</span>
                 <span className="font-bold text-[#D97736]">Real Cash (€ EUR) & Free Play</span>
               </div>
             </div>
-          </div>
+          </CardHeader>
 
-          <div className="flex gap-2">
-            <Link
-              href={`/matches/new?profileId=${resolvedProfile.id}`}
-              onClick={() => setActiveGame(resolvedProfile)}
-              className="flex-1 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase rounded-xl transition text-center shadow-sm"
-            >
-              + Create Match
-            </Link>
-            <Link
-              href="/challenges"
-              onClick={() => setActiveGame(resolvedProfile)}
-              className="px-4 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
-            >
-              Browse Open Board
-            </Link>
-          </div>
-        </div>
+          <CardContent className="pt-2">
+            <div className="flex gap-2">
+              <Link
+                href={`/matches/new?profileId=${resolvedProfile.id}`}
+                onClick={() => setActiveGame(resolvedProfile)}
+                className="flex-1"
+              >
+                <Button variant="default" size="default" className="w-full">
+                  + Create Match
+                </Button>
+              </Link>
+              <Link
+                href={`/challenges?gameId=${resolvedProfile.id}`}
+                className="flex-1"
+              >
+                <Button variant="secondary" size="default" className="w-full">
+                  Browse Open ({challenges?.length || 0})
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Choice B: Tournaments & Cups */}
-        <div className="p-6 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col justify-between gap-4">
-          <div>
+        <Card className="flex flex-col justify-between">
+          <CardHeader>
             <div className="flex items-center gap-2">
               <span className="text-2xl">🏆</span>
               <div>
-                <h3 className="text-lg font-bold text-white">Tournaments & Championships</h3>
-                <p className="text-xs text-gray-400">Single & Double Elimination brackets, Swiss cups</p>
+                <CardTitle>Bracket Tournaments</CardTitle>
+                <p className="text-xs text-gray-400 mt-0.5">Single-elimination knockout cups with automated brackets</p>
               </div>
             </div>
 
             <div className="mt-4 flex flex-col gap-2 text-xs text-gray-300">
-              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-lg border border-[#202430]">
-                <span>Bracket Formats:</span>
-                <span className="font-bold text-white">Single Elim, Double, Swiss, Round Robin</span>
+              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-xl border border-[#202430]">
+                <span className="text-gray-400 font-mono">Bracket Sizes:</span>
+                <span className="font-bold text-white">4, 8, 16, 32 Players</span>
               </div>
-              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-lg border border-[#202430]">
-                <span>Bracket Sizes:</span>
-                <span className="font-bold text-white">4 to 64 Entrants</span>
+              <div className="flex items-center justify-between p-2.5 bg-[#0B0C10] rounded-xl border border-[#202430]">
+                <span className="text-gray-400 font-mono">Prize Pool:</span>
+                <span className="font-bold text-emerald-400">Guaranteed Escrow Payouts</span>
               </div>
             </div>
-          </div>
+          </CardHeader>
 
-          <div className="flex gap-2">
-            <Link
-              href="/tournaments"
-              onClick={() => setActiveGame(resolvedProfile)}
-              className="flex-1 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-200 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
-            >
-              View Active Cups
-            </Link>
-            <Link
-              href={`/tournaments/new?profileId=${resolvedProfile.id}`}
-              onClick={() => setActiveGame(resolvedProfile)}
-              className="px-4 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
-            >
-              + Organize Cup
-            </Link>
-          </div>
-        </div>
+          <CardContent className="pt-2">
+            <div className="flex gap-2">
+              <Link
+                href={`/tournaments/new?profileId=${resolvedProfile.id}`}
+                onClick={() => setActiveGame(resolvedProfile)}
+                className="flex-1"
+              >
+                <Button variant="default" size="default" className="w-full">
+                  + Create Cup
+                </Button>
+              </Link>
+              <Link
+                href={`/tournaments?gameId=${resolvedProfile.id}`}
+                className="flex-1"
+              >
+                <Button variant="secondary" size="default" className="w-full">
+                  View Cups
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* 4. Live Open Matches for this Game */}
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C86228]" />
-            <h3 className="text-base font-bold text-white">
-              Open {resolvedProfile.displayName} Duels
-            </h3>
-          </div>
-          <Link href="/challenges" className="text-xs text-[#D97736] hover:underline font-bold">
-            View All Open Matches →
-          </Link>
-        </div>
+      {/* 4. Same-Page Context: Open Duels & Ranking Standings */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left 2 Cols: Live Open Duels for this game */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <span>⚔️</span>
+                <span>Open Duels in {resolvedProfile.displayName}</span>
+              </h2>
+              <p className="text-xs text-gray-400">Join instantly or stake real funds against online challengers</p>
+            </div>
 
-        {loadingChallenges ? (
-          <div className="p-8 text-center text-gray-500 font-mono text-xs bg-[#111319] border border-[#202430] rounded-xl">
-            Querying open matchmaking pool...
-          </div>
-        ) : challenges && challenges.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {challenges.slice(0, 3).map((c) => (
-              <ChallengeCard
-                key={c.id}
-                id={c.id}
-                gameTitle={c.game_profiles?.display_name || resolvedProfile.displayName}
-                gameType={c.game_profiles?.game_type || resolvedProfile.gameType}
-                entryFee={c.entry_fee ?? 0}
-                prizePool={c.prize_pool ?? 0}
-                creatorName={c.created_by?.slice(0, 8) || 'Player'}
-                format={c.format || 'BO1'}
-                countryCode={c.country_code}
-                mode={c.mode || '1v1'}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 bg-[#111319] border border-[#202430] rounded-xl text-center flex flex-col items-center gap-2">
-            <span className="text-2xl">{icon}</span>
-            <span className="text-sm font-bold text-white">No open duels waiting for {resolvedProfile.displayName}</span>
-            <p className="text-xs text-gray-400">Be the first to post a duel and set your stake!</p>
             <Link
               href={`/matches/new?profileId=${resolvedProfile.id}`}
-              className="mt-2 px-5 py-2 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase rounded-lg transition"
+              onClick={() => setActiveGame(resolvedProfile)}
             >
-              Post Open Duel
+              <Button variant="default" size="sm">
+                + New Duel
+              </Button>
             </Link>
           </div>
-        )}
-      </div>
 
-      {/* 5. Same Page Rankings & Ladder Preview */}
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C86228]" />
-            <h3 className="text-base font-bold text-white">
-              {resolvedProfile.displayName} Ranked Ladder
-            </h3>
-          </div>
-          <Link href={`/leaderboards/${resolvedProfile.id}`} className="text-xs text-[#D97736] hover:underline font-bold">
-            Full Leaderboard →
-          </Link>
+          {loadingChallenges ? (
+            <div className="p-8 text-center text-gray-400 font-mono text-xs bg-[#111319] border border-[#202430] rounded-2xl animate-pulse">
+              Fetching open duels...
+            </div>
+          ) : !challenges || challenges.length === 0 ? (
+            <div className="p-8 text-center bg-[#111319] border border-[#202430] rounded-2xl flex flex-col items-center justify-center gap-3">
+              <span className="text-3xl opacity-50">🕹️</span>
+              <p className="text-sm font-bold text-white">No active open duels right now</p>
+              <p className="text-xs text-gray-400 max-w-sm">
+                Be the first to post a match challenge in {resolvedProfile.displayName} and set your own stake amount.
+              </p>
+              <Link
+                href={`/matches/new?profileId=${resolvedProfile.id}`}
+                onClick={() => setActiveGame(resolvedProfile)}
+              >
+                <Button variant="default" size="sm">
+                  Create First Duel
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {challenges.map((c) => (
+                <ChallengeCard
+                  key={c.id}
+                  id={c.id}
+                  gameTitle={c.game_profiles?.display_name || resolvedProfile.displayName}
+                  gameType={c.game_profiles?.game_type || resolvedProfile.gameType}
+                  entryFee={c.entry_fee ?? 0}
+                  prizePool={c.prize_pool ?? 0}
+                  creatorName={c.created_by ? c.created_by.slice(0, 8) : 'Challenger'}
+                  format={c.format}
+                  countryCode={c.country_code}
+                  mode={c.mode}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {loadingLadder ? (
-          <div className="p-8 text-center text-gray-500 font-mono text-xs bg-[#111319] border border-[#202430] rounded-xl">
-            Loading rankings...
+        {/* Right 1 Col: Live Competitive Ladder Standings */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <span>🥇</span>
+                <span>Ladder Ranking</span>
+              </h2>
+              <p className="text-xs text-gray-400">Top rated players</p>
+            </div>
+
+            <Link
+              href={`/leaderboards/${resolvedProfile.gameType.toLowerCase()}`}
+              className="text-xs text-[#D97736] hover:underline font-bold"
+            >
+              Full Ladder →
+            </Link>
           </div>
-        ) : (
-          <LeaderboardTable
-            entries={(ladderEntries || []).slice(0, 5)}
-            gameTitle={resolvedProfile.displayName}
-            gameIcon={icon}
-            gameType={resolvedProfile.gameType}
-          />
-        )}
+
+          <div className="bg-[#111319] border border-[#202430] rounded-2xl p-4 flex flex-col gap-3 shadow-xl">
+            {loadingLadder ? (
+              <div className="p-6 text-center text-gray-400 font-mono text-xs animate-pulse">
+                Loading standings...
+              </div>
+            ) : !ladderEntries || ladderEntries.length === 0 ? (
+              <div className="p-6 text-center text-gray-400 text-xs">
+                No rated match records yet for {resolvedProfile.displayName}. Play your first duel to claim #1 rank!
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {(ladderEntries || []).slice(0, 5).map((entry, idx) => (
+                  <div
+                    key={entry.userId}
+                    className="flex items-center justify-between p-2.5 bg-[#0B0C10] border border-[#202430] rounded-xl text-xs hover:border-[#C86228]/40 transition"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-5 h-5 rounded font-black text-[10px] flex items-center justify-center ${
+                        idx === 0 ? 'bg-amber-500 text-black' : idx === 1 ? 'bg-gray-300 text-black' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-[#161922] text-gray-400'
+                      }`}>
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <span className="font-bold text-white block">
+                          @{entry.username || `player_${entry.userId.slice(0, 6)}`}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-mono">
+                          {entry.wins}W / {entry.losses}L
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <EloBadge elo={entry.rating} size="sm" />
+                      <span className="font-mono font-bold text-white">{entry.rating}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
