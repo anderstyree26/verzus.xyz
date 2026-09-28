@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { usePartyStore } from '../lib/partyStore';
@@ -20,6 +20,7 @@ export function PartyBar() {
     setQueueStatus,
     toggleChat,
     sendMessage,
+    setUserProfile,
   } = usePartyStore();
 
   const { activeGame } = useGameStore();
@@ -34,6 +35,13 @@ export function PartyBar() {
   const [chatInput, setChatInput] = useState('');
   const [copied, setCopied] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+
+  // Sync real profile into the party member state
+  useEffect(() => {
+    if (userProfile?.username) {
+      setUserProfile(userProfile.username, userProfile.rating ?? 1000);
+    }
+  }, [userProfile, setUserProfile]);
 
   const emptySlotsCount = Math.max(0, maxSlots - members.length);
   const me = members.find((m) => m.id === 'me') || members[0];

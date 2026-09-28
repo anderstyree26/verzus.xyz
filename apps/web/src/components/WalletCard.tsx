@@ -52,7 +52,7 @@ export function WalletCard() {
 
   const cashBalance = balanceData?.cashEur ?? 0.0;
   const lockedCash = balanceData?.lockedCashEur ?? 0.0;
-  const pointsBalance = balanceData?.balance ?? 10000;
+  const pointsBalance = balanceData?.balance ?? 0;
   const lockedPoints = balanceData?.locked ?? 0;
 
   return (

@@ -7,6 +7,7 @@ import { ChallengeCard } from '../../components/ChallengeCard';
 import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
 import { GLOBAL_REGIONS, type GlobalRegion } from '@antigravity/core';
+import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../../lib/gamesCatalog';
 
 interface ChallengeItem {
   id: string;
@@ -21,7 +22,7 @@ interface ChallengeItem {
 }
 
 export default function ChallengesPage() {
-  const { activeGame } = useGameStore();
+  const { activeGame, setActiveGame } = useGameStore();
   const [filterGameOnly, setFilterGameOnly] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
   const [feeFilter, setFeeFilter] = useState<'ALL' | 'FREE' | 'CASH'>('ALL');
@@ -104,22 +105,50 @@ export default function ChallengesPage() {
         </Link>
       </div>
 
+      {/* FACEIT-Style Game Selector Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none">
+        <button
+          type="button"
+          onClick={() => setFilterGameOnly(false)}
+          className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+            !filterGameOnly
+              ? 'bg-[#C86228] text-white border-[#C86228] shadow-sm'
+              : 'bg-[#111319] hover:bg-[#161922] text-gray-400 hover:text-white border-[#202430]'
+          }`}
+        >
+          <span>🌐</span>
+          <span>All Games</span>
+        </button>
+
+        {OFFICIAL_GAMES.map((game) => {
+          const isSelected = filterGameOnly && activeGame?.id?.toLowerCase() === game.id.toLowerCase();
+          return (
+            <button
+              key={game.id}
+              type="button"
+              onClick={() => {
+                setActiveGame(game);
+                setFilterGameOnly(true);
+              }}
+              className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
+                isSelected
+                  ? 'bg-[#C86228] text-white border-[#C86228] shadow-md shadow-[#C86228]/20'
+                  : 'bg-[#111319] hover:bg-[#161922] text-gray-400 hover:text-white border-[#202430]'
+              }`}
+            >
+              <span>{game.icon}</span>
+              <span>{game.displayName}</span>
+              {isSelected && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Filter Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#111319] border border-[#202430] rounded-xl text-xs">
         <div className="flex items-center gap-2">
-          {activeGame && (
-            <button
-              onClick={() => setFilterGameOnly(!filterGameOnly)}
-              className={`px-3 py-1.5 rounded-lg font-bold border transition ${
-                filterGameOnly
-                  ? 'bg-[#C86228]/20 border-[#C86228] text-white'
-                  : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
-              }`}
-            >
-              🎮 {activeGame.displayName} Only
-            </button>
-          )}
-
           <div className="flex items-center bg-[#161922] border border-[#202430] rounded-lg p-0.5">
             {(['ALL', 'FREE', 'CASH'] as const).map((mode) => (
               <button

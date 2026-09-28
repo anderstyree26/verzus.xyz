@@ -7,9 +7,12 @@ import { EloBadge } from '../../components/EloBadge';
 import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
 import { formatEUR } from '../../lib/currency';
+import { getGameById, OFFICIAL_GAMES } from '../../lib/gamesCatalog';
 
 interface MatchItem {
   id: string;
+  profile_id?: string;
+  game_profiles?: { display_name: string; game_type: string };
   format: string;
   status: string;
   entry_fee: number;
@@ -98,24 +101,36 @@ export default function DashboardPage() {
               <p className="text-sm text-gray-400 py-6 text-center font-mono animate-pulse">Loading match record...</p>
             ) : matches && matches.length > 0 ? (
               <div className="divide-y divide-[#202430]">
-                {matches.map((m) => (
-                  <div key={m.id} className="py-3.5 flex items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">Match #{m.id.slice(0, 8)}</span>
-                        {m.room_code && (
-                          <span className="px-1.5 py-0.2 bg-[#161922] text-gray-400 font-mono text-[10px] rounded">
-                            {m.room_code}
-                          </span>
-                        )}
+                {matches.map((m) => {
+                  const gameTitle = m.game_profiles?.display_name || 'Esports Duel';
+                  const catalogItem = OFFICIAL_GAMES.find((c) =>
+                    c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
+                    c.displayName.toLowerCase() === gameTitle.toLowerCase()
+                  );
+                  const gameIcon = catalogItem?.icon || '🎮';
+
+                  return (
+                    <div key={m.id} className="py-3.5 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl select-none">{gameIcon}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-white">{gameTitle}</span>
+                            <span className="text-xs text-gray-500 font-mono">#{m.id.slice(0, 8)}</span>
+                            {m.room_code && (
+                              <span className="px-1.5 py-0.2 bg-[#161922] text-gray-400 font-mono text-[10px] rounded">
+                                {m.room_code}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400 font-mono mt-0.5">
+                            Format: <strong className="text-gray-200">{m.format}</strong> · Prize:{' '}
+                            <strong className="text-[#D97736]">
+                              {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Glory & Elo'}
+                            </strong>
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-400 font-mono mt-0.5">
-                        Format: <strong className="text-gray-200">{m.format}</strong> · Prize:{' '}
-                        <strong className="text-[#D97736]">
-                          {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Glory & Elo'}
-                        </strong>
-                      </p>
-                    </div>
 
                     <div className="flex items-center gap-3">
                       <span
@@ -137,8 +152,9 @@ export default function DashboardPage() {
                       </Link>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
+            </div>
             ) : (
               <div className="py-12 text-center text-gray-500">
                 <div className="text-2xl mb-1">🎮</div>

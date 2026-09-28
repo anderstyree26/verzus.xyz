@@ -192,7 +192,7 @@ export function CalibrationTool({
 
         {/* Bounding Box overlay */}
         <div
-          className="absolute border-2 border-accent bg-accent/25 pointer-events-none transition-all duration-75 shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+          className="absolute border-2 border-accent bg-accent/25 pointer-events-none transition-all duration-75 shadow-[0_0_15px_rgba(200,98,40,0.5)]"
           style={{
             left: `${roi.x * 100}%`,
             top: `${roi.y * 100}%`,

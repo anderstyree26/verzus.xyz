@@ -59,13 +59,13 @@ export default function TournamentDetailPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      <div className="p-6 bg-surface-elevated border border-surface-border rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="p-6 sm:p-8 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <span className="text-xs text-accent font-bold uppercase tracking-wider">
-            {tournament.game_profiles?.display_name} · {tournament.format}
+          <span className="text-xs text-[#D97736] font-bold uppercase tracking-wider">
+            {tournament.game_profiles?.display_name || 'Tournament'} · {tournament.format.replace(/_/g, ' ')}
           </span>
-          <h1 className="text-3xl font-extrabold mt-1">{tournament.name}</h1>
-          <p className="text-xs text-gray-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">{tournament.name}</h1>
+          <p className="text-xs text-gray-400 mt-1 font-mono">
             Status: <b className="text-white uppercase">{tournament.status}</b> · Entrants: {entrantsCount}/{tournament.size}
           </p>
         </div>
@@ -74,7 +74,7 @@ export default function TournamentDetailPage() {
           {tournament.status === 'REGISTRATION' && (
             <button
               onClick={handleJoin}
-              className="px-5 py-2.5 bg-accent hover:bg-accent-600 font-bold text-xs rounded-md transition"
+              className="px-5 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20"
             >
               Join Tournament
             </button>
@@ -83,7 +83,7 @@ export default function TournamentDetailPage() {
           {tournament.status === 'CHECKIN' && (
             <button
               onClick={handleCheckin}
-              className="px-5 py-2.5 bg-green-600 hover:bg-green-700 font-bold text-xs rounded-md transition"
+              className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition"
             >
               Check In
             </button>
@@ -91,9 +91,9 @@ export default function TournamentDetailPage() {
 
           <Link
             href={`/tournaments/${id}/bracket`}
-            className="px-5 py-2.5 bg-surface hover:bg-surface-border border border-surface-border font-bold text-xs rounded-md transition"
+            className="px-5 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition"
           >
-            View Bracket
+            View Bracket →
           </Link>
         </div>
       </div>

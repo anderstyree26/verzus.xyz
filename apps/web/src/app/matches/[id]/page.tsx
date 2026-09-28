@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { MatchRoom } from '../../../components/MatchRoom';
 import { apiClient } from '../../../lib/api';
+import { getGameById } from '../../../lib/gamesCatalog';
 import type { GameProfile } from '@antigravity/core';
 
 interface MatchDetails {
@@ -26,7 +27,7 @@ export default function MatchDetailPage() {
 
   const { data: profile, isLoading: loadingProfile } = useQuery<GameProfile>({
     queryKey: ['game-profile', match?.profileId],
-    queryFn: () => apiClient<GameProfile>(`/games/${match!.profileId}`),
+    queryFn: () => apiClient<GameProfile>(`/games/${match!.profileId}`).catch(() => getGameById(match?.profileId)),
     enabled: !!match?.profileId,
   });
 

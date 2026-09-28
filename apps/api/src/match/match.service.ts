@@ -17,12 +17,20 @@ export class MatchService {
   async getMyMatches(userId: string) {
     const { data, error } = await this.supabase
       .from('matches')
-      .select('*')
+      .select('*, game_profiles(display_name, game_type)')
       .or(`player_a.eq.${userId},player_b.eq.${userId}`)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
-    return data;
+    if (error) {
+      // Fallback without relation if foreign key cache is stale
+      const fallback = await this.supabase
+        .from('matches')
+        .select('*')
+        .or(`player_a.eq.${userId},player_b.eq.${userId}`)
+        .order('created_at', { ascending: false });
+      return fallback.data || [];
+    }
+    return data || [];
   }
 
   async getOpenMatches(profileId?: string) {

@@ -37,6 +37,7 @@ interface PartyState {
   sendMessage: (sender: string, text: string) => void;
   addMember: (member: Omit<PartyMember, 'isLeader' | 'isReady'>) => void;
   removeMember: (memberId: string) => void;
+  setUserProfile: (username: string, elo?: number) => void;
 }
 
 export const usePartyStore = create<PartyState>((set, get) => ({
@@ -46,13 +47,13 @@ export const usePartyStore = create<PartyState>((set, get) => ({
   status: 'IDLE',
   isChatOpen: false,
 
-  // Initial user in party (default leader)
+  // Initial user in party (default leader, standard baseline Level 1 / 1000 Elo)
   members: [
     {
       id: 'me',
-      username: 'PlayerOne',
-      level: 7,
-      elo: 1650,
+      username: 'You',
+      level: 1,
+      elo: 1000,
       isLeader: true,
       isReady: true,
     },
@@ -104,6 +105,17 @@ export const usePartyStore = create<PartyState>((set, get) => ({
   removeMember: (memberId) => {
     set((state) => ({
       members: state.members.filter((m) => m.id !== memberId),
+    }));
+  },
+
+  setUserProfile: (username, elo = 1000) => {
+    const level = Math.min(10, Math.max(1, Math.floor(elo / 200) + 1));
+    set((state) => ({
+      members: state.members.map((m) =>
+        m.id === 'me'
+          ? { ...m, username: username || m.username, elo, level }
+          : m
+      ),
     }));
   },
 }));

@@ -367,21 +367,21 @@ function NewGameProfileForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-300 mb-1">
-                Engine Game Type
+                Score Extraction Rule (OCR)
               </label>
               <select
                 value={gameType}
                 onChange={(e) => setGameType(e.target.value as GameType)}
                 className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
               >
-                <option value="HIGH_SCORE">HIGH_SCORE (Highest score wins)</option>
-                <option value="LOW_TIME">LOW_TIME (Fastest duration wins)</option>
-                <option value="SURVIVAL">SURVIVAL (Longest duration wins)</option>
-                <option value="HEAD_TO_HEAD">HEAD_TO_HEAD (Both on screen)</option>
-                <option value="BINARY_RESULT">BINARY_RESULT (Win / Loss detected)</option>
-                <option value="COMPOSITE_STAT">COMPOSITE_STAT (Weighted formula)</option>
-                <option value="PROGRESSION">PROGRESSION (Ranks + value)</option>
-                <option value="PHYSICAL">PHYSICAL (Stable whiteboard reads)</option>
+                <option value="HEAD_TO_HEAD">Head-to-Head Score (Direct side-by-side HUD)</option>
+                <option value="HIGH_SCORE">Highest Score Wins (Points / High score)</option>
+                <option value="BINARY_RESULT">Match Outcome (Win / Loss detected)</option>
+                <option value="LOW_TIME">Time Trial / Speedrun (Fastest duration wins)</option>
+                <option value="SURVIVAL">Survival / Endurance (Longest time wins)</option>
+                <option value="COMPOSITE_STAT">Composite Formula (Weighted stats)</option>
+                <option value="PROGRESSION">Rank Tier (Rank progression)</option>
+                <option value="PHYSICAL">Physical / Analog (Whiteboard / live camera)</option>
               </select>
             </div>
 
