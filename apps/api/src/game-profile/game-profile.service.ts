@@ -37,14 +37,60 @@ export class GameProfileService {
   }
 
   async getById(id: string) {
-    const { data, error } = await this.supabase
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    if (isUuid) {
+      const { data } = await this.supabase
+        .from('game_profiles')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (data) return this.mapProfile(data);
+    }
+
+    const SLUG_TO_UUID: Record<string, string> = {
+      'cs2': '00000000-0000-0000-0000-000000000001',
+      'counter-strike-2': '00000000-0000-0000-0000-000000000001',
+      'eafc': '00000000-0000-0000-0000-000000000002',
+      'eafc24': '00000000-0000-0000-0000-000000000002',
+      'fc25': '00000000-0000-0000-0000-000000000002',
+      'rl': '00000000-0000-0000-0000-000000000003',
+      'rocket-league': '00000000-0000-0000-0000-000000000003',
+      'val': '00000000-0000-0000-0000-000000000004',
+      'valorant': '00000000-0000-0000-0000-000000000004',
+      'dota2': '00000000-0000-0000-0000-000000000005',
+      'dota': '00000000-0000-0000-0000-000000000005',
+      'cod': '00000000-0000-0000-0000-000000000006',
+      'warzone': '00000000-0000-0000-0000-000000000006',
+      'fortnite': '00000000-0000-0000-0000-000000000007',
+      'tekken8': '00000000-0000-0000-0000-000000000008',
+      'tekken': '00000000-0000-0000-0000-000000000008',
+    };
+
+    const targetUuid = SLUG_TO_UUID[id.toLowerCase()];
+    if (targetUuid) {
+      const { data } = await this.supabase
+        .from('game_profiles')
+        .select('*')
+        .eq('id', targetUuid)
+        .maybeSingle();
+
+      if (data) return this.mapProfile(data);
+    }
+
+    // Fallback: search by display_name
+    const { data: nameMatches } = await this.supabase
       .from('game_profiles')
       .select('*')
-      .eq('id', id)
-      .maybeSingle();
+      .ilike('display_name', `%${id}%`)
+      .limit(1);
 
-    if (error || !data) throw new NotFoundException('Game profile not found');
-    return this.mapProfile(data);
+    if (nameMatches && nameMatches.length > 0) {
+      return this.mapProfile(nameMatches[0]);
+    }
+
+    throw new NotFoundException(`Game profile '${id}' not found`);
   }
 
   async submitProfile(
