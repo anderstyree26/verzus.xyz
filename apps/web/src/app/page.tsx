@@ -1,17 +1,21 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useGameStore } from '../lib/gameStore';
 import { EloBadge } from '../components/EloBadge';
 import { ChallengeCard } from '../components/ChallengeCard';
 import { GamePoster } from '../components/GamePoster';
+import { AuthPromptModal } from '../components/AuthPromptModal';
+import { GameSelectionModal } from '../components/GameSelectionModal';
 import { apiClient } from '../lib/api';
 import { formatEUR } from '../lib/currency';
-import { getGameById } from '../lib/gamesCatalog';
+import { getGameById, OFFICIAL_GAMES } from '../lib/gamesCatalog';
+import { notifyUser } from '../lib/notifications';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
+import { Card, CardHeader, CardContent } from '../components/ui/card';
 
 interface ChallengeItem {
   id: string;
@@ -42,6 +46,8 @@ interface UserProfile {
 
 export default function HomePage() {
   const { activeGame } = useGameStore();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [gameModalOpen, setGameModalOpen] = useState(false);
 
   const catalogGame = getGameById(activeGame?.id);
   const gameTitle = catalogGame.displayName;
@@ -63,7 +69,7 @@ export default function HomePage() {
   });
 
   // 2. Real User Profile from Database
-  const { data: userProfile } = useQuery<UserProfile | null>({
+  const { data: userProfile, isLoading: loadingProfile } = useQuery<UserProfile | null>({
     queryKey: ['home-user-profile'],
     queryFn: async () => {
       try {
@@ -75,7 +81,7 @@ export default function HomePage() {
     staleTime: 30000,
   });
 
-  // 3. Real User Match History from Database
+  // 3. Real User Match History from Database (only when authenticated)
   const { data: myMatches } = useQuery<MyMatchItem[]>({
     queryKey: ['home-my-matches'],
     queryFn: async () => {
@@ -85,8 +91,11 @@ export default function HomePage() {
         return [];
       }
     },
+    enabled: !!userProfile?.id,
     staleTime: 15000,
   });
+
+  const isAuthenticated = !!userProfile?.id;
 
   // Calculate real performance metrics from real matches
   const settledMatches = (myMatches || []).filter((m) => m.status === 'SETTLED' || m.status === 'COMPLETED');
@@ -97,7 +106,6 @@ export default function HomePage() {
   const losses = Math.max(0, totalSettled - wins);
   const winRate = totalSettled > 0 ? ((wins / totalSettled) * 100).toFixed(1) : '0.0';
 
-  // Real recent 5 match outcomes
   const recentForm = settledMatches.slice(0, 5).map((m) => {
     if (!userProfile?.id || !m.winner_id) return 'D';
     return m.winner_id === userProfile.id ? 'W' : 'L';
@@ -109,13 +117,29 @@ export default function HomePage() {
   const eloProgressPercent = Math.min(100, Math.max(10, ((150 - eloToNext) / 150) * 100));
 
   const handleAcceptDuel = async (matchId: string) => {
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+
     try {
       await apiClient(`/matches/${matchId}/accept`, { method: 'POST' });
       window.location.href = `/matches/${matchId}`;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      alert(`Could not accept duel: ${msg}`);
+      notifyUser('Could not accept duel', {
+        body: msg,
+        sound: 'score',
+        type: 'error',
+      });
       refetchChallenges();
+    }
+  };
+
+  const handleHostDuelClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated) {
+      e.preventDefault();
+      setAuthModalOpen(true);
     }
   };
 
@@ -134,8 +158,91 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto min-w-0">
-      {/* 1. Clean, Spacious Active Game Arena Header with Game Poster */}
-      <div className="relative overflow-hidden rounded-3xl border border-[#202430] bg-[#111319] p-6 sm:p-8 shadow-2xl">
+      {/* 1. If GUEST: High-Impact FACEIT-Style Hero Onboarding Banner */}
+      {!isAuthenticated && !loadingProfile && (
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-10 shadow-2xl">
+          {/* Subtle background art glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-accent-400/5 rounded-full filter blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="copper">ZERO-CONFIG ESPORTS</Badge>
+                <Badge variant="secondary" className="font-mono text-[10px]">
+                  AUTOMATED BACKGROUND OCR
+                </Badge>
+                <Badge variant="outline" className="font-mono text-[10px]">
+                  8 OFFICIAL TITLES
+                </Badge>
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground uppercase leading-none">
+                Play Competitive Duels. <br />
+                <span className="text-accent-400">Win Real Prizes.</span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Connect your game, queue 1v1 matches or squad tournaments, and let client-side OCR verify scores in the background. No manual screenshot uploads or disputed matches.
+              </p>
+
+              <div className="flex items-center gap-3 pt-2 flex-wrap sm:flex-nowrap">
+                <Link href="/signup">
+                  <Button variant="default" size="lg" className="font-black text-xs uppercase tracking-wider">
+                    🚀 Create Free Account
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button variant="secondary" size="lg" className="font-bold text-xs uppercase tracking-wider">
+                    Sign In
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setGameModalOpen(true)}
+                  className="font-bold text-xs uppercase tracking-wider gap-1.5"
+                >
+                  <span>🕹️ Explore Arenas</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* 3 Supported Key Pillars */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 flex-shrink-0">
+              <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
+                <div className="font-bold text-xs text-foreground flex items-center gap-2">
+                  <span>⚡</span> Automated OCR
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Background capture validates results seamlessly. Zero player effort.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
+                <div className="font-bold text-xs text-foreground flex items-center gap-2">
+                  <span>💰</span> Euro (€) Escrow
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Compete for real cash or play free with community demo points.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
+                <div className="font-bold text-xs text-foreground flex items-center gap-2">
+                  <span>🥇</span> Level 1-10 ELO
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  FairPlay matchmaking calibrated to your verified skill rating.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Active Game Arena Header with Game Poster (FACEIT Hub Style) */}
+      <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-2xl">
         {/* Background banner art backdrop */}
         {catalogGame.bannerUrl && (
           <div
@@ -143,14 +250,14 @@ export default function HomePage() {
             style={{ backgroundImage: `url(${catalogGame.bannerUrl})` }}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0C10] via-[#0B0C10]/90 to-[#0B0C10]/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/60 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4 sm:gap-6 min-w-0">
             <GamePoster
               game={catalogGame}
               aspect="thumb"
-              className="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl shadow-2xl border border-[#202430] flex-shrink-0"
+              className="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl shadow-2xl border border-border flex-shrink-0"
             />
             <div className="flex flex-col gap-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -164,10 +271,10 @@ export default function HomePage() {
                 </Badge>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase mt-0.5 truncate">
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground uppercase mt-0.5 truncate">
                 {gameTitle}
               </h1>
-              <p className="text-xs sm:text-sm text-gray-400">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {gameTagline} · Automated background score validation.
               </p>
             </div>
@@ -175,39 +282,48 @@ export default function HomePage() {
 
           {/* Primary Action Launchers */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
-            <Link href={`/matches/new?profileId=${gameId}`}>
-              <Button variant="default" size="lg" className="w-full sm:w-auto">
+            <Link href={`/matches/new?profileId=${gameId}`} onClick={handleHostDuelClick}>
+              <Button variant="default" size="lg" className="w-full sm:w-auto font-bold">
                 ⚔️ HOST 1v1 DUEL
               </Button>
             </Link>
 
             <Link href="/tournaments">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto font-bold">
                 🏆 BROWSE CUPS
               </Button>
             </Link>
+
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setGameModalOpen(true)}
+              className="w-full sm:w-auto font-bold gap-1.5"
+            >
+              <span>⇄ SWITCH ARENA</span>
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* 2. Main 2-Column Responsive Hub */}
+      {/* 3. Main 2-Column Responsive Hub */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 Cols): Open Matches Board */}
         <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#C86228]" />
-              <h2 className="text-base font-bold tracking-tight text-white uppercase truncate">
+              <span className="w-2 h-2 rounded-full bg-primary" />
+              <h2 className="text-base font-bold tracking-tight text-foreground uppercase truncate">
                 {gameTitle} Duels & Challenges
               </h2>
             </div>
-            <Link href="/challenges" className="text-xs text-[#D97736] hover:underline font-bold flex-shrink-0">
+            <Link href="/challenges" className="text-xs text-accent-400 hover:underline font-bold flex-shrink-0">
               View All Open ({totalOpenCount}) →
             </Link>
           </div>
 
           {loadingChallenges ? (
-            <div className="p-8 text-center text-gray-500 font-mono text-xs bg-[#111319] border border-[#202430] rounded-xl animate-pulse">
+            <div className="p-8 text-center text-muted-foreground font-mono text-xs bg-card border border-border rounded-xl animate-pulse">
               Querying open matchmaking pool...
             </div>
           ) : activeChallenges.length > 0 ? (
@@ -230,19 +346,19 @@ export default function HomePage() {
             </div>
           ) : (
             /* Clean Empty State with Game Poster */
-            <div className="p-8 sm:p-10 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col items-center justify-center text-center gap-4">
+            <div className="p-8 sm:p-10 bg-card border border-border rounded-2xl flex flex-col items-center justify-center text-center gap-4">
               <GamePoster
                 game={catalogGame}
                 aspect="thumb"
-                className="w-16 h-22 rounded-xl shadow-lg border border-[#202430]"
+                className="w-16 h-22 rounded-xl shadow-lg border border-border"
               />
               <div>
-                <h3 className="text-base font-bold text-white">No Open {gameTitle} Duels Right Now</h3>
-                <p className="text-xs text-gray-400 mt-1 max-w-md">
+                <h3 className="text-base font-bold text-foreground">No Open {gameTitle} Duels Right Now</h3>
+                <p className="text-xs text-muted-foreground mt-1 max-w-md">
                   Be the first player to host a match in this arena. Set your stake in EUR (€) or play for free.
                 </p>
               </div>
-              <Link href={`/matches/new?profileId=${gameId}`}>
+              <Link href={`/matches/new?profileId=${gameId}`} onClick={handleHostDuelClick}>
                 <Button variant="default" size="default">
                   + Host Open Duel
                 </Button>
@@ -251,20 +367,20 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Right Column (1 Col): Real Competitor Profile Card */}
+        {/* Right Column (1 Col): Real Competitor Profile or Guest Callout */}
         <div className="flex flex-col gap-4 min-w-0">
-          <Card className="flex flex-col gap-4">
-            <CardHeader className="pb-3 border-b border-[#202430]">
+          <Card className="flex flex-col gap-4 p-4 sm:p-5">
+            <CardHeader className="p-0 pb-3 border-b border-border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-stone-800 to-[#C86228] flex items-center justify-center font-black text-white text-sm shadow-sm flex-shrink-0">
-                    {userProfile?.username ? userProfile.username.slice(0, 1).toUpperCase() : 'U'}
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-stone-800 to-primary flex items-center justify-center font-black text-primary-foreground text-sm shadow-sm flex-shrink-0">
+                    {userProfile?.username ? userProfile.username.slice(0, 1).toUpperCase() : '👤'}
                   </div>
                   <div className="min-w-0">
-                    <span className="font-bold text-sm text-white truncate block">
+                    <span className="font-bold text-sm text-foreground truncate block">
                       {userProfile?.username ? `@${userProfile.username}` : 'Guest Competitor'}
                     </span>
-                    <span className="text-[10px] text-gray-500 font-mono block">
+                    <span className="text-[10px] text-muted-foreground font-mono block">
                       {userProfile ? 'Verified Player' : 'Sign in to record stats'}
                     </span>
                   </div>
@@ -274,49 +390,49 @@ export default function HomePage() {
               </div>
             </CardHeader>
 
-            <CardContent className="flex flex-col gap-4">
+            <CardContent className="p-0 flex flex-col gap-4">
               {/* Elo Meter */}
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
-                  <span className="text-gray-400 text-[11px]">
-                    Rating: <strong className="text-white">{elo} ELO</strong>
+                  <span className="text-muted-foreground text-[11px]">
+                    Rating: <strong className="text-foreground">{elo} ELO</strong>
                   </span>
-                  <span className="text-gray-500 text-[11px]">
-                    Next Tier: <strong className="text-[#D97736]">{nextLevelThreshold}</strong>
+                  <span className="text-muted-foreground text-[11px]">
+                    Next Tier: <strong className="text-accent-400">{nextLevelThreshold}</strong>
                   </span>
                 </div>
-                <div className="w-full h-2 bg-[#0B0C10] border border-[#202430] rounded-full overflow-hidden p-0.5">
+                <div className="w-full h-2 bg-secondary border border-border rounded-full overflow-hidden p-0.5">
                   <div
-                    className="h-full bg-[#C86228] rounded-full transition-all duration-500"
+                    className="h-full bg-primary rounded-full transition-all duration-500"
                     style={{ width: `${eloProgressPercent}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-gray-500 font-mono mt-1 block text-right">
+                <span className="text-[10px] text-muted-foreground font-mono mt-1 block text-right">
                   {eloToNext > 0 ? `${eloToNext} Elo to next level` : 'Top Level reached'}
                 </span>
               </div>
 
               {/* Real Match Stats Grid */}
-              <div className="grid grid-cols-3 gap-2 p-3 bg-[#0B0C10] border border-[#202430] rounded-xl text-center text-xs">
+              <div className="grid grid-cols-3 gap-2 p-3 bg-secondary/60 border border-border rounded-xl text-center text-xs">
                 <div>
-                  <span className="text-[10px] text-gray-500 font-bold uppercase block">Win Rate</span>
+                  <span className="text-[10px] text-muted-foreground font-bold uppercase block">Win Rate</span>
                   <span className="font-mono font-bold text-emerald-400 text-xs sm:text-sm">{winRate}%</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-gray-500 font-bold uppercase block">Record</span>
-                  <span className="font-mono font-bold text-white text-xs">
+                  <span className="text-[10px] text-muted-foreground font-bold uppercase block">Record</span>
+                  <span className="font-mono font-bold text-foreground text-xs">
                     {wins}W - {losses}L
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-gray-500 font-bold uppercase block">Matches</span>
-                  <span className="font-mono font-bold text-gray-300 text-xs">{totalSettled}</span>
+                  <span className="text-[10px] text-muted-foreground font-bold uppercase block">Matches</span>
+                  <span className="font-mono font-bold text-muted-foreground text-xs">{totalSettled}</span>
                 </div>
               </div>
 
               {/* Recent Match Form Dots */}
               <div>
-                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider block mb-2">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block mb-2">
                   Recent Match Form
                 </span>
                 <div className="flex items-center gap-1.5">
@@ -328,15 +444,15 @@ export default function HomePage() {
                           res === 'W'
                             ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/40'
                             : res === 'L'
-                            ? 'bg-red-600/20 text-red-400 border border-red-500/40'
-                            : 'bg-gray-800 text-gray-400'
+                            ? 'bg-destructive/20 text-destructive border border-destructive/40'
+                            : 'bg-secondary text-muted-foreground'
                         }`}
                       >
                         {res}
                       </div>
                     ))
                   ) : (
-                    <span className="text-xs text-gray-500 font-mono">
+                    <span className="text-xs text-muted-foreground font-mono">
                       — — — — — (No matches settled yet)
                     </span>
                   )}
@@ -344,7 +460,7 @@ export default function HomePage() {
               </div>
 
               {/* Action buttons */}
-              <div className="pt-2 border-t border-[#202430] flex gap-2">
+              <div className="pt-2 border-t border-border flex gap-2">
                 <Link href="/challenges" className="flex-1">
                   <Button variant="secondary" size="sm" className="w-full">
                     Find Duels
@@ -360,6 +476,21 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
+
+      {/* Auth Prompt Modal (For Guests Attempting Gated Actions) */}
+      <AuthPromptModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        title="Sign In to Compete"
+        description="To accept duels, stake entry fees, and win real cash or demo points, please create a free player account or log in."
+        actionReason="Matches are verified by client-side OCR and credited to your competitive profile."
+      />
+
+      {/* Global Game Selection Modal */}
+      <GameSelectionModal
+        open={gameModalOpen}
+        onClose={() => setGameModalOpen(false)}
+      />
     </div>
   );
 }

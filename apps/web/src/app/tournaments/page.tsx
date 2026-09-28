@@ -9,6 +9,8 @@ import { useGameStore } from '../../lib/gameStore';
 import { GLOBAL_REGIONS } from '@antigravity/core';
 import { OFFICIAL_GAMES } from '../../lib/gamesCatalog';
 import { GamePoster } from '../../components/GamePoster';
+import { GameContextBar } from '../../components/GameContextBar';
+import { AuthPromptModal } from '../../components/AuthPromptModal';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
@@ -32,6 +34,13 @@ export default function TournamentsPage() {
   const [filterGameOnly, setFilterGameOnly] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
   const [feeFilter, setFeeFilter] = useState<'ALL' | 'FREE' | 'CASH'>('ALL');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  const { data: userProfile } = useQuery<{ id: string } | null>({
+    queryKey: ['tournaments-profile'],
+    queryFn: () => apiClient<{ id: string }>('/profile/me').catch(() => null),
+    staleTime: 30000,
+  });
 
   const { data: tournaments, isLoading } = useQuery<TournamentItem[]>({
     queryKey: ['tournaments-list'],
@@ -85,6 +94,12 @@ export default function TournamentsPage() {
 
         <Link
           href={activeGame ? `/tournaments/new?profileId=${activeGame.id}` : '/tournaments/new'}
+          onClick={(e) => {
+            if (!userProfile) {
+              e.preventDefault();
+              setAuthModalOpen(true);
+            }
+          }}
           className="flex-shrink-0"
         >
           <Button variant="default" size="lg" className="w-full sm:w-auto">
@@ -93,50 +108,13 @@ export default function TournamentsPage() {
         </Link>
       </div>
 
-      {/* FACEIT-Style Game Selector Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none max-w-full">
-        <button
-          type="button"
-          onClick={() => setFilterGameOnly(false)}
-          className={`flex-shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
-            !filterGameOnly
-              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-              : 'bg-card hover:bg-secondary text-muted-foreground hover:text-foreground border-border'
-          }`}
-        >
-          <span>🌐</span>
-          <span>All Games</span>
-        </button>
-
-        {OFFICIAL_GAMES.map((game) => {
-          const isSelected = filterGameOnly && activeGame?.id?.toLowerCase() === game.id.toLowerCase();
-          return (
-            <button
-              key={game.id}
-              type="button"
-              onClick={() => {
-                setActiveGame(game);
-                setFilterGameOnly(true);
-              }}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
-                isSelected
-                  ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20'
-                  : 'bg-card hover:bg-secondary text-muted-foreground hover:text-foreground border-border'
-              }`}
-            >
-              <GamePoster
-                game={game}
-                aspect="mini"
-                className="w-4 h-6 rounded flex-shrink-0"
-              />
-              <span className="truncate">{game.displayName}</span>
-              {isSelected && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0 animate-pulse" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Active Game Arena Context Bar (Replaces horizontal scroll) */}
+      <GameContextBar
+        title={filterGameOnly ? `${activeGame?.displayName || 'Arena'} Cups & Tournaments` : 'All Esports Tournaments'}
+        subtitle={filterGameOnly ? `Single-elimination brackets & cash cups for ${activeGame?.displayName || 'Active Game'}` : 'Browse and register for tournaments across all supported titles'}
+        filterGameOnly={filterGameOnly}
+        onToggleFilter={setFilterGameOnly}
+      />
 
       {/* Filter Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-card border border-border rounded-2xl text-xs">
@@ -226,6 +204,14 @@ export default function TournamentsPage() {
           </div>
         </Card>
       )}
+
+      {/* Auth Prompt Modal for Unauthenticated Competitors */}
+      <AuthPromptModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        title="Sign In to Host Tournament"
+        description="Create an account or sign in to configure brackets, schedule match rounds, and set prize pools."
+      />
     </div>
   );
 }

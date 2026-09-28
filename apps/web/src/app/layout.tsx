@@ -5,6 +5,8 @@ import { GameRail } from '../components/GameRail';
 import { TopHeader } from '../components/TopHeader';
 import { PartyBar } from '../components/PartyBar';
 
+import { NotificationToastContainer } from '../components/NotificationToastContainer';
+
 export const metadata: Metadata = {
   title: 'VerzusXYZ — Universal Esports Arena',
   description: 'Skill-based esports matchmaking, party duels, and tournaments for any game verified by client-side OCR.',
@@ -32,6 +34,9 @@ export default function RootLayout({
 
           {/* Persistent Bottom Party Dock */}
           <PartyBar />
+
+          {/* Live In-App Notification Toast Popups */}
+          <NotificationToastContainer />
         </Providers>
       </body>
     </html>

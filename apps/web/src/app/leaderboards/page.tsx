@@ -9,6 +9,7 @@ import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
 import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../../lib/gamesCatalog';
 import { GamePoster } from '../../components/GamePoster';
+import { GameContextBar } from '../../components/GameContextBar';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
@@ -136,34 +137,13 @@ export default function LeaderboardsPage() {
         </Card>
       </div>
 
-      {/* 2. Switch Game Ladder Tabs with Mini Posters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none max-w-full">
-        {OFFICIAL_GAMES.map((game) => {
-          const isSelected = selectedGame.id.toLowerCase() === game.id.toLowerCase();
-          return (
-            <button
-              key={game.id}
-              type="button"
-              onClick={() => handleSelectGame(game)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
-                isSelected
-                  ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20'
-                  : 'bg-card hover:bg-secondary text-muted-foreground hover:text-foreground border-border'
-              }`}
-            >
-              <GamePoster
-                game={game}
-                aspect="mini"
-                className="w-4 h-6 rounded flex-shrink-0"
-              />
-              <span className="truncate">{game.displayName}</span>
-              {isSelected && (
-                <span className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0 animate-pulse" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Active Game Ladder Context Bar (Replaces horizontal scroll) */}
+      <GameContextBar
+        title={`${selectedGame.displayName} Elo Leaderboard`}
+        subtitle={`Official competitive ladder standings & MMR for ${selectedGame.displayName}`}
+        showAllToggle={false}
+        onSelectGame={(g) => handleSelectGame(g)}
+      />
 
       {/* 3. Global Ladder Table */}
       {isLoading ? (

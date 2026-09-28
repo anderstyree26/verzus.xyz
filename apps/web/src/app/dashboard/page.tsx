@@ -8,6 +8,10 @@ import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
 import { formatEUR } from '../../lib/currency';
 import { getGameById, OFFICIAL_GAMES } from '../../lib/gamesCatalog';
+import { GamePoster } from '../../components/GamePoster';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Card, CardHeader, CardContent } from '../../components/ui/card';
 
 interface MatchItem {
   id: string;
@@ -24,9 +28,9 @@ interface MatchItem {
 export default function DashboardPage() {
   const { activeGame } = useGameStore();
 
-  const { data: userProfile } = useQuery<{ rating?: number }>({
+  const { data: userProfile } = useQuery<{ rating?: number; username?: string }>({
     queryKey: ['dashboard-profile'],
-    queryFn: () => apiClient<{ rating?: number }>('/profile/me').catch(() => ({ rating: 1000 })),
+    queryFn: () => apiClient<{ rating?: number; username?: string }>('/profile/me').catch(() => ({ rating: 1000 })),
   });
 
   const { data: matches, isLoading } = useQuery<MatchItem[]>({
@@ -35,134 +39,156 @@ export default function DashboardPage() {
   });
 
   const elo = userProfile?.rating ?? 1000;
+  const username = userProfile?.username || 'Competitor';
+  const catalogGame = getGameById(activeGame?.id);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="space-y-6 max-w-7xl mx-auto w-full min-w-0">
       {/* Player Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#C86228] text-white font-black text-2xl flex items-center justify-center shadow-md shadow-[#C86228]/20">
-            VX
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
-                Competitive Dashboard
-              </span>
-              {activeGame && (
-                <span className="text-xs px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 font-bold rounded">
-                  🎮 {activeGame.displayName}
+      <Card className="p-4 sm:p-6 bg-card border-border shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-stone-900 to-primary text-primary-foreground font-black text-xl flex items-center justify-center shadow-md flex-shrink-0">
+              {username.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider font-mono">
+                  Player Command Center
                 </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-1">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Player Command Center
-              </h1>
-              <EloBadge elo={elo} size="md" showLabel />
+                <Badge variant="copper" className="text-[9px]">
+                  {catalogGame.displayName}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground truncate">
+                  @{username}
+                </h1>
+                <EloBadge elo={elo} size="md" showLabel />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2.5">
-          <Link
-            href="/matches/new"
-            className="px-5 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20"
-          >
-            ⚔️ Host Duel
-          </Link>
-          <Link
-            href="/challenges"
-            className="px-5 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition"
-          >
-            Find Duels
-          </Link>
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap flex-shrink-0">
+            <Link href="/matches/new">
+              <Button variant="default" size="default" className="text-xs font-bold">
+                ⚔️ Host Duel
+              </Button>
+            </Link>
+            <Link href="/challenges">
+              <Button variant="secondary" size="default" className="text-xs font-bold">
+                Find Duels
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </Card>
 
+      {/* 2-Column Responsive Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 min-w-0">
           <WalletCard />
         </div>
 
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          <div className="p-6 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#202430]">
+        <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
+          <Card className="p-4 sm:p-6 bg-card border-border shadow-xl space-y-4 overflow-hidden">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
               <div>
-                <h3 className="font-black text-lg text-white">Recent Match History</h3>
-                <p className="text-xs text-gray-400">Head-to-head duels and tournament matches</p>
+                <h3 className="font-black text-base sm:text-lg text-foreground uppercase tracking-tight">
+                  Recent Match History
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Head-to-head duels and tournament bracket matches
+                </p>
               </div>
-              <span className="text-xs font-mono text-gray-400">
-                {matches?.length ?? 0} Total Records
-              </span>
+              <Badge variant="secondary" className="font-mono text-xs">
+                {matches?.length ?? 0} Records
+              </Badge>
             </div>
 
             {isLoading ? (
-              <p className="text-sm text-gray-400 py-6 text-center font-mono animate-pulse">Loading match record...</p>
+              <p className="text-xs text-muted-foreground py-8 text-center font-mono animate-pulse">
+                Querying match history records...
+              </p>
             ) : matches && matches.length > 0 ? (
-              <div className="divide-y divide-[#202430]">
+              <div className="divide-y divide-border overflow-x-hidden">
                 {matches.map((m) => {
-                  const gameTitle = m.game_profiles?.display_name || 'Esports Duel';
-                  const catalogItem = OFFICIAL_GAMES.find((c) =>
-                    c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
-                    c.displayName.toLowerCase() === gameTitle.toLowerCase()
-                  );
-                  const gameIcon = catalogItem?.icon || '🎮';
+                  const gameTitle = m.game_profiles?.display_name || catalogGame.displayName;
+                  const catalogItem = OFFICIAL_GAMES.find(
+                    (c) =>
+                      c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
+                      c.displayName.toLowerCase() === gameTitle.toLowerCase()
+                  ) || catalogGame;
 
                   return (
-                    <div key={m.id} className="py-3.5 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl select-none">{gameIcon}</span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-white">{gameTitle}</span>
-                            <span className="text-xs text-gray-500 font-mono">#{m.id.slice(0, 8)}</span>
+                    <div
+                      key={m.id}
+                      className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <GamePoster
+                          game={catalogItem}
+                          aspect="mini"
+                          className="w-7 h-10 rounded-lg flex-shrink-0 border border-border"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-xs text-foreground truncate">
+                              {gameTitle}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              #{m.id.slice(0, 8)}
+                            </span>
                             {m.room_code && (
-                              <span className="px-1.5 py-0.2 bg-[#161922] text-gray-400 font-mono text-[10px] rounded">
+                              <span className="px-1.5 py-0.2 bg-secondary text-muted-foreground font-mono text-[9px] rounded">
                                 {m.room_code}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-400 font-mono mt-0.5">
-                            Format: <strong className="text-gray-200">{m.format}</strong> · Prize:{' '}
-                            <strong className="text-[#D97736]">
+                          <p className="text-[11px] text-muted-foreground font-mono mt-0.5 truncate">
+                            Format: <strong className="text-foreground">{m.format}</strong> · Prize:{' '}
+                            <strong className="text-accent-400">
                               {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Glory & Elo'}
                             </strong>
                           </p>
                         </div>
                       </div>
 
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`px-2.5 py-1 font-black text-[10px] uppercase rounded-lg border ${
-                          m.status === 'SETTLED'
-                            ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-                            : m.status === 'OPEN'
-                            ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500'
-                            : 'bg-green-500/10 border-green-500/30 text-green-400'
-                        }`}
-                      >
-                        {m.status}
-                      </span>
-                      <Link
-                        href={`/matches/${m.id}`}
-                        className="px-3 py-1.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-xs rounded-lg font-bold text-white transition"
-                      >
-                        Matchroom →
-                      </Link>
+                      <div className="flex items-center gap-2.5 self-end sm:self-auto flex-shrink-0">
+                        <Badge
+                          variant={
+                            m.status === 'SETTLED'
+                              ? 'success'
+                              : m.status === 'OPEN'
+                              ? 'warning'
+                              : 'secondary'
+                          }
+                          className="font-mono text-[10px]"
+                        >
+                          {m.status}
+                        </Badge>
+                        <Link href={`/matches/${m.id}`}>
+                          <Button variant="secondary" size="sm" className="h-7 text-[11px] font-bold">
+                            Matchroom →
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
             ) : (
-              <div className="py-12 text-center text-gray-500">
-                <div className="text-2xl mb-1">🎮</div>
-                <p className="text-sm font-semibold text-gray-400">No match records yet.</p>
-                <p className="text-xs text-gray-500 mt-1">Host or join a duel to start climbing the ladder!</p>
+              <div className="py-12 text-center text-muted-foreground space-y-2">
+                <span className="text-3xl block">🎮</span>
+                <p className="text-xs font-semibold">No competitive matches on record yet.</p>
+                <Link href="/challenges" className="inline-block mt-2">
+                  <Button variant="copper" size="sm">
+                    Enter Matchmaking Queue
+                  </Button>
+                </Link>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     </div>

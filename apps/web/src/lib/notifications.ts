@@ -126,14 +126,44 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return false;
 }
 
+import { useNotificationStore, type NotificationType } from './notificationStore';
+
 /**
- * Dispatch desktop notification + optional audio alert
+ * Dispatch in-app toast popup, desktop notification + optional audio alert
  */
-export function notifyUser(title: string, options?: { body?: string; sound?: 'connect' | 'score' | 'victory' }) {
+export function notifyUser(
+  title: string,
+  options?: {
+    body?: string;
+    sound?: 'connect' | 'score' | 'victory';
+    type?: NotificationType;
+    actionLabel?: string;
+    actionUrl?: string;
+    durationMs?: number;
+  }
+) {
+  // 1. Play audio chime if requested
   if (options?.sound === 'connect') sounds.playConnectChime();
   else if (options?.sound === 'score') sounds.playScorePip();
   else if (options?.sound === 'victory') sounds.playVictoryChord();
 
+  // 2. Dispatch visual in-app popup toast (always visible to user)
+  if (typeof window !== 'undefined') {
+    try {
+      useNotificationStore.getState().addNotification({
+        title,
+        body: options?.body || 'Check the Verzus arena room for updates.',
+        type: options?.type || (options?.sound === 'victory' ? 'success' : options?.sound === 'connect' ? 'match' : 'info'),
+        actionLabel: options?.actionLabel,
+        actionUrl: options?.actionUrl,
+        durationMs: options?.durationMs ?? 6000,
+      });
+    } catch {
+      // Store fallback
+    }
+  }
+
+  // 3. Dispatch native desktop notification if user granted permission
   if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
     try {
       new Notification(title, {
@@ -145,3 +175,4 @@ export function notifyUser(title: string, options?: { body?: string; sound?: 'co
     }
   }
 }
+

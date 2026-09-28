@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -11,6 +12,7 @@ import { EloBadge } from '../../../components/EloBadge';
 import { ChallengeCard } from '../../../components/ChallengeCard';
 import { LeaderboardTable } from '../../../components/LeaderboardTable';
 import { GamePoster } from '../../../components/GamePoster';
+import { GameSelectionModal } from '../../../components/GameSelectionModal';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
@@ -83,6 +85,8 @@ export default function GameHubPage() {
     staleTime: 15000,
   });
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   const handleSelectAnotherGame = (game: CatalogGame) => {
     setActiveGame(game);
     router.push(`/games/${game.id}`);
@@ -90,34 +94,31 @@ export default function GameHubPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto min-w-0">
-      {/* 1. Quick-Switch to Other Most Played Games with Mini Posters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none max-w-full">
-        <span className="text-[11px] uppercase font-bold text-gray-400 tracking-wider flex-shrink-0 mr-1">
-          Quick Switch:
-        </span>
-        {OFFICIAL_GAMES.map((g) => {
-          const isCurrent = g.id.toLowerCase() === resolvedProfile.id.toLowerCase();
-          return (
-            <button
-              key={g.id}
-              type="button"
-              onClick={() => handleSelectAnotherGame(g)}
-              className={`flex-shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
-                isCurrent
-                  ? 'bg-[#C86228] text-white border-[#C86228] shadow-md shadow-[#C86228]/20'
-                  : 'bg-[#111319] hover:bg-[#161922] text-gray-400 hover:text-white border-[#202430]'
-              }`}
-            >
-              <GamePoster
-                game={g}
-                aspect="mini"
-                className="w-4 h-6 rounded flex-shrink-0"
-              />
-              <span className="truncate">{g.shortName}</span>
-            </button>
-          );
-        })}
+      {/* Navigation Breadcrumb & Arena Switcher (Replaces horizontal scroll) */}
+      <div className="flex items-center justify-between gap-4 p-3 bg-card border border-border rounded-2xl">
+        <div className="flex items-center gap-2 text-xs min-w-0">
+          <Link href="/games" className="text-muted-foreground hover:text-foreground font-semibold transition">
+            🎮 Game Catalog
+          </Link>
+          <span className="text-muted-foreground/50">/</span>
+          <span className="font-bold text-foreground truncate">{resolvedProfile.displayName}</span>
+        </div>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setModalOpen(true)}
+          className="text-xs font-bold gap-1.5 flex-shrink-0"
+        >
+          <span>⇄ Switch Arena</span>
+        </Button>
       </div>
+
+      <GameSelectionModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSelectGame={handleSelectAnotherGame}
+      />
 
       {/* 2. Official Game Hub Hero Banner (FACEIT Style with Poster Cover) */}
       <div className="relative rounded-3xl overflow-hidden border border-[#202430] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#111319] shadow-2xl">

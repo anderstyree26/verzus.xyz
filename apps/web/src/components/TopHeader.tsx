@@ -12,6 +12,7 @@ import { formatEUR, formatPoints } from '../lib/currency';
 import { useWalletModeStore } from '../lib/walletModeStore';
 import { OFFICIAL_GAMES, getGameById } from '../lib/gamesCatalog';
 import { GamePoster } from './GamePoster';
+import { GameSelectionModal } from './GameSelectionModal';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 
@@ -324,93 +325,10 @@ export function TopHeader() {
       )}
 
       {/* FACEIT-Style Game Poster Selection Modal */}
-      {gameModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-3xl bg-card border border-border rounded-2xl shadow-2xl p-6 text-foreground flex flex-col gap-4 max-h-[85vh] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-foreground">Select Esports Arena</h3>
-                <p className="text-xs text-muted-foreground">
-                  Switching titles filters duels, tournaments, and rankings to your selected game.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setGameModalOpen(false)}
-                className="text-muted-foreground hover:text-foreground text-lg p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Poster Cards Grid (FACEIT Style) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 overflow-y-auto pr-1 scrollbar-thin max-h-[60vh]">
-              {OFFICIAL_GAMES.map((g) => {
-                const isSelected = activeCatalogGame.id.toLowerCase() === g.id.toLowerCase();
-                return (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveGame(g);
-                      setGameModalOpen(false);
-                    }}
-                    className={`relative rounded-xl overflow-hidden border text-left transition-all duration-200 group aspect-[3/4] flex flex-col justify-between p-2.5 ${
-                      isSelected
-                        ? 'border-primary ring-2 ring-primary/40 shadow-lg'
-                        : 'border-border hover:border-muted-foreground'
-                    }`}
-                  >
-                    <GamePoster
-                      game={g}
-                      aspect="poster"
-                      showOverlay
-                      className="absolute inset-0 w-full h-full"
-                    />
-
-                    <div className="relative z-10 flex items-center justify-between w-full">
-                      <Badge variant="secondary" className="backdrop-blur-md bg-background/70 text-[9px] font-mono">
-                        {g.platform}
-                      </Badge>
-                      {isSelected && (
-                        <span className="px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-black">
-                          ACTIVE ✓
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="relative z-10">
-                      <span className="font-bold text-xs text-white block leading-tight group-hover:text-accent-400 transition-colors truncate">
-                        {g.displayName}
-                      </span>
-                      <span className="text-[9px] text-gray-300 font-mono block mt-0.5">
-                        {g.gameType.replace('_', ' ')}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
-              <Link
-                href="/games"
-                onClick={() => setGameModalOpen(false)}
-                className="text-accent-400 hover:underline font-bold"
-              >
-                View Full Game Catalog →
-              </Link>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setGameModalOpen(false)}
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GameSelectionModal
+        open={gameModalOpen}
+        onClose={() => setGameModalOpen(false)}
+      />
     </header>
   );
 }

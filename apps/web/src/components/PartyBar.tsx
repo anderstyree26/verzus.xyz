@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { usePartyStore } from '../lib/partyStore';
 import { useGameStore } from '../lib/gameStore';
 import { apiClient } from '../lib/api';
+import { notifyUser } from '../lib/notifications';
 
 export function PartyBar() {
   const router = useRouter();
@@ -49,10 +50,19 @@ export function PartyBar() {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(inviteCode);
     setCopied(true);
+    notifyUser('Squad Invite Copied!', {
+      body: `Code ${inviteCode} copied to clipboard. Share with your teammates.`,
+      sound: 'score',
+      type: 'party',
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleActionClick = () => {
+    if (!userProfile) {
+      router.push('/login');
+      return;
+    }
     if (status === 'IN_QUEUE') {
       setQueueStatus('IDLE');
     } else {
