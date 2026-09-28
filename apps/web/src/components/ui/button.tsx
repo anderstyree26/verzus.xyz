@@ -1,35 +1,44 @@
 import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@antigravity/ui';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'copper';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-}
+export const buttonVariants = cva(
+  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 select-none',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground shadow hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+        outline: 'border border-border bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 border border-border',
+        ghost: 'hover:bg-secondary hover:text-foreground text-muted-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+        copper: 'bg-gradient-to-r from-accent-600 to-primary text-white shadow-md hover:from-primary hover:to-accent-400',
+      },
+      size: {
+        default: 'h-10 px-4 py-2 text-xs uppercase tracking-wider',
+        sm: 'h-8 rounded-lg px-3 text-[11px] uppercase tracking-wider',
+        lg: 'h-12 rounded-xl px-6 text-sm uppercase tracking-wider',
+        icon: 'h-9 w-9',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
-    const base = 'inline-flex items-center justify-center rounded-xl font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C86228] disabled:pointer-events-none disabled:opacity-50 select-none';
-
-    const variants = {
-      default: 'bg-[#C86228] hover:bg-[#D97736] text-white shadow-md shadow-[#C86228]/20',
-      copper: 'bg-gradient-to-r from-[#AF4F1A] to-[#C86228] hover:from-[#C86228] hover:to-[#D97736] text-white shadow-md',
-      secondary: 'bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-200 hover:text-white',
-      outline: 'border border-[#202430] hover:border-[#C86228]/60 bg-transparent text-gray-300 hover:text-white',
-      ghost: 'hover:bg-[#161922] text-gray-400 hover:text-white',
-      destructive: 'bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-400 hover:text-red-300',
-    };
-
-    const sizes = {
-      default: 'h-10 px-4 py-2 text-xs uppercase tracking-wider',
-      sm: 'h-8 px-3 text-[11px] uppercase tracking-wider',
-      lg: 'h-12 px-6 text-sm uppercase tracking-wider',
-      icon: 'h-9 w-9 p-0',
-    };
-
+  ({ className, variant, size, ...props }, ref) => {
     return (
       <button
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        className={cn(base, variants[variant], sizes[size], className)}
         {...props}
       />
     );

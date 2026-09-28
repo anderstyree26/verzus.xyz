@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { formatEUR } from '../lib/currency';
 import { getCountryByCode } from '@antigravity/core';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 interface TournamentCardProps {
   id: string;
@@ -34,68 +37,71 @@ export function TournamentCard({
   const country = countryCode ? getCountryByCode(countryCode) : null;
 
   return (
-    <div className="p-5 bg-[#111319] border border-[#202430] hover:border-[#C86228]/50 rounded-2xl flex flex-col justify-between gap-4 text-white shadow-md transition-all group">
-      <div>
-        <div className="flex items-center justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-1.5">
-            <span className="px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] text-[10px] font-bold uppercase tracking-wider rounded">
+    <Card className="flex flex-col justify-between hover:border-primary/50 transition-all duration-200 group">
+      <CardHeader className="space-y-3 pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Badge variant="copper">
               {format.replace(/_/g, ' ')}
-            </span>
-            <span className="px-2 py-0.5 bg-[#161922] border border-[#202430] text-gray-300 text-[10px] font-bold rounded flex items-center gap-1">
+            </Badge>
+            <Badge variant="secondary" className="flex items-center gap-1 font-mono text-[10px]">
               {country ? `${country.flag} ${country.name}` : `🌍 ${region}`}
-            </span>
+            </Badge>
           </div>
 
-          <span
-            className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${
+          <Badge
+            variant={
               status === 'REGISTRATION' || status === 'OPEN'
-                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                ? 'success'
                 : status === 'ACTIVE' || status === 'IN_PROGRESS'
-                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                : 'bg-white/10 text-gray-400'
-            }`}
+                ? 'copper'
+                : 'secondary'
+            }
           >
-            {status.replace('_', ' ')}
-          </span>
+            {status.replace(/_/g, ' ')}
+          </Badge>
         </div>
 
-        <h3 className="text-base font-bold tracking-tight text-white group-hover:text-[#D97736] transition-colors line-clamp-1">
-          {name}
-        </h3>
-        {gameTitle && (
-          <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider block mt-0.5">
-            {gameTitle}
-          </span>
-        )}
-      </div>
+        <div>
+          <CardTitle className="text-base group-hover:text-accent-400 transition-colors line-clamp-1">
+            {name}
+          </CardTitle>
+          {gameTitle && (
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block mt-1">
+              {gameTitle}
+            </span>
+          )}
+        </div>
+      </CardHeader>
 
-      <div className="grid grid-cols-3 gap-2 py-2.5 px-3 bg-[#0B0C10] border border-[#202430] rounded-xl text-center text-xs">
-        <div>
-          <span className="text-[9px] uppercase font-bold text-gray-500 block">Slots</span>
-          <span className="font-mono font-bold text-white">
-            {enrolledCount > 0 ? `${enrolledCount}/${size}` : `${size} Cap`}
-          </span>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-3 gap-2 p-3 bg-secondary/60 border border-border rounded-xl text-center text-xs">
+          <div>
+            <span className="text-[9px] uppercase font-bold text-muted-foreground block">Slots</span>
+            <span className="font-mono font-bold text-foreground">
+              {enrolledCount > 0 ? `${enrolledCount}/${size}` : `${size} Cap`}
+            </span>
+          </div>
+          <div>
+            <span className="text-[9px] uppercase font-bold text-muted-foreground block">Entry Fee</span>
+            <span className="font-mono font-bold text-foreground">
+              {entryFee === 0 ? <span className="text-emerald-400">FREE</span> : formatEUR(entryFee)}
+            </span>
+          </div>
+          <div>
+            <span className="text-[9px] uppercase font-bold text-muted-foreground block">Prize Pool</span>
+            <span className="font-mono font-bold text-accent-400">
+              {prizePool === 0 ? 'Trophies' : formatEUR(prizePool)}
+            </span>
+          </div>
         </div>
-        <div>
-          <span className="text-[9px] uppercase font-bold text-gray-500 block">Entry Fee</span>
-          <span className="font-mono font-bold text-white">
-            {entryFee === 0 ? <span className="text-green-400">FREE</span> : formatEUR(entryFee)}
-          </span>
-        </div>
-        <div>
-          <span className="text-[9px] uppercase font-bold text-gray-500 block">Prize Pool</span>
-          <span className="font-mono font-bold text-[#D97736]">
-            {prizePool === 0 ? 'Trophies' : formatEUR(prizePool)}
-          </span>
-        </div>
-      </div>
 
-      <Link
-        href={`/tournaments/${id}`}
-        className="w-full py-2.5 bg-[#161922] group-hover:bg-[#C86228] group-hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all text-center"
-      >
-        View Tournament Bracket
-      </Link>
-    </div>
+        <Link href={`/tournaments/${id}`} className="block w-full">
+          <Button variant="secondary" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+            View Tournament Bracket
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
   );
 }

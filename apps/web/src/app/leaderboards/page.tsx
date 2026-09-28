@@ -8,6 +8,10 @@ import { EloBadge } from '../../components/EloBadge';
 import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
 import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../../lib/gamesCatalog';
+import { GamePoster } from '../../components/GamePoster';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 
 interface LeaderboardEntry {
   userId: string;
@@ -88,121 +92,88 @@ export default function LeaderboardsPage() {
   const userElo = userProfile?.rating ?? 1000;
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       {/* 1. Global Ladders Hero */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111319] p-6 sm:p-8 border border-[#202430] rounded-2xl shadow-xl">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#161922] border border-[#202430] flex items-center justify-center text-3xl font-black text-[#D97736] shadow-inner">
-            {selectedGame.icon}
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 text-[10px] font-bold uppercase tracking-wider rounded">
-                Competitive Ranked Ladder
-              </span>
-              <span className="px-2 py-0.5 bg-[#161922] text-gray-400 font-mono text-[10px] rounded border border-[#202430]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-6 sm:p-8 border border-border rounded-3xl shadow-xl">
+        <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+          <GamePoster
+            game={selectedGame}
+            aspect="thumb"
+            className="w-14 h-18 sm:w-16 sm:h-22 rounded-2xl shadow-xl border border-border flex-shrink-0"
+          />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <Badge variant="copper">Official Elo Ladder</Badge>
+              <Badge variant="secondary" className="font-mono text-[10px]">
                 {selectedGame.platform}
-              </span>
+              </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
-              {selectedGame.displayName} Rankings
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+              {selectedGame.displayName} Standings
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-              {selectedGame.tagline} · Elo rating scale with Level 1 to 10 rank progression.
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Live competitive skill ratings, global rankings, and win rates across all duels.
             </p>
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/matches/new?profileId=${selectedGame.id}`}
-            className="px-5 py-3 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20 flex items-center gap-2"
-          >
-            <span>⚔️</span>
-            <span>Play Ranked Duel</span>
-          </Link>
-          <Link
-            href="/tournaments"
-            className="px-4 py-3 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2"
-          >
-            <span>🏆</span>
-            <span className="hidden sm:inline">Tournaments</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 2. FACEIT-Style Game Selection Tabs (THE ONLY FILTER: THE GAMES THEMSELVES) */}
-      <div className="flex flex-col gap-2">
-        <span className="text-[11px] text-gray-400 uppercase font-bold tracking-wider px-1">
-          Select Game Ladder:
-        </span>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {OFFICIAL_GAMES.map((game) => {
-            const isSelected = game.id.toLowerCase() === selectedGameId.toLowerCase();
-            return (
-              <button
-                key={game.id}
-                type="button"
-                onClick={() => handleSelectGame(game)}
-                className={`flex-shrink-0 px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border select-none ${
-                  isSelected
-                    ? 'bg-[#C86228] text-white border-[#C86228] shadow-md shadow-[#C86228]/20'
-                    : 'bg-[#111319] hover:bg-[#161922] text-gray-400 hover:text-white border-[#202430]'
-                }`}
-              >
-                <span className="text-sm">{game.icon}</span>
-                <span>{game.displayName}</span>
-                {isSelected && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 3. User Personal Standing Callout (if logged in) */}
-      {userProfile && (
-        <div className="p-4 bg-[#111319] border border-[#202430] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <EloBadge elo={userElo} size="md" />
-            <div>
-              <span className="text-xs text-gray-400">Your Current Rating:</span>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-black text-white">{userElo} Elo</span>
-                {userRank ? (
-                  <span className="text-xs font-bold text-[#D97736] font-mono">
-                    · Ladder Position #{userRank}
-                  </span>
-                ) : (
-                  <span className="text-xs text-gray-500 font-mono">
-                    · Unranked (play your first match)
-                  </span>
-                )}
-              </div>
+        {/* User's Current Standings Chip */}
+        <Card className="p-4 bg-secondary/60 border-border flex items-center gap-4 flex-shrink-0">
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-muted-foreground">Your Rank</span>
+            <span className="text-xl font-black text-foreground font-mono">
+              {userRank ? `#${userRank}` : 'Unranked'}
+            </span>
+          </div>
+          <div className="h-8 w-px bg-border" />
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-muted-foreground">Your Elo</span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <EloBadge elo={userElo} size="sm" />
+              <span className="font-mono font-bold text-sm text-foreground">{userElo}</span>
             </div>
           </div>
+        </Card>
+      </div>
 
-          <Link
-            href={`/matches/new?profileId=${selectedGame.id}`}
-            className="text-xs text-[#D97736] hover:underline font-bold flex items-center gap-1 self-start sm:self-center"
-          >
-            <span>Climb the {selectedGame.displayName} Ladder →</span>
-          </Link>
-        </div>
-      )}
+      {/* 2. Switch Game Ladder Tabs with Mini Posters */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin select-none max-w-full">
+        {OFFICIAL_GAMES.map((game) => {
+          const isSelected = selectedGame.id.toLowerCase() === game.id.toLowerCase();
+          return (
+            <button
+              key={game.id}
+              type="button"
+              onClick={() => handleSelectGame(game)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
+                isSelected
+                  ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20'
+                  : 'bg-card hover:bg-secondary text-muted-foreground hover:text-foreground border-border'
+              }`}
+            >
+              <GamePoster
+                game={game}
+                aspect="mini"
+                className="w-4 h-6 rounded flex-shrink-0"
+              />
+              <span className="truncate">{game.displayName}</span>
+              {isSelected && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0 animate-pulse" />
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-      {/* 4. Ranked Ladder Table */}
+      {/* 3. Global Ladder Table */}
       {isLoading ? (
-        <div className="p-12 text-center text-gray-400 font-mono text-xs bg-[#111319] border border-[#202430] rounded-2xl animate-pulse">
-          Loading {selectedGame.displayName} competitive standings...
+        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-2xl">
+          Calculating Elo standings for {selectedGame.displayName}...
         </div>
       ) : (
         <LeaderboardTable
-          entries={entries ?? []}
+          entries={entries || []}
           gameTitle={selectedGame.displayName}
-          gameIcon={selectedGame.icon}
           gameType={selectedGame.gameType}
         />
       )}

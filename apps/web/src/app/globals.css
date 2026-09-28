@@ -4,17 +4,48 @@
 
 @layer base {
   :root {
-    --background: 10 10 15;
-    --foreground: 255 255 255;
+    --background: 228 32% 5%; /* #0B0C10 Deep Obsidian */
+    --foreground: 210 20% 98%; /* #F8FAFC White */
+
+    --card: 226 21% 8%; /* #111319 Elevated Card */
+    --card-foreground: 210 20% 98%;
+
+    --popover: 226 21% 10%; /* #161922 */
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 22 72% 47%; /* #C86228 Faded Warm Copper Brand */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 226 21% 11%; /* #161922 Dark Interactive Surface */
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 226 15% 15%; /* #1F232D */
+    --muted-foreground: 215 16% 65%; /* #9CA3AF */
+
+    --accent: 22 68% 53%; /* #D97736 Amber Copper */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%; /* Red */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 224 20% 16%; /* #202430 Standard Border */
+    --input: 224 20% 16%;
+    --ring: 22 72% 47%;
+
+    --radius: 0.75rem; /* 12px */
+  }
+
+  * {
+    @apply border-border;
   }
 
   html {
-    @apply bg-[rgb(var(--background))] text-[rgb(var(--foreground))];
+    @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
   }
 
   body {
-    @apply font-sans;
+    @apply font-sans bg-background text-foreground selection:bg-primary selection:text-white min-h-screen overflow-x-hidden;
   }
 }
 
@@ -24,6 +55,13 @@
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-white/10;
+    @apply rounded-full bg-white/10 hover:bg-white/20;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

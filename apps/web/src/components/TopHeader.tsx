@@ -95,14 +95,14 @@ export function TopHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0B0C10]/95 backdrop-blur-md border-b border-[#202430] h-16 flex items-center justify-between px-3 sm:px-6 gap-2 sm:gap-4 max-w-full overflow-x-hidden">
+    <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 gap-3 sm:gap-4 max-w-full overflow-x-hidden">
       {/* 1. Left Zone: Mobile Brand + Desktop Breadcrumb Context */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
         {/* Mobile menu toggle button */}
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-[#161922] transition flex-shrink-0"
+          className="lg:hidden p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition flex-shrink-0"
           aria-label="Toggle navigation drawer"
         >
           {mobileMenuOpen ? '✕' : '☰'}
@@ -111,7 +111,7 @@ export function TopHeader() {
         {/* Mobile Brand Mark */}
         <Link
           href="/"
-          className="lg:hidden w-8 h-8 rounded-lg bg-[#C86228] text-white flex items-center justify-center font-black text-xs shadow-sm flex-shrink-0"
+          className="lg:hidden w-8 h-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black text-xs shadow-sm flex-shrink-0"
           title="VerzusXYZ Home"
         >
           VX
@@ -119,11 +119,11 @@ export function TopHeader() {
 
         {/* Desktop Breadcrumb & Arena Context */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {/* Quick-Switch Active Arena Pill with Poster Thumbnail */}
+          {/* Quick-Switch Active Arena Pill */}
           <button
             type="button"
             onClick={() => setGameModalOpen(true)}
-            className="flex items-center gap-2 px-2 py-1 rounded-xl bg-[#111319] hover:bg-[#161922] border border-[#202430] hover:border-[#C86228]/50 transition group text-left min-w-0 flex-shrink"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-secondary/80 hover:bg-secondary border border-border hover:border-primary/50 transition group text-left min-w-0 flex-shrink"
             title="Switch Active Game Arena"
           >
             <GamePoster
@@ -132,24 +132,24 @@ export function TopHeader() {
               className="w-5 h-7 rounded flex-shrink-0"
             />
             <div className="hidden sm:flex flex-col min-w-0">
-              <span className="text-[9px] text-gray-400 font-mono uppercase tracking-wider leading-none flex items-center gap-1">
-                Arena <span className="text-[8px] text-[#D97736]">▾</span>
+              <span className="text-[9px] text-muted-foreground font-mono uppercase tracking-wider leading-none flex items-center gap-1">
+                Arena <span className="text-[8px] text-accent-400">▾</span>
               </span>
-              <span className="text-xs font-black text-white group-hover:text-[#D97736] transition-colors truncate max-w-[120px] leading-tight">
+              <span className="text-xs font-black text-foreground group-hover:text-accent-400 transition-colors truncate max-w-[120px] leading-tight">
                 {activeCatalogGame.displayName}
               </span>
             </div>
           </button>
 
-          <span className="hidden sm:inline text-gray-600 text-xs select-none">/</span>
+          <span className="hidden sm:inline text-muted-foreground/60 text-xs select-none">/</span>
 
           {/* Current Page Context Title */}
           <div className="hidden sm:flex flex-col text-left min-w-0">
-            <span className="text-xs font-bold text-white tracking-tight leading-tight truncate">
+            <span className="text-xs font-bold text-foreground tracking-tight leading-tight truncate">
               {pageContext.title}
             </span>
             {pageContext.subtitle && (
-              <span className="text-[9px] text-gray-400 font-mono leading-none">
+              <span className="text-[9px] text-muted-foreground font-mono leading-none">
                 {pageContext.subtitle}
               </span>
             )}
@@ -159,28 +159,28 @@ export function TopHeader() {
 
       {/* 2. Center Zone: Clean Omnisearch Bar */}
       <div className="hidden xl:flex items-center flex-1 max-w-md mx-4 relative min-w-0">
-        <span className="absolute left-3.5 text-gray-500 text-xs pointer-events-none select-none">🔍</span>
+        <span className="absolute left-3.5 text-muted-foreground text-xs pointer-events-none select-none">🔍</span>
         <input
           type="text"
           placeholder="Search duels, tournaments, players..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-14 py-2 bg-[#111319] hover:bg-[#141720] focus:bg-[#161922] border border-[#202430] focus:border-[#C86228] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none transition shadow-inner"
+          className="w-full pl-9 pr-14 py-2 bg-secondary/60 hover:bg-secondary focus:bg-secondary border border-border focus:border-primary rounded-xl text-xs text-foreground placeholder:text-muted-foreground focus:outline-none transition"
         />
-        <span className="absolute right-3 px-1.5 py-0.5 rounded bg-[#1A1D27] border border-[#262B38] text-[9px] font-mono text-gray-400 pointer-events-none select-none">
+        <span className="absolute right-3 px-1.5 py-0.5 rounded bg-muted border border-border text-[9px] font-mono text-muted-foreground pointer-events-none select-none">
           ⌘K
         </span>
       </div>
 
       {/* 3. Right Zone: Unified Wallet Capsule + Notifications + Profile Chip */}
-      <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-        {/* Unified Wallet Capsule (Mode + Balance + Top Up) */}
-        <div className="flex items-center bg-[#111319] border border-[#202430] hover:border-[#2A2E3D] rounded-xl p-1 gap-1 transition">
+      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        {/* Unified Wallet Capsule */}
+        <div className="flex items-center bg-card border border-border hover:border-border/80 rounded-xl p-1 gap-1 transition">
           {/* Mode Switcher Button */}
           <button
             type="button"
             onClick={toggleWalletMode}
-            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono font-bold tracking-wider transition ${
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold tracking-wider transition ${
               walletMode === 'REAL'
                 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
                 : 'bg-purple-500/15 text-purple-300 border border-purple-500/30 hover:bg-purple-500/25'
@@ -199,14 +199,14 @@ export function TopHeader() {
           {/* Active Balance Display */}
           <Link
             href="/dashboard"
-            className="px-1.5 sm:px-2 py-0.5 font-mono font-bold text-xs hover:text-[#D97736] transition flex items-center gap-1"
+            className="px-2 py-0.5 font-mono font-bold text-xs hover:text-accent-400 transition flex items-center gap-1"
             title={`Active Ledger: ${walletMode === 'REAL' ? 'Real Cash (€ EUR)' : 'Demo Play Points (PTS)'}`}
           >
             {walletMode === 'REAL' ? (
               <span className="text-emerald-400">{formatEUR(cashAmount)}</span>
             ) : (
               <span className="text-purple-300">
-                {formatPoints(pointsAmount)} <span className="text-[9px] text-gray-400 font-sans">PTS</span>
+                {formatPoints(pointsAmount)} <span className="text-[9px] text-muted-foreground font-sans">PTS</span>
               </span>
             )}
           </Link>
@@ -214,7 +214,7 @@ export function TopHeader() {
           {/* Quick Deposit '+' Button */}
           <Link
             href="/dashboard"
-            className="w-6 h-6 rounded-lg bg-[#C86228] hover:bg-[#D97736] text-white font-black text-xs flex items-center justify-center transition shadow-sm"
+            className="w-6 h-6 rounded-lg bg-primary hover:bg-accent-400 text-white font-black text-xs flex items-center justify-center transition shadow-sm"
             title="Deposit funds or claim demo points"
           >
             +
@@ -227,11 +227,11 @@ export function TopHeader() {
         {/* Unified Gamer Profile Chip */}
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 pl-1 sm:pl-1.5 pr-2 sm:pr-2.5 py-1 bg-[#111319] hover:bg-[#161922] border border-[#202430] hover:border-[#C86228]/50 rounded-xl transition group flex-shrink-0"
+          className="flex items-center gap-2 pl-1 sm:pl-1.5 pr-2.5 sm:pr-3 py-1 bg-card hover:bg-secondary border border-border hover:border-primary/50 rounded-xl transition group flex-shrink-0"
           title="Player Profile & Competitive Elo Level"
         >
           <div className="relative flex-shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-stone-800 to-[#C86228] flex items-center justify-center font-black text-white text-xs shadow-sm">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-stone-800 to-primary flex items-center justify-center font-black text-white text-xs shadow-sm">
               {avatarLetter}
             </div>
             {/* Embedded Mini Elo Level Badge Pip */}
@@ -240,11 +240,11 @@ export function TopHeader() {
             </div>
           </div>
           <div className="hidden sm:flex flex-col text-left leading-none">
-            <span className="text-xs font-bold text-white group-hover:text-[#D97736] transition-colors truncate max-w-[80px]">
+            <span className="text-xs font-bold text-foreground group-hover:text-accent-400 transition-colors truncate max-w-[85px]">
               {me?.username ? `@${me.username}` : 'Gamer'}
             </span>
-            <span className="text-[9px] font-mono text-gray-400 mt-0.5">
-              {eloRating} <span className="text-gray-500 font-sans text-[7px] uppercase">ELO</span>
+            <span className="text-[9px] font-mono text-muted-foreground mt-0.5">
+              {eloRating} <span className="text-muted-foreground/60 font-sans text-[7px] uppercase">ELO</span>
             </span>
           </div>
         </Link>
@@ -252,22 +252,22 @@ export function TopHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-[#0B0C10] border-b border-[#202430] p-4 flex flex-col gap-4 lg:hidden shadow-2xl z-50 max-h-[85vh] overflow-y-auto">
+        <div className="absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 lg:hidden shadow-2xl z-50 max-h-[85vh] overflow-y-auto">
           {/* Mobile Search */}
           <div className="relative">
-            <span className="absolute left-3 top-2.5 text-gray-500 text-xs">🔍</span>
+            <span className="absolute left-3 top-2.5 text-muted-foreground text-xs">🔍</span>
             <input
               type="text"
               placeholder="Search duels, tournaments, players..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 bg-[#111319] border border-[#202430] rounded-xl text-xs text-white focus:outline-none"
+              className="w-full pl-8 pr-3 py-2 bg-secondary border border-border rounded-xl text-xs text-foreground focus:outline-none"
             />
           </div>
 
           {/* Navigation Links */}
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider px-1">Navigation</span>
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-1">Navigation</span>
             {mobileNavLinks.map((tab) => {
               const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
               return (
@@ -276,7 +276,7 @@ export function TopHeader() {
                   href={tab.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`p-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2.5 transition ${
-                    isActive ? 'bg-[#C86228] text-white' : 'text-gray-300 hover:bg-[#161922]'
+                    isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   }`}
                 >
                   <span className="text-base">{tab.icon}</span>
@@ -287,10 +287,10 @@ export function TopHeader() {
           </div>
 
           {/* Quick Arena Switcher with Posters */}
-          <div className="border-t border-[#202430] pt-3 flex flex-col gap-2">
+          <div className="border-t border-border pt-3 flex flex-col gap-2">
             <div className="flex items-center justify-between px-1">
-              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Switch Arena</span>
-              <span className="text-[10px] text-[#D97736] font-mono">{activeCatalogGame.displayName}</span>
+              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Switch Arena</span>
+              <span className="text-[10px] text-accent-400 font-mono">{activeCatalogGame.displayName}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {OFFICIAL_GAMES.map((g) => {
@@ -305,8 +305,8 @@ export function TopHeader() {
                     }}
                     className={`p-2 rounded-xl text-xs font-bold flex items-center gap-2 text-left border transition ${
                       isSelected
-                        ? 'bg-[#C86228]/20 text-white border-[#C86228]'
-                        : 'bg-[#161922] text-gray-300 border-[#202430]'
+                        ? 'bg-primary/20 text-foreground border-primary'
+                        : 'bg-secondary text-muted-foreground border-border'
                     }`}
                   >
                     <GamePoster
@@ -325,19 +325,19 @@ export function TopHeader() {
 
       {/* FACEIT-Style Game Poster Selection Modal */}
       {gameModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-3xl bg-[#111319] border border-[#202430] rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4 max-h-[85vh] overflow-hidden">
-            <div className="flex items-center justify-between border-b border-[#202430] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-3xl bg-card border border-border rounded-2xl shadow-2xl p-6 text-foreground flex flex-col gap-4 max-h-[85vh] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-white">Select Esports Arena</h3>
-                <p className="text-xs text-gray-400">
+                <h3 className="text-base sm:text-lg font-bold text-foreground">Select Esports Arena</h3>
+                <p className="text-xs text-muted-foreground">
                   Switching titles filters duels, tournaments, and rankings to your selected game.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setGameModalOpen(false)}
-                className="text-gray-400 hover:text-white text-lg p-1"
+                className="text-muted-foreground hover:text-foreground text-lg p-1"
               >
                 ✕
               </button>
@@ -357,8 +357,8 @@ export function TopHeader() {
                     }}
                     className={`relative rounded-xl overflow-hidden border text-left transition-all duration-200 group aspect-[3/4] flex flex-col justify-between p-2.5 ${
                       isSelected
-                        ? 'border-[#C86228] ring-2 ring-[#C86228]/40 shadow-lg'
-                        : 'border-[#202430] hover:border-gray-500'
+                        ? 'border-primary ring-2 ring-primary/40 shadow-lg'
+                        : 'border-border hover:border-muted-foreground'
                     }`}
                   >
                     <GamePoster
@@ -369,21 +369,21 @@ export function TopHeader() {
                     />
 
                     <div className="relative z-10 flex items-center justify-between w-full">
-                      <Badge variant="secondary" className="backdrop-blur-md bg-black/70 text-[9px] font-mono">
+                      <Badge variant="secondary" className="backdrop-blur-md bg-background/70 text-[9px] font-mono">
                         {g.platform}
                       </Badge>
                       {isSelected && (
-                        <span className="px-1.5 py-0.5 rounded bg-[#C86228] text-white text-[9px] font-black">
+                        <span className="px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-black">
                           ACTIVE ✓
                         </span>
                       )}
                     </div>
 
                     <div className="relative z-10">
-                      <span className="font-bold text-xs text-white block leading-tight group-hover:text-[#D97736] transition-colors truncate">
+                      <span className="font-bold text-xs text-white block leading-tight group-hover:text-accent-400 transition-colors truncate">
                         {g.displayName}
                       </span>
-                      <span className="text-[9px] text-gray-400 font-mono block mt-0.5">
+                      <span className="text-[9px] text-gray-300 font-mono block mt-0.5">
                         {g.gameType.replace('_', ' ')}
                       </span>
                     </div>
@@ -392,11 +392,11 @@ export function TopHeader() {
               })}
             </div>
 
-            <div className="pt-2 border-t border-[#202430] flex items-center justify-between text-xs">
+            <div className="pt-2 border-t border-border flex items-center justify-between text-xs">
               <Link
                 href="/games"
                 onClick={() => setGameModalOpen(false)}
-                className="text-[#D97736] hover:underline font-bold"
+                className="text-accent-400 hover:underline font-bold"
               >
                 View Full Game Catalog →
               </Link>

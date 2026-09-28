@@ -17,15 +17,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#0B0C10] text-white antialiased flex font-sans selection:bg-[#C86228] selection:text-white overflow-x-hidden">
+      <body className="min-h-screen bg-background text-foreground antialiased flex font-sans selection:bg-primary selection:text-white overflow-x-hidden">
         <Providers>
-          {/* Vertical Game Rail (VX Left Rail) */}
+          {/* Vertical Navigation Rail */}
           <GameRail />
 
           {/* Main App Workspace */}
-          <div className="flex-1 flex flex-col min-w-0 bg-[#0B0C10] overflow-x-hidden">
+          <div className="flex-1 flex flex-col min-w-0 bg-background overflow-x-hidden">
             <TopHeader />
-            <main className="flex-1 p-3 sm:p-5 lg:p-6 pb-28 sm:pb-32 w-full max-w-[1600px] mx-auto">
+            <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-32 min-w-0">
               {children}
             </main>
           </div>
