@@ -6,12 +6,15 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api';
 import { useGameStore } from '../../../lib/gameStore';
 import { usePartyStore } from '../../../lib/partyStore';
-import { formatEUR } from '../../../lib/currency';
+import { formatEUR, formatPoints } from '../../../lib/currency';
 import { CountrySelect } from '../../../components/CountrySelect';
 import { OFFICIAL_GAMES, getGameById } from '../../../lib/gamesCatalog';
+import { useWalletModeStore } from '../../../lib/walletModeStore';
+import { useGameAccountsStore } from '../../../lib/gameAccountsStore';
 import type { GameProfile, MatchFormat } from '@antigravity/core';
 
-const STAKE_PRESETS = [0, 1, 2.5, 5, 10, 20];
+const STAKE_PRESETS_REAL = [0, 1, 2.5, 5, 10, 20];
+const STAKE_PRESETS_DEMO = [0, 100, 250, 500, 1000, 2500];
 
 function NewMatchForm() {
   const router = useRouter();
@@ -20,6 +23,8 @@ function NewMatchForm() {
 
   const { activeGame, setActiveGameById } = useGameStore();
   const { members } = usePartyStore();
+  const { mode: walletMode } = useWalletModeStore();
+  const { getGamertag, getGamertagLabel, setGamertag } = useGameAccountsStore();
 
   const [profileId, setProfileId] = useState(defaultProfileId || activeGame?.id || 'cs2');
   const [format, setFormat] = useState<MatchFormat>('BO1');
@@ -29,6 +34,7 @@ function NewMatchForm() {
   const [isCountryRestricted, setIsCountryRestricted] = useState(false);
   const [targetCountry, setTargetCountry] = useState<string>('');
   const [opponentId, setOpponentId] = useState('');
+  const [gamertagInput, setGamertagInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -205,19 +211,42 @@ function NewMatchForm() {
           </p>
         </div>
 
-        {/* EUR Entry Stakes & Prize Pool */}
+        {/* Active Ledger Entry Stakes & Prize Pool */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
-              4. Entry Stake (Euros €)
-            </label>
+            <div className="flex items-center gap-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
+                4. Entry Stake
+              </label>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                walletMode === 'REAL'
+                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                  : 'bg-purple-500/15 border-purple-500/40 text-purple-300'
+              }`}>
+                {walletMode === 'REAL' ? '🟢 REAL CASH (€ EUR)' : '🟣 DEMO PLAY (PTS)'}
+              </span>
+            </div>
             <span className="text-xs text-gray-400">
-              Guaranteed Prize: <strong className="text-[#D97736] font-mono">{prizePool > 0 ? formatEUR(prizePool) : 'Free Glory'}</strong>
+              Guaranteed Prize:{' '}
+              <strong className="text-[#D97736] font-mono">
+                {prizePool > 0
+                  ? walletMode === 'REAL'
+                    ? formatEUR(prizePool)
+                    : `${formatPoints(prizePool)} PTS`
+                  : 'Free Glory'}
+              </strong>
             </span>
           </div>
 
+          {walletMode === 'DEMO' && (
+            <div className="mb-2 p-2 bg-purple-950/40 border border-purple-800/60 rounded-lg text-[11px] text-purple-300 flex items-center gap-2">
+              <span>🎮</span>
+              <span><strong>Demo Practice Match:</strong> Staking points with zero financial risk. Switch to Real Cash in the top bar to play for real Euros.</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            {STAKE_PRESETS.map((fee) => (
+            {(walletMode === 'REAL' ? STAKE_PRESETS_REAL : STAKE_PRESETS_DEMO).map((fee) => (
               <button
                 key={fee}
                 type="button"
@@ -231,7 +260,11 @@ function NewMatchForm() {
                     : 'bg-[#161922] border-[#202430] text-gray-300 hover:border-gray-500'
                 }`}
               >
-                {fee === 0 ? 'FREE' : formatEUR(fee)}
+                {fee === 0
+                  ? 'FREE'
+                  : walletMode === 'REAL'
+                  ? formatEUR(fee)
+                  : `${formatPoints(fee)} PTS`}
               </button>
             ))}
           </div>
@@ -240,9 +273,33 @@ function NewMatchForm() {
           <div className="mt-3 p-3 bg-[#0B0C10] border border-[#202430] rounded-lg flex items-start gap-2.5 text-[11px] text-gray-400">
             <span className="text-[#D97736] text-base leading-none">⚖️</span>
             <span>
-              <strong>Skill-Based Peer-to-Peer Competition:</strong> Entry stakes are held in escrow. The winner claims the pre-determined guaranteed prize pool. 10% platform fee is deducted for hosting & anti-cheat OCR verification.
+              <strong>Skill-Based Peer-to-Peer Competition:</strong> Entry stakes are held in escrow. The winner claims the pre-determined guaranteed prize pool. 10% platform fee is deducted for hosting & automated background verification.
             </span>
           </div>
+        </div>
+
+        {/* In-Game Gamertag Onboarding for Selected Game */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
+              5. Your {getGamertagLabel(profileId)} (In-Game Handle)
+            </label>
+            {getGamertag(profileId) && (
+              <span className="text-xs text-green-400 font-mono">
+                Linked: <strong>{getGamertag(profileId)}</strong>
+              </span>
+            )}
+          </div>
+          <input
+            type="text"
+            placeholder={`Enter your in-game ${getGamertagLabel(profileId)} so opponent can invite you...`}
+            value={gamertagInput || getGamertag(profileId) || ''}
+            onChange={(e) => {
+              setGamertagInput(e.target.value);
+              setGamertag(profileId, e.target.value);
+            }}
+            className="w-full px-4 py-2.5 bg-[#161922] border border-[#202430] rounded-xl text-sm font-mono text-white focus:outline-none focus:border-[#C86228]"
+          />
         </div>
 
         {/* Geo / Regional Eligibility */}

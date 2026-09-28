@@ -9,6 +9,7 @@ import { EloBadge } from './EloBadge';
 import { NotificationBell } from './NotificationBell';
 import { apiClient } from '../lib/api';
 import { formatEUR, formatPoints } from '../lib/currency';
+import { useWalletModeStore } from '../lib/walletModeStore';
 
 import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
 
@@ -27,6 +28,7 @@ interface HeaderProfile {
 export function TopHeader() {
   const pathname = usePathname();
   const { activeGame, setActiveGame } = useGameStore();
+  const { mode: walletMode, toggleMode: toggleWalletMode } = useWalletModeStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [gameModalOpen, setGameModalOpen] = useState(false);
@@ -154,17 +156,33 @@ export function TopHeader() {
           </div>
         </Link>
 
-        {/* Real Dual-Ledger EUR Wallet */}
+        {/* Mode Indicator & Switcher (REAL CASH vs DEMO PLAY) */}
+        <button
+          type="button"
+          onClick={toggleWalletMode}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold transition border ${
+            walletMode === 'REAL'
+              ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+              : 'bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25'
+          }`}
+          title="Click to toggle between Real Cash (€ EUR) and Free Demo Play (PTS)"
+        >
+          <span className={`w-2 h-2 rounded-full ${walletMode === 'REAL' ? 'bg-green-400' : 'bg-purple-400 animate-pulse'}`} />
+          <span className="font-mono tracking-wider">{walletMode === 'REAL' ? 'REAL CASH' : 'DEMO PLAY'}</span>
+          <span className="text-[9px] text-gray-500">⇄</span>
+        </button>
+
+        {/* Active Ledger Balance */}
         <Link
           href="/dashboard"
           className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-[#111319] hover:bg-[#161922] border border-[#202430] rounded-xl text-xs transition"
-          title="Wallet: EUR Cash & Points"
+          title={`Active Wallet: ${walletMode === 'REAL' ? 'Real Cash (€ EUR)' : 'Demo Play Points (PTS)'}`}
         >
-          <span className="font-mono font-bold text-green-400">{formatEUR(cashAmount)}</span>
-          <span className="text-gray-600 hidden sm:inline">|</span>
-          <span className="font-mono font-bold text-gray-300 hidden sm:inline">
-            {formatPoints(pointsAmount)} PTS
-          </span>
+          {walletMode === 'REAL' ? (
+            <span className="font-mono font-bold text-green-400">{formatEUR(cashAmount)}</span>
+          ) : (
+            <span className="font-mono font-bold text-purple-300">{formatPoints(pointsAmount)} PTS</span>
+          )}
           <span className="w-4 h-4 rounded-full bg-[#C86228] text-white font-bold text-[10px] flex items-center justify-center">
             +
           </span>
