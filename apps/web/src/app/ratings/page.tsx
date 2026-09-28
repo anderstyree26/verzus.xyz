@@ -62,7 +62,7 @@ export default function MyRatingsPage() {
               My Competitive Ratings & Tiers
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
-              Level 1 to 10 skill rankings across each esports title. All outcomes verified by client-side OCR.
+              Level 1 to 10 skill rankings across each esports title. All outcomes verified by automated instant match sync.
             </p>
           </div>
         </div>

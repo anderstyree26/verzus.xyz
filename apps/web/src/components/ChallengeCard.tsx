@@ -54,7 +54,7 @@ export function ChallengeCard({
             {gameTitle}
           </CardTitle>
           <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider mt-0.5 block">
-            Client-Side OCR Verified
+            Instant Sync Verified
           </span>
         </div>
       </CardHeader>

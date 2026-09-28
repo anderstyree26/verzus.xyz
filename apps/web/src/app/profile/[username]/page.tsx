@@ -342,7 +342,7 @@ export default function PublicProfilePage() {
             </div>
 
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Verified by client-side OCR automated match settlement. Zero dispute anomalies or infractions on record.
+              Verified by automated match settlement and anti-cheat. Zero dispute anomalies or infractions on record.
             </p>
           </Card>
         </div>

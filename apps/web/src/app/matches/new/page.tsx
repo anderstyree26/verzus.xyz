@@ -106,7 +106,7 @@ function NewMatchForm() {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-white">Create Arena Duel</h1>
           <p className="text-xs text-gray-400 mt-0.5">
-            Host a competitive duel or challenge with client-side OCR score validation.
+            Host a competitive duel or challenge with automated instant score verification.
           </p>
         </div>
       </div>

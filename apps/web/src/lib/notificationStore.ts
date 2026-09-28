@@ -40,7 +40,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     {
       id: 'welcome-init',
       title: 'Welcome to Verzus Esports Arena',
-      body: 'Zero-config OCR score verification active. Join duels or browse cups.',
+      body: 'Automated game sync active. Join duels or browse cups.',
       type: 'info',
       timestamp: Date.now() - 1000 * 60 * 5,
       read: false,

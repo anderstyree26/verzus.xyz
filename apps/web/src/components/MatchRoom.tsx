@@ -7,6 +7,7 @@ import { notifyUser, requestNotificationPermission } from '../lib/notifications'
 import { useGameAccountsStore } from '../lib/gameAccountsStore';
 import { getGameById } from '../lib/gamesCatalog';
 import { GamePoster } from './GamePoster';
+import { MatchPermissionsModal } from './MatchPermissionsModal';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -42,6 +43,7 @@ export function MatchRoom({
   const [isReadyA, setIsReadyA] = useState(false);
   const [isReadyB, setIsReadyB] = useState(false);
   const [notificationsGranted, setNotificationsGranted] = useState(false);
+  const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
 
   // In-Game Gamertag account store
   const { getGamertag, getGamertagLabel, setGamertag } = useGameAccountsStore();
@@ -53,7 +55,7 @@ export function MatchRoom({
   const isPlayerB = Boolean(playerBId && currentUserId === playerBId);
   const isParticipant = isPlayerA || isPlayerB;
 
-  // Background automated OCR stream (Zero technical UI shown to player)
+  // Background automated game sync pipeline
   const capture = useCapturePipeline(matchId, profile);
 
   // Track state transitions to trigger reactive audio / push alerts
@@ -162,6 +164,12 @@ export function MatchRoom({
   };
 
   const toggleReady = () => {
+    // Before player marks ready, verify that game feed capture has been granted
+    if (capture.status !== 'CAPTURING') {
+      setPermissionsModalOpen(true);
+      return;
+    }
+
     if (isPlayerA) {
       const next = !isReadyA;
       setIsReadyA(next);
@@ -221,7 +229,7 @@ export function MatchRoom({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-shrink-0 flex-wrap sm:flex-nowrap">
           {roomCode && (
             <div className="flex items-center gap-2 bg-secondary border border-border px-3.5 py-2 rounded-xl text-xs">
               <span className="text-muted-foreground font-semibold uppercase">Room:</span>
@@ -233,6 +241,25 @@ export function MatchRoom({
                 {copiedLink ? '✓ Copied' : 'Share'}
               </button>
             </div>
+          )}
+
+          {/* Permissions Status Capsule */}
+          {isParticipant && (
+            <button
+              type="button"
+              onClick={() => setPermissionsModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/80 hover:bg-secondary border border-border text-xs transition"
+              title="Click to check or update game feed and notification permissions"
+            >
+              <span className={`w-2 h-2 rounded-full ${capture.status === 'CAPTURING' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+              <span className="font-mono text-[10px] text-muted-foreground uppercase">
+                Feed: <strong className="text-foreground">{capture.status === 'CAPTURING' ? 'LIVE' : 'SETUP'}</strong>
+              </span>
+              <span className="text-muted-foreground/40">|</span>
+              <span className="font-mono text-[10px] text-muted-foreground uppercase">
+                Alerts: <strong className="text-foreground">{notificationsGranted ? 'ON' : 'OFF'}</strong>
+              </span>
+            </button>
           )}
 
           <Badge variant={capture.status === 'CAPTURING' ? 'success' : 'copper'} className="py-1 px-3 text-xs">
@@ -423,7 +450,7 @@ export function MatchRoom({
                 </Button>
               ) : (
                 <Button
-                  onClick={capture.startCapture}
+                  onClick={() => setPermissionsModalOpen(true)}
                   variant="default"
                   size="lg"
                   className="gap-2"
@@ -455,6 +482,26 @@ export function MatchRoom({
           )}
         </Card>
       )}
+
+      {/* Pre-Match Cross-Platform Permissions Modal */}
+      <MatchPermissionsModal
+        open={permissionsModalOpen}
+        onClose={() => setPermissionsModalOpen(false)}
+        onComplete={() => {
+          if (isPlayerA) setIsReadyA(true);
+          else setIsReadyB(true);
+          notifyUser('Permissions Verified & Ready!', { sound: 'score' });
+        }}
+        gameName={profile.displayName}
+        isCapturing={capture.status === 'CAPTURING'}
+        onStartCapture={capture.startCapture}
+        notificationsGranted={notificationsGranted}
+        onRequestNotifications={async () => {
+          const granted = await requestNotificationPermission();
+          setNotificationsGranted(granted);
+          return granted;
+        }}
+      />
     </div>
   );
 }

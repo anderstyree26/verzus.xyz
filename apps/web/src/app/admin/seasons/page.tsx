@@ -2,8 +2,12 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Link from 'next/link';
 import { apiClient } from '../../../lib/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
 
 interface Season {
   id: string;
@@ -46,119 +50,178 @@ export default function AdminSeasonsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-            <Link href="/admin" className="hover:text-white transition">Admin</Link>
-            <span>/</span>
-            <span className="text-gray-200">Seasons</span>
+    <div className="space-y-6 min-w-0">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-card border border-border rounded-3xl shadow-xl">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="copper">LADDER CYCLES</Badge>
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              {seasons?.length || 0} TOTAL SEASONS
+            </Badge>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Seasons & Resets</h1>
-          <p className="text-xs text-gray-400">Manage competitive seasons, ladder soft-resets, and rewards.</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            Seasons & Ladder Resets
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            Configure competitive season schedules, ladder soft-resets, and seasonal prize pool rewards.
+          </p>
         </div>
-        <button
+
+        <Button
+          variant="default"
+          size="default"
           onClick={() => setIsCreating(true)}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent hover:bg-accent/80 text-white transition"
+          className="font-bold text-xs gap-1.5 flex-shrink-0 shadow-md shadow-primary/20"
         >
-          + Create New Season
-        </button>
+          <span>+</span>
+          <span>Create New Season</span>
+        </Button>
       </div>
 
+      {/* Season Creation Form */}
       {isCreating && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            createMutation.mutate();
-          }}
-          className="p-5 bg-surface-elevated border border-surface-border rounded-xl space-y-4"
-        >
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">New Season Schedule</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Season Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Season 1: Reckoning"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-surface-border text-white text-xs px-3 py-2 rounded border border-surface-border focus:border-accent outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Start Date & Time</label>
-              <input
-                type="datetime-local"
-                required
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full bg-surface-border text-white text-xs px-3 py-2 rounded border border-surface-border focus:border-accent outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">End Date & Time</label>
-              <input
-                type="datetime-local"
-                required
-                value={endsAt}
-                onChange={(e) => setEndsAt(e.target.value)}
-                className="w-full bg-surface-border text-white text-xs px-3 py-2 rounded border border-surface-border focus:border-accent outline-none"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => setIsCreating(false)}
-              className="px-3 py-1.5 rounded text-xs text-gray-400 hover:text-white bg-surface-border"
+        <Card className="bg-card border-primary/50 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-base font-bold text-foreground">
+              Launch New Competitive Season
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">
+              Starting a season sets the active timeframe for ladder standings and seasonal leaderboard rewards.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createMutation.mutate();
+              }}
+              className="space-y-4"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending || !name}
-              className="px-4 py-1.5 rounded text-xs font-semibold bg-accent hover:bg-accent/80 text-white transition disabled:opacity-50"
-            >
-              {createMutation.isPending ? 'Starting...' : 'Launch Season'}
-            </button>
-          </div>
-        </form>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Season Title
+                  </label>
+                  <Input
+                    type="text"
+                    required
+                    placeholder="e.g. Season 1: Genesis Cup"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Start Date & Time
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    required
+                    value={startsAt}
+                    onChange={(e) => setStartsAt(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    End Date & Time
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    required
+                    value={endsAt}
+                    onChange={(e) => setEndsAt(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsCreating(false)}
+                  className="text-xs font-bold"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="sm"
+                  disabled={createMutation.isPending || !name}
+                  className="text-xs font-bold"
+                >
+                  {createMutation.isPending ? 'Launching...' : 'Confirm & Launch Season'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
-      {isLoading ? (
-        <div className="text-sm text-gray-500 py-8 text-center">Loading seasons...</div>
-      ) : !seasons || seasons.length === 0 ? (
-        <div className="text-sm text-gray-500 py-8 text-center bg-surface-elevated border border-surface-border rounded-lg">
-          No seasons found.
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {seasons.map((s) => (
-            <div
-              key={s.id}
-              className="p-5 bg-surface-elevated border border-surface-border rounded-xl flex items-center justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-white text-base">{s.name}</h3>
-                  {s.is_active && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-accent/20 text-accent border border-accent/40">
-                      LIVE SEASON
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {new Date(s.starts_at).toLocaleDateString()} — {new Date(s.ends_at).toLocaleDateString()}
-                </div>
-              </div>
-              <div className="text-right text-xs text-gray-500 font-mono">
-                ID: {s.id.substring(0, 8)}...
-              </div>
+      {/* Seasons Data Card */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-base font-bold text-foreground">
+            Season History & Active Windows
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Past and current competitive periods recorded in the global ledger.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-12 text-center text-xs text-muted-foreground">
+              Loading competitive seasons...
             </div>
-          ))}
-        </div>
-      )}
+          ) : !seasons || seasons.length === 0 ? (
+            <div className="p-12 text-center text-xs text-muted-foreground">
+              No seasons created yet. Click "+ Create New Season" above.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Season Name</TableHead>
+                  <TableHead className="font-bold">Duration</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="font-bold text-right">Season ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {seasons.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-bold text-foreground">
+                      {s.name}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground font-mono">
+                      {new Date(s.starts_at).toLocaleDateString()} — {new Date(s.ends_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {s.is_active ? (
+                        <Badge variant="copper" className="font-mono text-[10px]">
+                          LIVE ACTIVE ●
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="font-mono text-[10px]">
+                          CONCLUDED
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                      {s.id.substring(0, 8)}...
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

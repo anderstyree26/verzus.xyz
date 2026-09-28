@@ -143,7 +143,7 @@ export function NotificationBell() {
           <Separator className="my-2" />
 
           <div className="text-[10px] text-muted-foreground text-center font-mono">
-            Background OCR score & match alerts active
+            Live match alerts & instant score sync active
           </div>
         </div>
       )}

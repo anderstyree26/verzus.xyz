@@ -10,6 +10,7 @@ import type { GameProfile } from '@antigravity/core';
 import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
 import { GamePoster } from './GamePoster';
 import { GameSelectionModal } from './GameSelectionModal';
+import { AdminSidebar } from './AdminSidebar';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -19,6 +20,11 @@ export function GameRail() {
   const pathname = usePathname();
   const { activeGame, setActiveGame, initializeDefaultGame } = useGameStore();
   const [gameModalOpen, setGameModalOpen] = useState(false);
+
+  // If inside the admin console, render the dedicated shadcn Admin Sidebar
+  if (pathname.startsWith('/admin')) {
+    return <AdminSidebar className="hidden lg:flex" />;
+  }
 
   const { data: games } = useQuery<GameProfile[]>({
     queryKey: ['approved-games-rail'],

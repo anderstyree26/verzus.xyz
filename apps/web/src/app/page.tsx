@@ -170,7 +170,7 @@ export default function HomePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="copper">ZERO-CONFIG ESPORTS</Badge>
                 <Badge variant="secondary" className="font-mono text-[10px]">
-                  AUTOMATED BACKGROUND OCR
+                  AUTOMATED MATCH SYNC
                 </Badge>
                 <Badge variant="outline" className="font-mono text-[10px]">
                   8 OFFICIAL TITLES
@@ -183,7 +183,7 @@ export default function HomePage() {
               </h1>
 
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Connect your game, queue 1v1 matches or squad tournaments, and let client-side OCR verify scores in the background. No manual screenshot uploads or disputed matches.
+                Connect your game, queue 1v1 matches or squad tournaments, and let automated game sync verify scores in the background. No manual screenshot uploads or disputed matches.
               </p>
 
               <div className="flex items-center gap-3 pt-2 flex-wrap sm:flex-nowrap">
@@ -212,10 +212,10 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 flex-shrink-0">
               <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
                 <div className="font-bold text-xs text-foreground flex items-center gap-2">
-                  <span>⚡</span> Automated OCR
+                  <span>⚡</span> Instant Match Sync
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">
-                  Background capture validates results seamlessly. Zero player effort.
+                  Background feed validates results seamlessly. Zero player effort.
                 </p>
               </div>
 
@@ -483,7 +483,7 @@ export default function HomePage() {
         onClose={() => setAuthModalOpen(false)}
         title="Sign In to Compete"
         description="To accept duels, stake entry fees, and win real cash or demo points, please create a free player account or log in."
-        actionReason="Matches are verified by client-side OCR and credited to your competitive profile."
+        actionReason="Matches are verified automatically and credited to your competitive profile."
       />
 
       {/* Global Game Selection Modal */}

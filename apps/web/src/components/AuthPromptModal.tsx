@@ -59,10 +59,10 @@ export function AuthPromptModal({
 
         <div className="p-3.5 bg-secondary/60 rounded-2xl border border-border text-xs space-y-1.5">
           <div className="font-bold text-foreground flex items-center gap-1.5">
-            <span>🛡️</span> Zero-Config OCR Verification
+            <span>🛡️</span> Automated Match Verification
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            {actionReason} Client-side OCR captures your screen in the background to confirm scores automatically.
+            {actionReason} Automated game sync confirms match scores in the background automatically.
           </p>
         </div>
 

@@ -4,9 +4,13 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api';
 import type { GameProfile } from '@antigravity/core';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
 
 export default function AdminProfilesPage() {
-  const { data: profiles, refetch } = useQuery<GameProfile[]>({
+  const { data: profiles, refetch, isLoading } = useQuery<GameProfile[]>({
     queryKey: ['all-game-profiles'],
     queryFn: () => apiClient<GameProfile[]>('/games'),
   });
@@ -14,7 +18,6 @@ export default function AdminProfilesPage() {
   const handleApprove = async (id: string) => {
     try {
       await apiClient(`/games/${id}/approve`, { method: 'POST' });
-      alert('Profile approved!');
       refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -23,47 +26,114 @@ export default function AdminProfilesPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Approve Game Profiles</h1>
-          <p className="text-sm text-gray-400">Review game archetypes and calibrations submitted by the community.</p>
+    <div className="space-y-6 min-w-0">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-card border border-border rounded-3xl shadow-xl">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="copper">GAME REGISTRY</Badge>
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              {profiles?.length || 0} TOTAL TITLES
+            </Badge>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            Approve Game Profiles
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            Review community-submitted archetypes, ROI coordinate boxes, and OCR calibration metadata.
+          </p>
         </div>
 
-        <Link
-          href="/games/new?mode=admin"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#C86228] hover:bg-[#D97736] font-bold text-xs rounded-xl text-white uppercase tracking-wider transition shadow-md shadow-[#C86228]/20"
-        >
-          <span>⚡</span>
-          <span>Auto-Calibrate New Game</span>
+        <Link href="/games/new?mode=admin" className="flex-shrink-0">
+          <Button variant="default" size="default" className="font-bold text-xs gap-1.5 shadow-md shadow-primary/20">
+            <span>⚡</span>
+            <span>Auto-Calibrate New Game</span>
+          </Button>
         </Link>
       </div>
 
-      <div className="divide-y divide-surface-border bg-surface-elevated border border-surface-border rounded-lg">
-        {profiles?.map((p) => (
-          <div key={p.id} className="p-4 flex justify-between items-center text-sm">
-            <div>
-              <span className="font-bold text-white">{p.displayName}</span>
-              <p className="text-xs text-gray-400">Platform: {p.platform} · Type: {p.gameType}</p>
-            </div>
+      {/* Profiles Data Card */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-base font-bold text-foreground">
+            Registered Esports Archetypes
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Games approved here will immediately become playable across 1v1 duels, brackets, and ladder leaderboards.
+          </CardDescription>
+        </CardHeader>
 
-            <div className="flex items-center gap-2">
-              <span className={`px-2 py-0.5 rounded text-xs font-bold ${p.approved ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                {p.approved ? 'APPROVED' : 'PENDING'}
-              </span>
-
-              {!p.approved && (
-                <button
-                  onClick={() => handleApprove(p.id)}
-                  className="px-3 py-1 bg-accent hover:bg-accent-600 text-xs font-bold rounded transition"
-                >
-                  Approve
-                </button>
-              )}
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-12 text-center text-xs text-muted-foreground">
+              Loading registered game profiles...
             </div>
-          </div>
-        ))}
-      </div>
+          ) : !profiles || profiles.length === 0 ? (
+            <div className="p-12 text-center text-xs text-muted-foreground">
+              No game profiles registered yet. Launch the Auto-Calibrator to create one.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Game Title</TableHead>
+                  <TableHead className="font-bold">Platform</TableHead>
+                  <TableHead className="font-bold">Genre / Mode</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="font-bold text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {profiles.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-bold text-foreground">
+                      <div className="flex flex-col">
+                        <span>{p.displayName}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">{p.id}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="font-mono text-[10px]">
+                        {p.platform}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {p.gameType.replace('_', ' ')}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={p.approved ? 'success' : 'warning'}
+                        className="font-mono text-[10px]"
+                      >
+                        {p.approved ? 'APPROVED ✓' : 'PENDING REVIEW'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/games/${p.id}`}>
+                          <Button variant="ghost" size="sm" className="text-xs">
+                            View Hub
+                          </Button>
+                        </Link>
+                        {!p.approved && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleApprove(p.id)}
+                            className="text-xs font-bold"
+                          >
+                            Approve
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

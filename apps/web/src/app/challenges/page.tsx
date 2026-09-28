@@ -118,7 +118,7 @@ export default function ChallengesPage() {
               Duel Matchmaking Queue
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Challenge peers in instant 1v1 duels or Party matches. All results verified by client-side OCR.
+              Challenge peers in instant 1v1 duels or Party matches. All results verified by automated instant game sync.
             </p>
           </div>
         </div>

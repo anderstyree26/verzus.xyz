@@ -253,7 +253,7 @@ export function TopHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 lg:hidden shadow-2xl z-50 max-h-[85vh] overflow-y-auto">
+        <div className="absolute top-16 left-0 right-0 bg-background border-b border-border p-4 flex flex-col gap-4 lg:hidden shadow-2xl z-50">
           {/* Mobile Search */}
           <div className="relative">
             <span className="absolute left-3 top-2.5 text-muted-foreground text-xs">🔍</span>
@@ -287,39 +287,35 @@ export function TopHeader() {
             })}
           </div>
 
-          {/* Quick Arena Switcher with Posters */}
-          <div className="border-t border-border pt-3 flex flex-col gap-2">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Switch Arena</span>
-              <span className="text-[10px] text-accent-400 font-mono">{activeCatalogGame.displayName}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {OFFICIAL_GAMES.map((g) => {
-                const isSelected = activeCatalogGame.id.toLowerCase() === g.id.toLowerCase();
-                return (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveGame(g);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`p-2 rounded-xl text-xs font-bold flex items-center gap-2 text-left border transition ${
-                      isSelected
-                        ? 'bg-primary/20 text-foreground border-primary'
-                        : 'bg-secondary text-muted-foreground border-border'
-                    }`}
-                  >
-                    <GamePoster
-                      game={g}
-                      aspect="mini"
-                      className="w-5 h-7 rounded flex-shrink-0"
-                    />
-                    <span className="truncate">{g.shortName}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Quick Arena Switcher Action -> Opens Modal Only */}
+          <div className="border-t border-border pt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setGameModalOpen(true);
+              }}
+              className="w-full p-2.5 rounded-xl bg-secondary hover:bg-secondary/80 border border-border flex items-center justify-between transition text-left"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <GamePoster
+                  game={activeCatalogGame}
+                  aspect="mini"
+                  className="w-5 h-7 rounded flex-shrink-0"
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] text-muted-foreground uppercase font-mono leading-none">
+                    Current Arena
+                  </span>
+                  <span className="text-xs font-bold text-foreground truncate mt-0.5">
+                    {activeCatalogGame.displayName}
+                  </span>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-primary flex items-center gap-1 flex-shrink-0">
+                Switch Arena ▾
+              </span>
+            </button>
           </div>
         </div>
       )}

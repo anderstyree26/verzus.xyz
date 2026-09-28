@@ -9,7 +9,7 @@ import { NotificationToastContainer } from '../components/NotificationToastConta
 
 export const metadata: Metadata = {
   title: 'VerzusXYZ — Universal Esports Arena',
-  description: 'Skill-based esports matchmaking, party duels, and tournaments for any game verified by client-side OCR.',
+  description: 'Skill-based esports matchmaking, party duels, and tournaments with automated instant match verification and anti-cheat.',
 };
 
 export default function RootLayout({

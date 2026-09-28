@@ -2,8 +2,13 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Link from 'next/link';
 import { apiClient } from '../../../lib/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { formatEUR } from '../../../lib/currency';
 
 interface Sponsor {
   id: string;
@@ -45,126 +50,193 @@ export default function AdminSponsorsPage() {
     },
   });
 
+  const totalFunded = sponsors?.reduce((sum, s) => sum + (s.funded_amount || 0), 0) ?? 0;
+
   return (
-    <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-            <Link href="/admin" className="hover:text-white transition">Admin</Link>
-            <span>/</span>
-            <span className="text-gray-200">Sponsors</span>
+    <div className="space-y-6 min-w-0">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-card border border-border rounded-3xl shadow-xl">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="copper">TREASURY & LIQUIDITY</Badge>
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              {formatEUR(totalFunded)} COMMITTED
+            </Badge>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Sponsor Funding</h1>
-          <p className="text-xs text-gray-400">Manage partners funding platform tournaments and prize pools.</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            Sponsor Funding & Liquidity
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            Manage commercial brand partners funding tournament prize pools and sponsored esports circuits.
+          </p>
         </div>
-        <button
+
+        <Button
+          variant="default"
+          size="default"
           onClick={() => setIsCreating(true)}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent hover:bg-accent/80 text-white transition"
+          className="font-bold text-xs gap-1.5 flex-shrink-0 shadow-md shadow-primary/20"
         >
-          + Add Sponsor
-        </button>
+          <span>+</span>
+          <span>Add Brand Sponsor</span>
+        </Button>
       </div>
 
+      {/* Sponsor Creation Card */}
       {isCreating && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            createMutation.mutate();
-          }}
-          className="p-5 bg-surface-elevated border border-surface-border rounded-xl space-y-4"
-        >
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">New Sponsor Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Sponsor / Brand Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Red Bull Esports"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-surface-border text-white text-xs px-3 py-2 rounded border border-surface-border focus:border-accent outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Website URL</label>
-              <input
-                type="url"
-                placeholder="https://example.com"
-                value={websiteUrl}
-                onChange={(e) => setWebsiteUrl(e.target.value)}
-                className="w-full bg-surface-border text-white text-xs px-3 py-2 rounded border border-surface-border focus:border-accent outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Initial Funded Amount (POINTS)</label>
-              <input
-                type="number"
-                min="0"
-                value={fundedAmount}
-                onChange={(e) => setFundedAmount(e.target.value)}
-                className="w-full bg-surface-border text-white text-xs px-3 py-2 rounded border border-surface-border focus:border-accent outline-none"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => setIsCreating(false)}
-              className="px-3 py-1.5 rounded text-xs text-gray-400 hover:text-white bg-surface-border"
+        <Card className="bg-card border-primary/50 shadow-xl">
+          <CardHeader>
+            <CardTitle className="text-base font-bold text-foreground">
+              Register New Brand Sponsor
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">
+              Sponsor grants are directly allocated to tournament prize escrow pools.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createMutation.mutate();
+              }}
+              className="space-y-4"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending || !name}
-              className="px-4 py-1.5 rounded text-xs font-semibold bg-accent hover:bg-accent/80 text-white transition disabled:opacity-50"
-            >
-              {createMutation.isPending ? 'Saving...' : 'Create Sponsor'}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {isLoading ? (
-        <div className="text-sm text-gray-500 py-8 text-center">Loading sponsors...</div>
-      ) : !sponsors || sponsors.length === 0 ? (
-        <div className="text-sm text-gray-500 py-8 text-center bg-surface-elevated border border-surface-border rounded-lg">
-          No sponsors registered yet.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sponsors.map((s) => (
-            <div
-              key={s.id}
-              className="p-5 bg-surface-elevated border border-surface-border rounded-xl flex items-center justify-between"
-            >
-              <div>
-                <h3 className="font-bold text-white text-base">{s.name}</h3>
-                {s.website_url && (
-                  <a
-                    href={s.website_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-accent hover:underline block mt-0.5"
-                  >
-                    {s.website_url}
-                  </a>
-                )}
-                <div className="text-[11px] text-gray-500 mt-2">
-                  Created {new Date(s.created_at).toLocaleDateString()}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Sponsor / Brand Name
+                  </label>
+                  <Input
+                    type="text"
+                    required
+                    placeholder="e.g. Red Bull Esports"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Website URL
+                  </label>
+                  <Input
+                    type="url"
+                    placeholder="https://..."
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Committed Prize Liquidity (€ EUR)
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="5000"
+                    value={fundedAmount}
+                    onChange={(e) => setFundedAmount(e.target.value)}
+                    className="text-xs font-mono"
+                  />
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-[10px] uppercase text-gray-400 block">Total Funded</span>
-                <span className="text-lg font-mono font-bold text-emerald-400">
-                  {s.funded_amount.toLocaleString()} PTS
-                </span>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsCreating(false)}
+                  className="text-xs font-bold"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="sm"
+                  disabled={createMutation.isPending || !name}
+                  className="text-xs font-bold"
+                >
+                  {createMutation.isPending ? 'Registering...' : 'Register Sponsor'}
+                </Button>
               </div>
-            </div>
-          ))}
-        </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
+
+      {/* Sponsors Table Card */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-base font-bold text-foreground">
+            Active Brand Partners
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Organizations and advertisers powering prize guarantees on VerzusXYZ.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-12 text-center text-xs text-muted-foreground">
+              Loading sponsors list...
+            </div>
+          ) : !sponsors || sponsors.length === 0 ? (
+            <div className="p-12 text-center text-xs text-muted-foreground">
+              No brand sponsors added yet. Click "+ Add Brand Sponsor" above.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Brand Partner</TableHead>
+                  <TableHead className="font-bold">Website</TableHead>
+                  <TableHead className="font-bold">Funded Liquidity</TableHead>
+                  <TableHead className="font-bold text-right">Partner ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sponsors.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-bold text-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center text-xs">
+                          💎
+                        </span>
+                        <span>{s.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {s.website_url ? (
+                        <a
+                          href={s.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-mono"
+                        >
+                          {s.website_url}
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground font-mono">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="success" className="font-mono text-xs">
+                        {formatEUR(s.funded_amount)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                      {s.id.substring(0, 8)}...
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
