@@ -10,6 +10,8 @@ import { NotificationBell } from './NotificationBell';
 import { apiClient } from '../lib/api';
 import { formatEUR, formatPoints } from '../lib/currency';
 
+import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
+
 interface HeaderWallet {
   cashEur?: number;
   balance?: number;
@@ -24,9 +26,12 @@ interface HeaderProfile {
 
 export function TopHeader() {
   const pathname = usePathname();
-  const { activeGame } = useGameStore();
+  const { activeGame, setActiveGame } = useGameStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [gameModalOpen, setGameModalOpen] = useState(false);
+
+  const activeCatalogGame = getGameById(activeGame?.id);
 
   // Real Wallet Balance from API
   const { data: wallet } = useQuery<HeaderWallet>({
@@ -80,20 +85,25 @@ export function TopHeader() {
           VX
         </Link>
 
-        {/* Active Game Badge */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-[#161922] border border-[#202430] flex items-center justify-center text-sm font-black text-[#D97736]">
-            ⚡
+        {/* Active Game Badge - Clickable to switch games */}
+        <button
+          type="button"
+          onClick={() => setGameModalOpen(true)}
+          className="flex items-center gap-2 flex-shrink-0 p-1 rounded-xl hover:bg-[#161922] transition text-left group"
+          title="Click to switch active game"
+        >
+          <div className="w-8 h-8 rounded-lg bg-[#161922] group-hover:bg-[#202430] border border-[#202430] flex items-center justify-center text-sm font-black text-[#D97736]">
+            {activeCatalogGame.icon}
           </div>
           <div className="flex flex-col text-left">
-            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider leading-none">
-              Active Arena
+            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider leading-none flex items-center gap-1">
+              Active Arena <span className="text-[8px] text-[#D97736]">▼</span>
             </span>
-            <span className="text-xs sm:text-sm font-black text-white tracking-tight leading-tight truncate max-w-[120px] sm:max-w-[200px]">
-              {activeGame?.displayName || 'Select Game'}
+            <span className="text-xs sm:text-sm font-black text-white tracking-tight leading-tight truncate max-w-[120px] sm:max-w-[200px] group-hover:text-[#D97736] transition-colors">
+              {activeCatalogGame.displayName}
             </span>
           </div>
-        </div>
+        </button>
 
         {/* Navigation Tabs */}
         <nav className="hidden md:flex items-center gap-1">
@@ -184,23 +194,131 @@ export function TopHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-[#0B0C10] border-b border-[#202430] p-4 flex flex-col gap-2 md:hidden shadow-2xl z-50">
-          {navTabs.map((tab) => {
-            const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`p-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
-                  isActive ? 'bg-[#C86228] text-white' : 'text-gray-300 hover:bg-[#161922]'
-                }`}
+        <div className="absolute top-16 left-0 right-0 bg-[#0B0C10] border-b border-[#202430] p-4 flex flex-col gap-3 md:hidden shadow-2xl z-50">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Navigation</span>
+            {navTabs.map((tab) => {
+              const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`p-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${
+                    isActive ? 'bg-[#C86228] text-white' : 'text-gray-300 hover:bg-[#161922]'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-[#202430] pt-2 flex flex-col gap-1.5">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Active Title:</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {OFFICIAL_GAMES.map((g) => {
+                const isSelected = activeCatalogGame.id.toLowerCase() === g.id.toLowerCase();
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveGame(g);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 text-left border ${
+                      isSelected
+                        ? 'bg-[#C86228] text-white border-[#C86228]'
+                        : 'bg-[#161922] text-gray-300 border-[#202430]'
+                    }`}
+                  >
+                    <span>{g.icon}</span>
+                    <span className="truncate">{g.shortName}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game Selection Modal */}
+      {gameModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-[#111319] border border-[#202430] rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-[#202430] pb-3">
+              <div>
+                <h3 className="text-lg font-bold text-white">Select Game Arena</h3>
+                <p className="text-xs text-gray-400">
+                  Switching titles filters duels, tournaments, and rankings to your selected game.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGameModalOpen(false)}
+                className="text-gray-400 hover:text-white text-lg p-1"
               >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
+              {OFFICIAL_GAMES.map((g) => {
+                const isSelected = activeCatalogGame.id.toLowerCase() === g.id.toLowerCase();
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveGame(g);
+                      setGameModalOpen(false);
+                    }}
+                    className={`w-full p-3.5 rounded-xl border text-left flex items-center justify-between transition ${
+                      isSelected
+                        ? 'bg-[#C86228]/15 border-[#C86228] text-white shadow'
+                        : 'bg-[#161922] border-[#202430] hover:border-gray-500 text-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{g.icon}</span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-white">{g.displayName}</span>
+                          <span className="px-1.5 py-0.5 bg-[#C86228]/20 text-[#D97736] text-[9px] font-bold rounded">
+                            {g.platform}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{g.tagline}</p>
+                      </div>
+                    </div>
+
+                    {isSelected && (
+                      <span className="text-[#D97736] font-extrabold text-xs">SELECTED ✓</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-2 border-t border-[#202430] flex items-center justify-between text-xs">
+              <Link
+                href="/games"
+                onClick={() => setGameModalOpen(false)}
+                className="text-[#D97736] hover:underline font-bold"
+              >
+                View Full Game Catalog →
               </Link>
-            );
-          })}
+              <button
+                type="button"
+                onClick={() => setGameModalOpen(false)}
+                className="px-4 py-2 bg-[#161922] hover:bg-[#202430] border border-[#202430] rounded-lg text-white font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </header>

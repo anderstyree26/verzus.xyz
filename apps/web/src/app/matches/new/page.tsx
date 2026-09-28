@@ -8,6 +8,7 @@ import { useGameStore } from '../../../lib/gameStore';
 import { usePartyStore } from '../../../lib/partyStore';
 import { formatEUR } from '../../../lib/currency';
 import { CountrySelect } from '../../../components/CountrySelect';
+import { OFFICIAL_GAMES, getGameById } from '../../../lib/gamesCatalog';
 import type { GameProfile, MatchFormat } from '@antigravity/core';
 
 const STAKE_PRESETS = [0, 1, 2.5, 5, 10, 20];
@@ -20,7 +21,7 @@ function NewMatchForm() {
   const { activeGame, setActiveGameById } = useGameStore();
   const { members } = usePartyStore();
 
-  const [profileId, setProfileId] = useState(defaultProfileId);
+  const [profileId, setProfileId] = useState(defaultProfileId || activeGame?.id || 'cs2');
   const [format, setFormat] = useState<MatchFormat>('BO1');
   const [mode, setMode] = useState<'1v1' | 'PARTY'>(members.length > 1 ? 'PARTY' : '1v1');
   const [entryFee, setEntryFee] = useState<number>(0);
@@ -33,23 +34,25 @@ function NewMatchForm() {
 
   const { data: profiles } = useQuery<GameProfile[]>({
     queryKey: ['approved-profiles'],
-    queryFn: () => apiClient<GameProfile[]>('/games'),
+    queryFn: () => apiClient<GameProfile[]>('/games').catch(() => []),
   });
 
-  // Sync with activeGame or profiles
+  const officialIds = new Set(OFFICIAL_GAMES.map((g) => g.id.toLowerCase()));
+  const customGames = (profiles || []).filter(
+    (g) => !officialIds.has(g.id.toLowerCase())
+  );
+  const allAvailableGames = [...OFFICIAL_GAMES, ...customGames];
+
+  // Sync with activeGame or default
   useEffect(() => {
     if (!profileId && activeGame?.id) {
       setProfileId(activeGame.id);
-    } else if (!profileId && profiles && profiles.length > 0 && profiles[0]) {
-      setProfileId(profiles[0].id);
     }
-  }, [profileId, activeGame, profiles]);
+  }, [profileId, activeGame]);
 
   const handleGameSelect = (id: string) => {
     setProfileId(id);
-    if (profiles) {
-      setActiveGameById(id, profiles);
-    }
+    setActiveGameById(id, allAvailableGames);
   };
 
   const effectiveFee = customFee !== '' ? Math.max(0, parseFloat(customFee) || 0) : entryFee;
@@ -120,12 +123,13 @@ function NewMatchForm() {
             className="w-full px-4 py-3 bg-[#161922] border border-[#202430] rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-[#C86228] transition"
           >
             <option value="">Select a competitive game...</option>
-            {profiles?.map((p) => {
+            {allAvailableGames.map((p) => {
               const dName = p.displayName || (p as any).display_name || 'Game';
-              const gType = p.gameType || (p as any).game_type || 'CUSTOM';
+              const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === p.id.toLowerCase());
+              const icon = catalogItem?.icon || '🎮';
               return (
                 <option key={p.id} value={p.id}>
-                  {dName} ({p.platform || 'UNIVERSAL'} — {gType})
+                  {icon} {dName} ({p.platform || 'UNIVERSAL'})
                 </option>
               );
             })}

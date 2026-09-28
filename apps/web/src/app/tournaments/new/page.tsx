@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api';
+import { OFFICIAL_GAMES } from '../../../lib/gamesCatalog';
 import type { GameProfile, TournamentFormat } from '@antigravity/core';
 
 interface FormatDetail {
@@ -65,12 +66,18 @@ export default function NewTournamentPage() {
 
   const { data: profiles } = useQuery<GameProfile[]>({
     queryKey: ['approved-profiles'],
-    queryFn: () => apiClient<GameProfile[]>('/games'),
+    queryFn: () => apiClient<GameProfile[]>('/games').catch(() => []),
   });
+
+  const officialIds = new Set(OFFICIAL_GAMES.map((g) => g.id.toLowerCase()));
+  const customGames = (profiles || []).filter(
+    (g) => !officialIds.has(g.id.toLowerCase())
+  );
+  const allAvailableGames = [...OFFICIAL_GAMES, ...customGames];
 
   const handleProfileChange = (selectedId: string) => {
     setProfileId(selectedId);
-    const selected = profiles?.find((p) => p.id === selectedId);
+    const selected = allAvailableGames.find((p) => p.id === selectedId);
     if (selected) {
       const displayName = selected.displayName || (selected as any).display_name || 'Game';
       const formatLabel = TOURNAMENT_FORMATS[format].label;
@@ -140,21 +147,22 @@ export default function NewTournamentPage() {
         {/* Game Profile Selection */}
         <div>
           <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-gray-300">Game Profile</label>
-            <span className="text-[11px] text-gray-400">Determines OCR engine & calibration</span>
+            <label className="text-xs font-semibold text-gray-300">Esports Game Title</label>
+            <span className="text-[11px] text-gray-400">Title & rules calibration</span>
           </div>
           <select
             value={profileId}
             onChange={(e) => handleProfileChange(e.target.value)}
             className="w-full px-3 py-2.5 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
           >
-            <option value="">Select a game profile...</option>
-            {profiles?.map((p) => {
+            <option value="">Select a game title...</option>
+            {allAvailableGames.map((p) => {
               const dName = p.displayName || (p as any).display_name || 'Game';
-              const gType = p.gameType || (p as any).game_type || 'CUSTOM';
+              const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === p.id.toLowerCase());
+              const icon = catalogItem?.icon || '🎮';
               return (
                 <option key={p.id} value={p.id}>
-                  {dName} ({p.platform || 'UNIVERSAL'} — {gType})
+                  {icon} {dName} ({p.platform || 'UNIVERSAL'})
                 </option>
               );
             })}

@@ -14,20 +14,27 @@ interface LeaderboardEntry {
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[];
-  gameType: string;
+  gameType?: string;
+  gameTitle?: string;
+  gameIcon?: string;
 }
 
-export function LeaderboardTable({ entries, gameType }: LeaderboardTableProps) {
+export function LeaderboardTable({ entries, gameType, gameTitle, gameIcon }: LeaderboardTableProps) {
+  const displayTitle = gameTitle || gameType?.replace(/_/g, ' ') || 'Competitive Ladder';
+
   return (
     <div className="bg-[#111319] border border-[#202430] rounded-2xl overflow-hidden shadow-2xl">
       <div className="p-5 border-b border-[#202430] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <div>
-          <h3 className="font-black text-lg text-white">Global Ladder & Rankings</h3>
-          <span className="text-xs text-gray-400">Category: <strong className="text-white uppercase font-bold">{gameType.replace(/_/g, ' ')}</strong></span>
+        <div className="flex items-center gap-3">
+          {gameIcon && <span className="text-2xl">{gameIcon}</span>}
+          <div>
+            <h3 className="font-black text-lg text-white">Global Ranked Ladder</h3>
+            <span className="text-xs text-gray-400">Game: <strong className="text-white font-bold">{displayTitle}</strong></span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] px-2.5 py-1 bg-[#C86228]/15 border border-[#C86228]/30 text-[#D97736] font-bold uppercase tracking-wider rounded-lg font-mono">
-            VX ELO (K=32)
+            VX ELO (Level 1–10)
           </span>
         </div>
       </div>
@@ -88,7 +95,7 @@ export function LeaderboardTable({ entries, gameType }: LeaderboardTableProps) {
             {entries.length === 0 && (
               <tr>
                 <td colSpan={6} className="py-12 text-center text-gray-500 font-sans">
-                  No rated matches completed for this ladder archetype yet.
+                  No ranked matches completed for {displayTitle} yet. Host or play a duel to claim Rank #1!
                 </td>
               </tr>
             )}

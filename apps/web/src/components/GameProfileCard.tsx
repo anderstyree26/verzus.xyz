@@ -5,19 +5,24 @@ import Link from 'next/link';
 interface GameProfileCardProps {
   id: string;
   displayName: string;
-  gameType: string;
+  gameType?: string;
   platform: string;
   platforms?: string[];
   isOfficial?: boolean;
+  icon?: string;
+  tagline?: string;
+  onSelectGame?: () => void;
 }
 
 export function GameProfileCard({
   id,
   displayName,
-  gameType,
   platform,
   platforms,
   isOfficial,
+  icon = '🎮',
+  tagline,
+  onSelectGame,
 }: GameProfileCardProps) {
   const platformDisplay = platforms && platforms.length > 0 ? platforms.join(' · ') : platform;
 
@@ -32,22 +37,35 @@ export function GameProfileCard({
             </span>
           )}
         </div>
-        <h3 className="text-lg font-black text-white group-hover:text-[#D97736] transition-colors mt-1.5">{displayName}</h3>
-        <p className="text-xs text-gray-400 mt-1 font-mono">Engine: <span className="text-white font-bold">{gameType}</span></p>
+        <div className="flex items-center gap-3 mt-2">
+          <span className="text-3xl">{icon}</span>
+          <div>
+            <h3 className="text-lg font-black text-white group-hover:text-[#D97736] transition-colors leading-tight">
+              {displayName}
+            </h3>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {tagline || 'Competitive OCR Matchmaking'}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-2">
         <Link
           href={`/matches/new?profileId=${id}`}
-          className="flex-1 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition text-center shadow-md shadow-[#C86228]/20"
+          onClick={onSelectGame}
+          className="flex-1 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition text-center shadow-md shadow-[#C86228]/20 flex items-center justify-center gap-1.5"
         >
-          ⚔️ Play Duel
+          <span>⚔️</span>
+          <span>Play Duel</span>
         </Link>
         <Link
-          href={`/games/${id}`}
-          className="px-3.5 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-xs font-bold rounded-xl transition text-center text-gray-300 hover:text-white"
+          href={`/leaderboards/${id}`}
+          onClick={onSelectGame}
+          className="px-3.5 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-xs font-bold rounded-xl transition text-center text-gray-300 hover:text-white flex items-center gap-1"
         >
-          HUD Spec
+          <span>🥇</span>
+          <span>Rankings</span>
         </Link>
       </div>
     </div>

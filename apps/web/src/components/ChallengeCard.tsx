@@ -54,7 +54,7 @@ export function ChallengeCard({
           {gameTitle}
         </h3>
         <span className="text-[10px] text-gray-500 uppercase font-mono tracking-wider">
-          {gameType.replace(/_/g, ' ')}
+          Client-Side OCR Verified
         </span>
       </div>
 

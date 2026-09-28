@@ -8,15 +8,7 @@ import { useGameStore } from '../lib/gameStore';
 import { apiClient } from '../lib/api';
 import type { GameProfile } from '@antigravity/core';
 
-// Preset default esports games if API is still loading
-const PRESET_GAMES = [
-  { id: 'cs2', name: 'Counter-Strike 2', short: 'CS2', icon: '🎯', color: 'from-amber-700 to-stone-900' },
-  { id: 'rl', name: 'Rocket League', short: 'RL', icon: '🚗', color: 'from-blue-700 to-stone-900' },
-  { id: 'eafc', name: 'EA Sports FC 25', short: 'FC25', icon: '⚽', color: 'from-emerald-700 to-stone-900' },
-  { id: 'cod', name: 'Call of Duty: Warzone', short: 'COD', icon: '🪖', color: 'from-stone-700 to-stone-950' },
-  { id: 'dota2', name: 'Dota 2', short: 'DOTA', icon: '🛡️', color: 'from-red-800 to-stone-950' },
-  { id: 'subway', name: 'Subway Surfers', short: 'SUB', icon: '🛹', color: 'from-purple-800 to-stone-950' },
-];
+import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
 
 export function GameRail() {
   const pathname = usePathname();
@@ -33,15 +25,12 @@ export function GameRail() {
     }
   }, [games, initializeDefaultGame]);
 
-  const displayGames = (games && games.length > 0)
-    ? games
-    : PRESET_GAMES.map((p) => ({
-        id: p.id,
-        displayName: p.name,
-        gameType: 'HIGH_SCORE' as const,
-        platform: 'UNIVERSAL' as const,
-        isOfficial: true,
-      } as unknown as GameProfile));
+  // Combine official catalog games with any custom user-calibrated games
+  const officialIds = new Set(OFFICIAL_GAMES.map((g) => g.id.toLowerCase()));
+  const customGames = (games || []).filter(
+    (g) => !officialIds.has(g.id.toLowerCase())
+  );
+  const displayGames: (CatalogGame | GameProfile)[] = [...OFFICIAL_GAMES, ...customGames];
 
   return (
     <aside className="hidden lg:flex w-16 flex-shrink-0 bg-[#0B0C10] border-r border-[#202430] flex-col items-center py-3 z-40 select-none">
@@ -59,9 +48,11 @@ export function GameRail() {
       {/* Vertical Games Rail */}
       <div className="flex-1 flex flex-col items-center gap-2.5 overflow-y-auto overflow-x-hidden w-full scrollbar-none px-2">
         {displayGames.map((game, idx) => {
-          const isActive = activeGame?.id === game.id || (!activeGame && idx === 0);
+          const isActive = activeGame?.id?.toLowerCase() === game.id.toLowerCase() || (!activeGame && idx === 0);
           const name = game.displayName || (game as any).display_name || 'Game';
-          const preset = PRESET_GAMES[idx % PRESET_GAMES.length];
+          const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === game.id.toLowerCase());
+          const icon = catalogItem?.icon || '🎮';
+          const tagline = catalogItem?.tagline || `${game.platform || 'UNIVERSAL'} Esports`;
 
           return (
             <div key={game.id} className="relative group w-full flex items-center justify-center">
@@ -78,16 +69,16 @@ export function GameRail() {
                     ? 'bg-[#161922] border-2 border-[#C86228] text-white shadow-sm scale-105'
                     : 'bg-[#111319] border border-[#202430] hover:border-gray-500 text-gray-400 hover:text-white hover:scale-105'
                 }`}
+                title={name}
               >
-                <div className={`absolute inset-0 opacity-20 bg-gradient-to-br ${preset?.color || 'from-gray-700 to-black'}`} />
-                <span className="relative z-10 text-sm">{preset?.icon || '🎮'}</span>
+                <span className="text-base select-none">{icon}</span>
               </button>
 
               {/* Floating Tooltip */}
               <div className="fixed left-20 z-50 pointer-events-none hidden group-hover:flex flex-col bg-[#161922] border border-[#262B3A] py-1.5 px-3 rounded-lg shadow-2xl text-left whitespace-nowrap animate-in fade-in zoom-in-95 duration-100">
                 <span className="text-xs font-bold text-white">{name}</span>
-                <span className="text-[10px] text-gray-400 font-mono">
-                  {game.platform || 'UNIVERSAL'} · {game.gameType || 'ESPORTS'}
+                <span className="text-[10px] text-gray-400">
+                  {tagline}
                 </span>
               </div>
             </div>

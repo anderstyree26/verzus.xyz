@@ -7,6 +7,7 @@ import { EloBadge } from '../components/EloBadge';
 import { ChallengeCard } from '../components/ChallengeCard';
 import { apiClient } from '../lib/api';
 import { formatEUR } from '../lib/currency';
+import { getGameById } from '../lib/gamesCatalog';
 
 interface ChallengeItem {
   id: string;
@@ -38,9 +39,12 @@ interface UserProfile {
 export default function HomePage() {
   const { activeGame } = useGameStore();
 
-  const gameTitle = activeGame?.displayName || 'Select Game';
-  const gamePlatform = activeGame?.platform || 'UNIVERSAL';
-  const gameId = activeGame?.id;
+  const catalogGame = getGameById(activeGame?.id);
+  const gameTitle = catalogGame.displayName;
+  const gamePlatform = catalogGame.platform;
+  const gameId = catalogGame.id;
+  const gameIcon = catalogGame.icon;
+  const gameTagline = catalogGame.tagline;
 
   // 1. Real Open Challenges from Database
   const { data: openChallenges, refetch: refetchChallenges, isLoading: loadingChallenges } = useQuery<ChallengeItem[]>({
@@ -112,41 +116,55 @@ export default function HomePage() {
     }
   };
 
-  const openCount = openChallenges?.length ?? 0;
+  // Filter open challenges strictly by the active game title
+  const activeChallenges = (openChallenges || []).filter((c) => {
+    const matchName = c.game_profiles?.display_name?.toLowerCase();
+    const activeName = gameTitle.toLowerCase();
+    if (matchName && activeName) {
+      return matchName.includes(activeName) || activeName.includes(matchName);
+    }
+    return true;
+  });
+
+  const totalOpenCount = openChallenges?.length ?? 0;
+  const activeOpenCount = activeChallenges.length;
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-      {/* 1. Clean, Spacious Game Arena Header */}
+      {/* 1. Clean, Spacious Active Game Arena Header */}
       <div className="relative overflow-hidden rounded-2xl border border-[#202430] bg-[#111319] p-6 sm:p-8 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex flex-col gap-2 max-w-xl">
-            {/* Live Ticker & Verified Pill */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 bg-[#C86228] text-white font-bold text-[10px] uppercase tracking-wider rounded">
-                Official Arena
-              </span>
-              <span className="px-2.5 py-0.5 bg-[#161922] text-gray-300 font-mono text-[10px] rounded border border-[#202430] flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span>{openCount > 0 ? `${openCount} OPEN DUELS WAITING` : '0 OPEN DUELS · BE THE FIRST'}</span>
-              </span>
-              <span className="px-2 py-0.5 bg-[#161922] text-gray-400 font-mono text-[10px] rounded border border-[#202430]">
-                {gamePlatform}
-              </span>
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-[#161922] border border-[#202430] flex items-center justify-center text-4xl shadow-inner flex-shrink-0">
+              {gameIcon}
             </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-[#C86228] text-white font-bold text-[10px] uppercase tracking-wider rounded">
+                  Official Arena
+                </span>
+                <span className="px-2.5 py-0.5 bg-[#161922] text-gray-300 font-mono text-[10px] rounded border border-[#202430] flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeOpenCount > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
+                  <span>{activeOpenCount > 0 ? `${activeOpenCount} DUEL${activeOpenCount > 1 ? 'S' : ''} READY` : 'READY TO PLAY'}</span>
+                </span>
+                <span className="px-2 py-0.5 bg-[#161922] text-gray-400 font-mono text-[10px] rounded border border-[#202430]">
+                  {gamePlatform}
+                </span>
+              </div>
 
-            {/* Title */}
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase mt-1">
-              {gameTitle}
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
-              Skill matchmaking verified directly in your browser by client-side OCR. Compete in 1v1 duels or tournaments standardized in unified Euros (€).
-            </p>
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white uppercase mt-0.5">
+                {gameTitle}
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-400">
+                {gameTagline} · Verified in-browser by client-side OCR.
+              </p>
+            </div>
           </div>
 
           {/* Primary Action Launchers */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Link
-              href={gameId ? `/matches/new?profileId=${gameId}` : '/matches/new'}
+              href={`/matches/new?profileId=${gameId}`}
               className="px-6 py-3.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20 text-center flex items-center justify-center gap-2"
             >
               <span>⚔️</span>
@@ -172,11 +190,11 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded bg-[#C86228]" />
               <h2 className="text-base font-bold tracking-tight text-white uppercase">
-                Live Challenges & Duels
+                {gameTitle} Duels & Challenges
               </h2>
             </div>
             <Link href="/challenges" className="text-xs text-[#D97736] hover:underline font-bold">
-              View All Duels ({openCount}) →
+              View All Open ({totalOpenCount}) →
             </Link>
           </div>
 
@@ -184,14 +202,14 @@ export default function HomePage() {
             <div className="p-8 text-center text-gray-500 font-mono text-xs bg-[#111319] border border-[#202430] rounded-xl animate-pulse">
               Querying open matchmaking pool...
             </div>
-          ) : openChallenges && openChallenges.length > 0 ? (
+          ) : activeChallenges.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {openChallenges.slice(0, 4).map((c) => (
+              {activeChallenges.slice(0, 4).map((c) => (
                 <ChallengeCard
                   key={c.id}
                   id={c.id}
-                  gameTitle={c.game_profiles?.display_name || 'Esports Match'}
-                  gameType={c.game_profiles?.game_type || 'HEAD_TO_HEAD'}
+                  gameTitle={c.game_profiles?.display_name || gameTitle}
+                  gameType={c.game_profiles?.game_type || catalogGame.gameType}
                   entryFee={c.entry_fee ?? 0}
                   prizePool={c.prize_pool ?? 0}
                   creatorName={c.created_by?.slice(0, 8) || 'Player'}
@@ -204,19 +222,20 @@ export default function HomePage() {
             </div>
           ) : (
             /* Clean Empty State */
-            <div className="p-8 bg-[#111319] border border-[#202430] rounded-xl flex flex-col items-center justify-center text-center gap-3">
-              <span className="text-3xl">⚔️</span>
+            <div className="p-8 sm:p-10 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col items-center justify-center text-center gap-3">
+              <span className="text-4xl">{gameIcon}</span>
               <div>
-                <h3 className="text-sm font-bold text-white">No Open Duels Right Now</h3>
-                <p className="text-xs text-gray-400 mt-1 max-w-sm">
-                  There are currently no opponents waiting in the challenge board for this title. Host a duel and other players can join instantly.
+                <h3 className="text-base font-bold text-white">No Open {gameTitle} Duels Right Now</h3>
+                <p className="text-xs text-gray-400 mt-1 max-w-md">
+                  Be the first player to host a match in this arena. Set your stake in EUR (€) and other competitors can join instantly.
                 </p>
               </div>
               <Link
-                href={gameId ? `/matches/new?profileId=${gameId}` : '/matches/new'}
-                className="mt-2 px-5 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition"
+                href={`/matches/new?profileId=${gameId}`}
+                className="mt-2 px-6 py-2.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20 flex items-center gap-2"
               >
-                + Create Open Duel
+                <span>+</span>
+                <span>Host Open Duel</span>
               </Link>
             </div>
           )}
@@ -224,7 +243,7 @@ export default function HomePage() {
 
         {/* Right Column (1 Col): Real Competitor Profile Card */}
         <div className="flex flex-col gap-4">
-          <div className="p-5 sm:p-6 bg-[#111319] border border-[#202430] rounded-xl flex flex-col gap-4 shadow-xl">
+          <div className="p-5 sm:p-6 bg-[#111319] border border-[#202430] rounded-2xl flex flex-col gap-4 shadow-xl">
             {/* Header: User Tag & Level Badge */}
             <div className="flex items-center justify-between pb-3.5 border-b border-[#202430]">
               <div className="flex items-center gap-3">
@@ -268,7 +287,7 @@ export default function HomePage() {
             </div>
 
             {/* Real Match Stats Grid */}
-            <div className="grid grid-cols-3 gap-2 p-3 bg-[#0B0C10] border border-[#202430] rounded-lg text-center text-xs">
+            <div className="grid grid-cols-3 gap-2 p-3 bg-[#0B0C10] border border-[#202430] rounded-xl text-center text-xs">
               <div>
                 <span className="text-[10px] text-gray-500 font-bold uppercase block">Win Rate</span>
                 <span className="font-mono font-bold text-green-400 text-xs sm:text-sm">{winRate}%</span>
@@ -318,13 +337,13 @@ export default function HomePage() {
             <div className="pt-2 border-t border-[#202430] flex gap-2">
               <Link
                 href="/challenges"
-                className="flex-1 py-2 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-lg transition text-center"
+                className="flex-1 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
               >
-                Find Matches
+                Find Duels
               </Link>
               <Link
                 href="/leaderboards"
-                className="flex-1 py-2 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-lg transition text-center"
+                className="flex-1 py-2.5 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-xl transition text-center"
               >
                 View Ladders
               </Link>

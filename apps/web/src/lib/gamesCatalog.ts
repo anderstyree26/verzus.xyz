@@ -1,0 +1,158 @@
+import type { GameProfile, GameType, Platform, ROI } from '@antigravity/core';
+
+export interface CatalogGame extends GameProfile {
+  shortName: string;
+  icon: string;
+  tagline: string;
+  gradient: string;
+  bannerUrl?: string;
+  defaultRoi: ROI;
+}
+
+export const OFFICIAL_GAMES: CatalogGame[] = [
+  {
+    id: 'cs2',
+    displayName: 'Counter-Strike 2',
+    shortName: 'CS2',
+    icon: '🎯',
+    tagline: '1v1 Aim & Tactical Combat',
+    gradient: 'from-amber-700 via-orange-900 to-stone-950',
+    platform: 'PC',
+    gameType: 'HEAD_TO_HEAD',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['MATCH POINT', 'VICTORY', 'DEFEAT', 'TERRORISTS WIN', 'COUNTER-TERRORISTS WIN'],
+    regexPattern: '(\\d{1,2})\\s*[-:]\\s*(\\d{1,2})',
+    defaultRoi: { x: 0.4, y: 0.02, w: 0.2, h: 0.08 },
+    roi: { x: 0.4, y: 0.02, w: 0.2, h: 0.08 },
+    constraints: { min: 0, max: 30 },
+  },
+  {
+    id: 'eafc',
+    displayName: 'EA Sports FC 25',
+    shortName: 'FC25',
+    icon: '⚽',
+    tagline: '1v1 Competitive Football Matches',
+    gradient: 'from-emerald-700 via-teal-900 to-stone-950',
+    platform: 'CONSOLE',
+    gameType: 'HEAD_TO_HEAD',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['FULL TIME', 'MATCH OVER', 'FINAL SCORE'],
+    regexPattern: '(\\d{1,2})\\s*[-:]\\s*(\\d{1,2})',
+    defaultRoi: { x: 0.05, y: 0.05, w: 0.2, h: 0.08 },
+    roi: { x: 0.05, y: 0.05, w: 0.2, h: 0.08 },
+    constraints: { min: 0, max: 20 },
+  },
+  {
+    id: 'rl',
+    displayName: 'Rocket League',
+    shortName: 'RL',
+    icon: '🚗',
+    tagline: '1v1 & 2v2 Car Football Duels',
+    gradient: 'from-blue-700 via-indigo-950 to-stone-950',
+    platform: 'PC',
+    gameType: 'HEAD_TO_HEAD',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['WINNER', 'GAME OVER', 'FINAL'],
+    regexPattern: '(\\d{1,2})\\s*[-:]\\s*(\\d{1,2})',
+    defaultRoi: { x: 0.42, y: 0.02, w: 0.16, h: 0.08 },
+    roi: { x: 0.42, y: 0.02, w: 0.16, h: 0.08 },
+    constraints: { min: 0, max: 25 },
+  },
+  {
+    id: 'subway',
+    displayName: 'Subway Surfers',
+    shortName: 'SUB',
+    icon: '🛹',
+    tagline: 'Endless High-Score Speedrun',
+    gradient: 'from-purple-800 via-fuchsia-950 to-stone-950',
+    platform: 'MOBILE',
+    gameType: 'HIGH_SCORE',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['GAME OVER', 'SAVE ME', 'HIGH SCORE'],
+    regexPattern: '([0-9][0-9,\\.]*)',
+    defaultRoi: { x: 0.65, y: 0.05, w: 0.3, h: 0.08 },
+    roi: { x: 0.65, y: 0.05, w: 0.3, h: 0.08 },
+    constraints: { min: 0, max: 100000000 },
+  },
+  {
+    id: 'cod',
+    displayName: 'Call of Duty: Warzone',
+    shortName: 'COD',
+    icon: '🪖',
+    tagline: 'Resurgence & Kill Race Duels',
+    gradient: 'from-stone-700 via-zinc-900 to-black',
+    platform: 'PC',
+    gameType: 'HEAD_TO_HEAD',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['VICTORY', 'ELIMINATED', 'DEFEAT'],
+    regexPattern: '(\\d{1,3})\\s*KILLS',
+    defaultRoi: { x: 0.8, y: 0.05, w: 0.18, h: 0.08 },
+    roi: { x: 0.8, y: 0.05, w: 0.18, h: 0.08 },
+    constraints: { min: 0, max: 100 },
+  },
+  {
+    id: 'val',
+    displayName: 'Valorant',
+    shortName: 'VAL',
+    icon: '🗡️',
+    tagline: 'Tactical 1v1 & Deathmatch',
+    gradient: 'from-rose-800 via-red-950 to-stone-950',
+    platform: 'PC',
+    gameType: 'BINARY_RESULT',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['VICTORY', 'DEFEAT', 'MATCH COMPLETED'],
+    regexPattern: null,
+    defaultRoi: { x: 0.35, y: 0.2, w: 0.3, h: 0.15 },
+    roi: { x: 0.35, y: 0.2, w: 0.3, h: 0.15 },
+    constraints: {},
+  },
+  {
+    id: 'dota2',
+    displayName: 'Dota 2',
+    shortName: 'DOTA',
+    icon: '🛡️',
+    tagline: '1v1 Solo Mid Championship',
+    gradient: 'from-red-900 via-stone-900 to-black',
+    platform: 'PC',
+    gameType: 'BINARY_RESULT',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['VICTORY', 'DEFEAT', 'RADIANT VICTORY', 'DIRE VICTORY'],
+    regexPattern: null,
+    defaultRoi: { x: 0.3, y: 0.25, w: 0.4, h: 0.2 },
+    roi: { x: 0.3, y: 0.25, w: 0.4, h: 0.2 },
+    constraints: {},
+  },
+  {
+    id: 'fortnite',
+    displayName: 'Fortnite',
+    shortName: 'FN',
+    icon: '⚡',
+    tagline: '1v1 Box Fights & Build Battles',
+    gradient: 'from-cyan-800 via-blue-950 to-stone-950',
+    platform: 'PC',
+    gameType: 'BINARY_RESULT',
+    approved: true,
+    isOfficial: true,
+    endKeywords: ['VICTORY ROYALE', 'PLACED', 'GAME OVER'],
+    regexPattern: null,
+    defaultRoi: { x: 0.3, y: 0.1, w: 0.4, h: 0.2 },
+    roi: { x: 0.3, y: 0.1, w: 0.4, h: 0.2 },
+    constraints: {},
+  },
+];
+
+export function getGameById(id?: string | null): CatalogGame {
+  const fallback = OFFICIAL_GAMES[0]!;
+  if (!id) return fallback;
+  const found = OFFICIAL_GAMES.find(
+    (g) => g.id.toLowerCase() === id.toLowerCase() || g.displayName.toLowerCase().includes(id.toLowerCase())
+  );
+  return found || fallback;
+}

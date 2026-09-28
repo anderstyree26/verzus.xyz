@@ -7,6 +7,8 @@ import { apiClient } from '../lib/api';
 import { useGameStore } from '../lib/gameStore';
 import type { GameProfile } from '@antigravity/core';
 
+import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
+
 export function GameSwitcher() {
   const [modalOpen, setModalOpen] = useState(false);
   const { activeGame, setActiveGame, initializeDefaultGame } = useGameStore();
@@ -22,15 +24,21 @@ export function GameSwitcher() {
     }
   }, [games, initializeDefaultGame]);
 
-  const topGames = (games || []).slice(0, 4);
+  const officialIds = new Set(OFFICIAL_GAMES.map((g) => g.id.toLowerCase()));
+  const customGames = (games || []).filter(
+    (g) => !officialIds.has(g.id.toLowerCase())
+  );
+  const allGames: (CatalogGame | GameProfile)[] = [...OFFICIAL_GAMES, ...customGames];
+  const topGames = allGames.slice(0, 4);
 
   return (
     <>
       <div className="flex items-center gap-1.5">
         {/* Quick Game Chips */}
         {topGames.map((game) => {
-          const isActive = activeGame?.id === game.id;
-          const initial = (game.displayName || 'G').charAt(0).toUpperCase();
+          const isActive = activeGame?.id?.toLowerCase() === game.id.toLowerCase();
+          const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === game.id.toLowerCase());
+          const icon = catalogItem?.icon || '🎮';
 
           return (
             <button
@@ -42,10 +50,10 @@ export function GameSwitcher() {
                   ? 'bg-[#C86228] text-white shadow-sm'
                   : 'bg-surface hover:bg-surface-elevated text-gray-400 hover:text-white border border-surface-border'
               }`}
-              title={`${game.displayName} (${game.gameType})`}
+              title={game.displayName}
             >
-              <span className="w-4 h-4 rounded bg-black/40 flex items-center justify-center text-[10px] font-mono">
-                {initial}
+              <span className="text-xs select-none">
+                {icon}
               </span>
               <span className="hidden lg:inline truncate max-w-[120px]">
                 {game.displayName.replace(' (Universal)', '')}
@@ -62,10 +70,10 @@ export function GameSwitcher() {
           type="button"
           onClick={() => setModalOpen(true)}
           className="px-2 py-1.5 bg-surface hover:bg-surface-elevated border border-dashed border-gray-600 hover:border-[#C86228] text-gray-400 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1"
-          title="Browse all games or calibrate new"
+          title="Browse all games"
         >
           <span>🎮</span>
-          <span className="hidden sm:inline">Games ({games?.length || 0})</span>
+          <span className="hidden sm:inline">Games ({allGames.length})</span>
         </button>
       </div>
 
@@ -75,9 +83,9 @@ export function GameSwitcher() {
           <div className="w-full max-w-lg bg-[#111319] border border-surface-border rounded-2xl shadow-2xl p-6 text-white flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-surface-border pb-3">
               <div>
-                <h3 className="text-lg font-bold">Select Active Game Context</h3>
+                <h3 className="text-lg font-bold">Select Active Game</h3>
                 <p className="text-xs text-gray-400">
-                  Switching games adapts matchmaking, tournaments, and leaderboards.
+                  Switching titles updates your matchmaking, duels, and rankings.
                 </p>
               </div>
               <button
@@ -90,8 +98,12 @@ export function GameSwitcher() {
             </div>
 
             <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1 scrollbar-thin">
-              {games?.map((g) => {
-                const isSelected = activeGame?.id === g.id;
+              {allGames.map((g) => {
+                const isSelected = activeGame?.id?.toLowerCase() === g.id.toLowerCase();
+                const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === g.id.toLowerCase());
+                const icon = catalogItem?.icon || '🎮';
+                const tagline = catalogItem?.tagline || 'Competitive Esports Duel';
+
                 return (
                   <button
                     key={g.id}
@@ -106,18 +118,21 @@ export function GameSwitcher() {
                         : 'bg-surface border-surface-border hover:border-gray-500 text-gray-300'
                     }`}
                   >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">{g.displayName}</span>
-                        {g.isOfficial && (
-                          <span className="px-1.5 py-0.5 bg-[#C86228]/20 text-[#D97736] text-[9px] font-bold rounded">
-                            OFFICIAL
-                          </span>
-                        )}
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{icon}</span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-white">{g.displayName}</span>
+                          {g.isOfficial && (
+                            <span className="px-1.5 py-0.5 bg-[#C86228]/20 text-[#D97736] text-[9px] font-bold rounded">
+                              OFFICIAL
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {g.platform} · {tagline}
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5 font-mono">
-                        Engine: {g.gameType} · Platform: {g.platform}
-                      </p>
                     </div>
 
                     {isSelected && (
