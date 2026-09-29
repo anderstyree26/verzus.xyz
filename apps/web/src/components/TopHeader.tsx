@@ -29,7 +29,7 @@ import { formatEUR, formatPoints } from '../lib/currency';
 import { useWalletModeStore } from '../lib/walletModeStore';
 import { OFFICIAL_GAMES, getGameById } from '../lib/gamesCatalog';
 import { GamePoster } from './GamePoster';
-import { GameSelectionModal } from './GameSelectionModal';
+import { GameDropdown } from './GameDropdown';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Sheet, SheetHeader, SheetTitle } from './ui/sheet';
@@ -68,7 +68,7 @@ export function TopHeader() {
   const { mode: walletMode, toggleMode: toggleWalletMode } = useWalletModeStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [gameModalOpen, setGameModalOpen] = useState(false);
+  const [gameDropdownOpen, setGameDropdownOpen] = useState(false);
   const [cashierOpen, setCashierOpen] = useState(false);
 
   const activeCatalogGame = getGameById(activeGame?.id);
@@ -138,27 +138,36 @@ export function TopHeader() {
           VX
         </Link>
 
-        {/* Active Game Switcher Pill (Click to open dialog modal - NO top scrollbars) */}
-        <button
-          type="button"
-          onClick={() => setGameModalOpen(true)}
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-card hover:bg-muted border border-border hover:border-primary/50 transition group text-left min-w-0"
-          title="Switch Active Game Arena"
-        >
-          <GamePoster
-            game={activeCatalogGame}
-            aspect="mini"
-            className="w-5 h-7 rounded flex-shrink-0"
+        {/* Active Game Dropdown Switcher (Anchored dropdown - NO sticky popup modals) */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setGameDropdownOpen((prev) => !prev)}
+            aria-expanded={gameDropdownOpen}
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-card hover:bg-muted border border-border hover:border-primary/50 transition group text-left min-w-0"
+            title="Switch Active Game Arena"
+          >
+            <GamePoster
+              game={activeCatalogGame}
+              aspect="mini"
+              className="w-5 h-7 rounded flex-shrink-0"
+            />
+            <div className="hidden sm:flex flex-col min-w-0">
+              <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider leading-none flex items-center gap-1">
+                Arena <ChevronDown className={`w-3 h-3 text-primary transition-transform duration-200 ${gameDropdownOpen ? 'rotate-180' : ''}`} />
+              </span>
+              <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[120px] leading-tight">
+                {activeCatalogGame.displayName}
+              </span>
+            </div>
+          </button>
+
+          {/* Anchored Dropdown Menu */}
+          <GameDropdown
+            open={gameDropdownOpen}
+            onClose={() => setGameDropdownOpen(false)}
           />
-          <div className="hidden sm:flex flex-col min-w-0">
-            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider leading-none flex items-center gap-1">
-              Arena <ChevronDown className="w-3 h-3 text-primary" />
-            </span>
-            <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[120px] leading-tight">
-              {activeCatalogGame.displayName}
-            </span>
-          </div>
-        </button>
+        </div>
 
         <span className="hidden sm:inline text-muted-foreground/40 text-xs">/</span>
 
@@ -287,7 +296,7 @@ export function TopHeader() {
             type="button"
             onClick={() => {
               setMobileMenuOpen(false);
-              setGameModalOpen(true);
+              setGameDropdownOpen(true);
             }}
             className="w-full p-2.5 rounded-xl bg-muted border border-border flex items-center justify-between text-left"
           >
@@ -337,17 +346,12 @@ export function TopHeader() {
         </div>
       </Sheet>
 
-      {/* FACEIT-Style Game Selection Modal */}
-      <GameSelectionModal
-        open={gameModalOpen}
-        onClose={() => setGameModalOpen(false)}
-      />
-
       {/* Cashier & Deposit / Withdrawal Modal */}
       <CashierModal
         open={cashierOpen}
         onClose={() => setCashierOpen(false)}
         userBalanceEur={cashAmount}
+        userBalancePoints={pointsAmount}
       />
     </header>
   );

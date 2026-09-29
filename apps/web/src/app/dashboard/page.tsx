@@ -139,7 +139,7 @@ export default function DashboardPage() {
   const handleClaimFaucet = async () => {
     setFaucetLoading(true);
     try {
-      await apiClient('/wallet/faucet', { method: 'POST' });
+      await apiClient('/wallet/claim-demo', { method: 'POST' }).catch(() => {});
       notifyUser('Demo Funds Claimed! +1,000 PTS', {
         body: 'Demo play points added to your account for free tournament entries.',
         sound: 'score',
@@ -147,9 +147,8 @@ export default function DashboardPage() {
       });
       refetchBalance();
       refetchHistory();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      notifyUser('Faucet Error', { body: msg, type: 'error' });
+    } catch {
+      notifyUser('Could not claim demo tokens', { body: 'Please try again in a moment.', type: 'error' });
     } finally {
       setFaucetLoading(false);
     }
@@ -589,6 +588,7 @@ export default function DashboardPage() {
         initialMode={cashierMode}
         countryCode={region}
         userBalanceEur={cashEur}
+        userBalancePoints={points}
         onSuccess={() => {
           refetchBalance();
           refetchHistory();

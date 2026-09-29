@@ -12,8 +12,10 @@ import { OFFICIAL_GAMES } from '../../lib/gamesCatalog';
 import { GamePoster } from '../../components/GamePoster';
 import { GameContextBar } from '../../components/GameContextBar';
 import { AuthPromptModal } from '../../components/AuthPromptModal';
+import { EmptyState } from '../../components/EmptyState';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
+import { Skeleton } from '../../components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 
 interface TournamentItem {
@@ -157,10 +159,22 @@ export default function TournamentsPage() {
         </div>
       </Card>
 
-      {/* Tournaments Grid */}
+      {/* Tournaments Grid States */}
       {isLoading ? (
-        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-xl">
-          Loading championships and tournament brackets...
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="p-6 rounded-2xl bg-card border border-border space-y-4">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-24 rounded-md" />
+                <Skeleton className="h-5 w-16 rounded-md" />
+              </div>
+              <Skeleton className="h-14 w-full rounded-xl" />
+              <div className="flex items-center justify-between pt-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-8 w-24 rounded-lg" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredTournaments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -189,32 +203,17 @@ export default function TournamentsPage() {
           })}
         </div>
       ) : (
-        <Card className="p-16 text-center border border-border bg-card flex flex-col items-center justify-center gap-4">
-          <Trophy className="w-10 h-10 text-muted-foreground/60" />
-          <CardTitle className="text-xl">No Tournaments Found</CardTitle>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {filterGameOnly && activeGame
+        <EmptyState
+          icon={Trophy}
+          title="No Tournaments Found"
+          description={
+            filterGameOnly && activeGame
               ? `No cups are currently scheduled for ${activeGame.displayName}. Be the first organizer to launch a bracket!`
-              : 'No tournaments match your current filters. Host a cup now to invite competitors!'}
-          </p>
-          <div className="flex items-center justify-center gap-3 pt-2">
-            {filterGameOnly && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setFilterGameOnly(false)}
-              >
-                View All Games
-              </Button>
-            )}
-            <Link href={activeGame ? `/tournaments/new?profileId=${activeGame.id}` : '/tournaments/new'}>
-              <Button variant="default" size="sm" className="gap-1.5 font-bold">
-                <Plus className="w-4 h-4" />
-                <span>Create Tournament Cup</span>
-              </Button>
-            </Link>
-          </div>
-        </Card>
+              : 'No tournaments match your current filters. Host a championship cup now to invite competitors!'
+          }
+          actionLabel="Create Tournament Cup"
+          actionHref={activeGame ? `/tournaments/new?profileId=${activeGame.id}` : '/tournaments/new'}
+        />
       )}
 
       {/* Auth Prompt Modal */}

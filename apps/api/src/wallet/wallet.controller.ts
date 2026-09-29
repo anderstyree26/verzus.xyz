@@ -49,6 +49,11 @@ export class WalletController {
     return this.walletService.requestPayout(user.id, body.amount, body.method);
   }
 
+  @Post('claim-demo')
+  async claimDemo(@CurrentUser() user: AuthUser) {
+    return this.walletService.claimDemoTokens(user.id);
+  }
+
   @Get('paysafe/config')
   getPaysafeConfig() {
     return this.walletService.getPaysafeConfig();
