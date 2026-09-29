@@ -6,11 +6,16 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api';
 import { OFFICIAL_GAMES } from '../../../lib/gamesCatalog';
 import type { GameProfile, TournamentFormat } from '@antigravity/core';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Trophy, Gamepad2, Users, Layers, AlertCircle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface FormatDetail {
   label: string;
   badge: string;
-  tagColor: string;
   description: string;
   bestFor: string;
   matchCount: string;
@@ -20,7 +25,6 @@ const TOURNAMENT_FORMATS: Record<TournamentFormat, FormatDetail> = {
   SINGLE_ELIM: {
     label: 'Single Elimination',
     badge: 'Knockout / Sudden Death',
-    tagColor: 'bg-red-500/20 text-red-400 border-red-500/30',
     description:
       'Classic high-stakes bracket. Win and advance; lose a single match and you are eliminated. Highest adrenaline and fastest progression to the championship.',
     bestFor: 'Large fields (8 to 64 players), fast-paced cups, decisive spectator esports.',
@@ -29,16 +33,14 @@ const TOURNAMENT_FORMATS: Record<TournamentFormat, FormatDetail> = {
   DOUBLE_ELIM: {
     label: 'Double Elimination',
     badge: 'Second Chance / EVO Style',
-    tagColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
     description:
-      'Two-tier bracket with Winners and Losers paths. Players must lose twice before elimination. The Losers bracket champion faces the undefeated Winners champion in the Grand Finals.',
+      'Two-tier bracket with Winners and Losers paths. Players must lose twice before elimination. The Losers bracket champion faces the undefeated Winners champion in Grand Finals.',
     bestFor: 'Fighting games, Rocket League, competitive fairness where one fluke loss does not end your run.',
     matchCount: 'Approx 2N - 1 matches (Grand Finals includes potential bracket reset)',
   },
   ROUND_ROBIN: {
     label: 'Round Robin',
     badge: 'League / All-Play-All',
-    tagColor: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
     description:
       'Every participant plays a direct match against every other entrant. Placements are determined by total wins, head-to-head records, and cumulative score differential.',
     bestFor: 'Small groups (4 to 8 players), friend leagues, community nights with guaranteed play time for all.',
@@ -47,7 +49,6 @@ const TOURNAMENT_FORMATS: Record<TournamentFormat, FormatDetail> = {
   SWISS: {
     label: 'Swiss System',
     badge: 'Skill-Paired / No Knockout',
-    tagColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     description:
       'Non-elimination format over set rounds. Each round, players are paired against opponents with identical match records (e.g., 2-0 vs 2-0). No one gets knocked out early.',
     bestFor: 'Chess, Card Games (TCGs), Major qualifiers, competitive rankings where everyone plays every round.',
@@ -81,7 +82,6 @@ export default function NewTournamentPage() {
     if (selected) {
       const displayName = selected.displayName || (selected as any).display_name || 'Game';
       const formatLabel = TOURNAMENT_FORMATS[format].label;
-      // Auto-fill tournament name if empty or user hasn't typed custom name
       if (!name || name.includes('Tournament') || name.includes('Cup') || name.includes('Championship')) {
         setName(`${displayName} ${formatLabel} Championship`);
       }
@@ -100,7 +100,7 @@ export default function NewTournamentPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profileId) {
-      setError('Please select a game profile');
+      setError('Please select a game title.');
       return;
     }
 
@@ -129,162 +129,166 @@ export default function NewTournamentPage() {
   const currentFormatInfo = TOURNAMENT_FORMATS[format];
 
   return (
-    <div className="max-w-2xl mx-auto my-8 p-8 bg-surface-elevated border border-surface-border rounded-xl text-white">
-      <div className="border-b border-surface-border pb-4 mb-6">
-        <h1 className="text-2xl font-bold">Create Tournament</h1>
-        <p className="text-xs text-gray-400 mt-1">
-          Configure tournament structure, bracket elimination engine, player caps, and rules.
-        </p>
-      </div>
+    <div className="max-w-2xl mx-auto my-6 space-y-6">
+      <Link
+        href="/tournaments"
+        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition font-semibold"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        <span>Back to Tournaments</span>
+      </Link>
 
-      {error && (
-        <div className="mb-5 p-3 bg-red-950/60 border border-red-800 rounded text-xs text-red-300">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleCreate} className="flex flex-col gap-6">
-        {/* Game Profile Selection */}
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-gray-300">Esports Game Title</label>
-            <span className="text-[11px] text-gray-400">Title & rules calibration</span>
+      <Card className="bg-card border-border shadow-2xl">
+        <CardHeader className="border-b border-border pb-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Badge variant="copper" className="flex items-center gap-1">
+              <Trophy className="w-3 h-3" />
+              Tournament Engine
+            </Badge>
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              COMMUNITY & PRO CUPS
+            </Badge>
           </div>
-          <select
-            value={profileId}
-            onChange={(e) => handleProfileChange(e.target.value)}
-            className="w-full px-3 py-2.5 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-          >
-            <option value="">Select a game title...</option>
-            {allAvailableGames.map((p) => {
-              const dName = p.displayName || (p as any).display_name || 'Game';
-              const catalogItem = OFFICIAL_GAMES.find((c) => c.id.toLowerCase() === p.id.toLowerCase());
-              const icon = catalogItem?.icon || '🎮';
-              return (
-                <option key={p.id} value={p.id}>
-                  {icon} {dName} ({p.platform || 'UNIVERSAL'})
-                </option>
-              );
-            })}
-          </select>
-        </div>
+          <CardTitle className="text-2xl font-black tracking-tight text-foreground">
+            Create Tournament Cup
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Configure tournament structure, bracket elimination engine, entrant caps, and competitive format.
+          </CardDescription>
+        </CardHeader>
 
-        {/* Tournament Name */}
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-gray-300">Tournament Name</label>
-            <span className="text-[11px] text-gray-400">Auto-fills on game selection</span>
-          </div>
-          <input
-            type="text"
-            required
-            placeholder="e.g. Genesis Weekly Cup #1"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2.5 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-          />
-        </div>
+        <CardContent className="pt-6">
+          {error && (
+            <div className="mb-6 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-        {/* Tournament Format Selector */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-2">
-            Tournament Format & Progression Engine
-          </label>
-          <div className="grid grid-cols-2 gap-2.5">
-            {(Object.keys(TOURNAMENT_FORMATS) as TournamentFormat[]).map((fKey) => {
-              const item = TOURNAMENT_FORMATS[fKey];
-              const isSelected = format === fKey;
-              return (
-                <button
-                  key={fKey}
-                  type="button"
-                  onClick={() => handleFormatChange(fKey)}
-                  className={`p-3 rounded-lg border text-left transition flex flex-col justify-between gap-1.5 ${
-                    isSelected
-                      ? 'bg-accent/15 border-accent text-white shadow-sm shadow-accent/20'
-                      : 'bg-surface border-surface-border text-gray-300 hover:border-gray-500 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-sm font-bold">{item.label}</span>
-                    <span
-                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${item.tagColor}`}
+          <form onSubmit={handleCreate} className="space-y-6">
+            {/* Game Profile Selection */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold text-foreground">Esports Game Arena</label>
+                <span className="text-[11px] text-muted-foreground font-mono">Title & calibrated rules</span>
+              </div>
+              <select
+                value={profileId}
+                onChange={(e) => handleProfileChange(e.target.value)}
+                className="w-full h-10 px-3 bg-secondary/70 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-primary transition"
+              >
+                <option value="">Select a game arena...</option>
+                {allAvailableGames.map((p) => {
+                  const dName = p.displayName || (p as any).display_name || 'Game';
+                  return (
+                    <option key={p.id} value={p.id}>
+                      {dName} ({p.platform || 'UNIVERSAL'})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            {/* Tournament Name */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold text-foreground">Tournament Title</label>
+                <span className="text-[11px] text-muted-foreground font-mono">Public banner name</span>
+              </div>
+              <Input
+                type="text"
+                required
+                placeholder="e.g. Genesis Weekly Cup #1"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+
+            {/* Tournament Format Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">
+                Tournament Format & Progression Rules
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {(Object.keys(TOURNAMENT_FORMATS) as TournamentFormat[]).map((fKey) => {
+                  const item = TOURNAMENT_FORMATS[fKey];
+                  const isSelected = format === fKey;
+                  return (
+                    <button
+                      key={fKey}
+                      type="button"
+                      onClick={() => handleFormatChange(fKey)}
+                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? 'bg-primary/10 border-primary shadow-sm'
+                          : 'bg-secondary/50 border-border hover:bg-secondary hover:border-border'
+                      }`}
                     >
-                      {fKey === 'SINGLE_ELIM'
-                        ? '1-Loss Out'
-                        : fKey === 'DOUBLE_ELIM'
-                        ? '2-Loss Out'
-                        : fKey === 'ROUND_ROBIN'
-                        ? 'All Play'
-                        : 'Record-Paired'}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-gray-400 line-clamp-2">{item.badge}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Detailed Format Explanation / Hint Card */}
-          <div className="mt-3 p-4 bg-surface/70 border border-surface-border rounded-lg text-xs flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-accent">{currentFormatInfo.label}</span>
-              <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded border ${currentFormatInfo.tagColor}`}
-              >
-                {currentFormatInfo.badge}
-              </span>
-            </div>
-            <p className="text-gray-300 leading-relaxed">{currentFormatInfo.description}</p>
-            <div className="pt-2 border-t border-surface-border/60 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <span className="text-gray-400 block font-semibold">Recommended for:</span>
-                <span className="text-gray-200">{currentFormatInfo.bestFor}</span>
-              </div>
-              <div>
-                <span className="text-gray-400 block font-semibold">Match Structure:</span>
-                <span className="text-accent-400 font-mono text-gray-200">{currentFormatInfo.matchCount}</span>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs font-black ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                          {item.label}
+                        </span>
+                        <Badge variant={isSelected ? 'copper' : 'secondary'} className="text-[9px] font-mono px-1 py-0">
+                          {item.badge}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Entrants Cap */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">
-            Entrants Cap (Bracket Size)
-          </label>
-          <div className="grid grid-cols-5 gap-2">
-            {[4, 8, 16, 32, 64].map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setSize(s)}
-                className={`py-2 text-xs font-bold rounded-md border transition ${
-                  size === s
-                    ? 'bg-accent border-accent text-white'
-                    : 'bg-surface border-surface-border text-gray-400 hover:text-white'
-                }`}
-              >
-                {s} Players
-              </button>
-            ))}
-          </div>
-          <p className="text-[11px] text-gray-500 mt-1.5">
-            {format === 'ROUND_ROBIN' && size > 8
-              ? '⚠️ Notice: Round Robin with >8 players generates over 36 matches. Consider Swiss or Single Elimination for larger pools.'
-              : `Generates a ${size}-entrant bracket tree with seed seeding.`}
-          </p>
-        </div>
+            {/* Format detail highlight card */}
+            <div className="p-4 bg-secondary/60 rounded-xl border border-border space-y-1.5 text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-foreground">
+                <Layers className="w-3.5 h-3.5 text-primary" />
+                <span>{currentFormatInfo.label} Breakdown</span>
+              </div>
+              <p className="text-muted-foreground text-[11px]">{currentFormatInfo.bestFor}</p>
+              <div className="text-[10px] font-mono text-primary font-bold pt-1">
+                Progression: {currentFormatInfo.matchCount}
+              </div>
+            </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 w-full py-3 bg-accent hover:bg-accent-600 font-bold text-sm rounded-md transition disabled:opacity-50 shadow-md shadow-accent/25"
-        >
-          {loading ? 'Publishing Tournament...' : 'Publish Tournament Bracket'}
-        </button>
-      </form>
+            {/* Entrant Cap */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">
+                Player Capacity Cap
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {[4, 8, 16, 32].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSize(s)}
+                    className={`py-2 rounded-xl border text-xs font-mono font-bold transition ${
+                      size === s
+                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                        : 'bg-secondary/50 border-border hover:bg-secondary text-foreground'
+                    }`}
+                  >
+                    {s} Players
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              variant="default"
+              size="lg"
+              className="w-full font-bold text-xs uppercase tracking-wider shadow-md shadow-primary/20"
+            >
+              {loading ? 'Creating Tournament...' : 'Confirm & Launch Tournament'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

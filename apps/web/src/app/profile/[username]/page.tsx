@@ -4,6 +4,21 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import {
+  Share2,
+  Users,
+  Swords,
+  ShieldCheck,
+  Trophy,
+  Check,
+  Flame,
+  Award,
+  Gamepad2,
+  History,
+  Coins,
+  ArrowRight,
+  TrendingUp,
+} from 'lucide-react';
 import { apiClient } from '../../../lib/api';
 import { EloBadge } from '../../../components/EloBadge';
 import { GamePoster } from '../../../components/GamePoster';
@@ -13,8 +28,18 @@ import { notifyUser } from '../../../lib/notifications';
 import { formatEUR } from '../../../lib/currency';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
 import { Separator } from '../../../components/ui/separator';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../../components/ui/table';
+import { Avatar, AvatarFallback } from '../../../components/ui/avatar';
 
 interface UserProfile {
   id: string;
@@ -58,7 +83,7 @@ export default function PublicProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="p-24 text-center text-muted-foreground font-mono text-xs animate-pulse bg-card border border-border rounded-3xl max-w-4xl mx-auto my-12">
+      <div className="p-20 text-center text-muted-foreground font-mono text-xs animate-pulse bg-card border border-border rounded-2xl max-w-4xl mx-auto my-12">
         Loading competitor profile and battle history...
       </div>
     );
@@ -67,10 +92,12 @@ export default function PublicProfilePage() {
   if (!profile) {
     return (
       <div className="max-w-md mx-auto my-16 text-center">
-        <Card className="p-10 space-y-5 shadow-2xl">
-          <span className="text-5xl block">👤</span>
-          <div className="space-y-2">
-            <h2 className="text-xl font-black text-foreground uppercase tracking-tight">
+        <Card className="p-8 space-y-4 shadow-xl">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+            👤
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold text-foreground">
               Player @{username} not found
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -78,8 +105,8 @@ export default function PublicProfilePage() {
             </p>
           </div>
           <Link href="/" className="inline-block pt-2">
-            <Button variant="default" size="default">
-              ← Return to Arena
+            <Button variant="default" size="sm">
+              Return to Arena
             </Button>
           </Link>
         </Card>
@@ -123,11 +150,11 @@ export default function PublicProfilePage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto w-full min-w-0 pb-16">
-      {/* 1. HERO PROFILE BANNER & IDENTITY CARD (Spacious, Uncluttered) */}
-      <Card className="relative overflow-hidden border-border bg-card shadow-2xl">
+    <div className="space-y-8 max-w-7xl mx-auto w-full pb-16">
+      {/* 1. HERO PROFILE BANNER & INTEGRATED COMPETITIVE LEDGER CARD */}
+      <Card className="relative overflow-hidden border border-border bg-card shadow-xl">
         {/* Cinematic Backdrop Banner */}
-        <div className="h-44 sm:h-60 bg-gradient-to-r from-stone-950 via-stone-900 to-primary/20 w-full relative overflow-hidden">
+        <div className="h-44 sm:h-56 bg-gradient-to-r from-stone-950 via-stone-900 to-primary/20 w-full relative overflow-hidden">
           {catalogGame.bannerUrl && (
             <div
               className="absolute inset-0 bg-cover bg-center opacity-25 filter blur-xs"
@@ -136,23 +163,24 @@ export default function PublicProfilePage() {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
           <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-            <Badge variant="secondary" className="backdrop-blur-md bg-background/70 font-mono text-[10px]">
+            <Badge variant="secondary" className="backdrop-blur-md bg-background/80 font-mono text-[10px] border-border">
               VERZUS ESPORTS
             </Badge>
           </div>
         </div>
 
-        {/* Profile Details Container */}
-        <div className="px-6 sm:px-10 pb-8 relative z-10">
+        {/* Profile Info Header */}
+        <div className="px-6 sm:px-8 pb-6 relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-16 sm:-mt-20">
             {/* Left: Avatar + Identity */}
             <div className="flex flex-col sm:flex-row sm:items-end gap-5 sm:gap-6 min-w-0">
-              {/* Large Avatar with Glowing Accent Ring */}
+              {/* Large Avatar */}
               <div className="relative flex-shrink-0">
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-tr from-stone-900 via-stone-800 to-primary text-primary-foreground font-black text-3xl sm:text-5xl flex items-center justify-center shadow-2xl border-4 border-card ring-2 ring-primary/30">
-                  {profile.username.slice(0, 2).toUpperCase()}
-                </div>
-                {/* Floating Elo Badge Pip */}
+                <Avatar className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border-4 border-card bg-primary text-primary-foreground text-3xl sm:text-4xl font-extrabold shadow-2xl">
+                  <AvatarFallback className="rounded-2xl bg-gradient-to-tr from-stone-900 to-primary">
+                    {profile.username.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="absolute -bottom-2 -right-2">
                   <EloBadge elo={elo} size="md" />
                 </div>
@@ -171,7 +199,7 @@ export default function PublicProfilePage() {
                 </div>
 
                 <div>
-                  <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight truncate leading-tight">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight truncate leading-tight">
                     {profile.display_name || profile.username}
                   </h1>
                   <p className="text-xs sm:text-sm text-muted-foreground font-mono mt-0.5">
@@ -181,284 +209,411 @@ export default function PublicProfilePage() {
               </div>
             </div>
 
-            {/* Right: Primary Action Buttons with Generous Spacing */}
-            <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap flex-shrink-0 pt-2 lg:pt-0">
+            {/* Right: Primary Action Buttons */}
+            <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap flex-shrink-0 pt-2 lg:pt-0">
               <Button
                 variant="outline"
-                size="default"
+                size="sm"
                 onClick={handleShareProfile}
-                className="text-xs font-bold gap-1.5"
+                className="gap-1.5 h-9 text-xs"
                 title="Copy profile link"
               >
-                <span>{copiedLink ? '✓ Copied' : '🔗 Share'}</span>
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+                <span>{copiedLink ? 'Copied' : 'Share'}</span>
               </Button>
 
               <Button
                 variant="secondary"
-                size="default"
+                size="sm"
                 onClick={handleInviteToParty}
-                className="text-xs font-bold gap-1.5"
+                className="gap-1.5 h-9 text-xs"
               >
-                <span>👥 Invite Squad</span>
+                <Users className="w-3.5 h-3.5" />
+                <span>Invite Squad</span>
               </Button>
 
               <Link
                 href={activeGame ? `/matches/new?profileId=${activeGame.id}&opponent=${profile.id}` : '/matches/new'}
               >
-                <Button variant="default" size="default" className="text-xs font-bold gap-1.5 shadow-md shadow-primary/20">
-                  <span>⚔️ Challenge 1v1</span>
+                <Button variant="default" size="sm" className="gap-1.5 h-9 text-xs font-bold shadow-sm">
+                  <Swords className="w-3.5 h-3.5" />
+                  <span>Challenge 1v1</span>
                 </Button>
               </Link>
+            </div>
+          </div>
+
+          <Separator className="my-6" />
+
+          {/* INTEGRATED COMPETITIVE LEDGER (Part of Intro Card - Generous, Full Width, No Squeeze!) */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-primary" />
+                Competitive Ledger & Career Dossier
+              </span>
+              <span className="text-[11px] text-muted-foreground font-mono">
+                Verified Skill Level & Battle Records
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {/* Stat 1: Elo Rating & Level */}
+              <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono">
+                    Skill Rating
+                  </span>
+                  <EloBadge elo={elo} size="sm" />
+                </div>
+                <div className="mt-2">
+                  <div className="text-2xl font-bold font-mono text-foreground">{elo}</div>
+                  <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden mt-1.5">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${eloPercent}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-mono mt-1 block">
+                    {eloToNext > 0 ? `${eloToNext} to next tier` : 'Top Tier'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 2: Win Rate */}
+              <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono">
+                  Win Rate
+                </span>
+                <div className="mt-2">
+                  <div className="text-2xl font-bold font-mono text-emerald-400">{winRate}%</div>
+                  <span className="text-[10px] text-muted-foreground block mt-1">
+                    {wins} Wins in {totalMatches} Matches
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 3: Match Record */}
+              <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono">
+                  W/L Record
+                </span>
+                <div className="mt-2">
+                  <div className="text-2xl font-bold font-mono text-foreground">
+                    {wins}W <span className="text-muted-foreground text-sm font-normal">/</span> {losses}L
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block mt-1">
+                    {totalMatches} Settled Duels
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 4: Recent 5 Form */}
+              <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono">
+                  Recent Form
+                </span>
+                <div className="mt-2">
+                  <div className="flex items-center gap-1.5">
+                    {recentForm.length > 0 ? (
+                      recentForm.map((outcome, idx) => (
+                        <span
+                          key={idx}
+                          className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs font-mono border ${
+                            outcome === 'W'
+                              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                              : 'bg-destructive/20 text-destructive border-destructive/40'
+                          }`}
+                        >
+                          {outcome}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground font-mono">
+                        No matches yet
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block mt-2">
+                    Last 5 contested duels
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 5: FairPlay Trust Score */}
+              <div className="p-4 rounded-xl bg-muted/40 border border-border flex flex-col justify-between">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                  Trust Score
+                </span>
+                <div className="mt-2">
+                  <div className="text-2xl font-bold font-mono text-emerald-400">
+                    {profile.trust_score}
+                    <span className="text-xs text-muted-foreground font-normal">/1000</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block mt-1">
+                    Anti-cheat verified · Zero bans
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </Card>
 
-      {/* 2. MAIN 2-COLUMN RESPONSIVE LAYOUT (Generous Breathing Room) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* LEFT COLUMN: Career Rank, Performance & FairPlay (4 cols) */}
-        <div className="lg:col-span-4 space-y-6 min-w-0">
-          {/* Card 1: Competitive Elo Tier */}
-          <Card className="p-6 bg-card border-border shadow-md space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider">
-                Competitive Elo
-              </span>
-              <Badge variant="copper" className="text-[10px] font-mono">
-                TIER MMR
-              </Badge>
-            </div>
+      {/* 2. MAIN TABS SECTION (Full Width, Standard Shadcn UI Tabs) */}
+      <Tabs defaultValue="matches" className="space-y-6">
+        <TabsList className="h-10 bg-muted/70 p-1 border border-border">
+          <TabsTrigger value="matches" className="text-xs font-semibold gap-1.5">
+            <History className="w-3.5 h-3.5" />
+            <span>Match History</span>
+            <Badge variant="secondary" className="text-[10px] ml-1 px-1 py-0">
+              {matches?.length ?? 0}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="ratings" className="text-xs font-semibold gap-1.5">
+            <Gamepad2 className="w-3.5 h-3.5" />
+            <span>Game Ratings</span>
+          </TabsTrigger>
+          <TabsTrigger value="badges" className="text-xs font-semibold gap-1.5">
+            <Award className="w-3.5 h-3.5" />
+            <span>Badges & Trophies</span>
+          </TabsTrigger>
+          <TabsTrigger value="ledger" className="text-xs font-semibold gap-1.5">
+            <Coins className="w-3.5 h-3.5" />
+            <span>Settlement Ledger</span>
+          </TabsTrigger>
+        </TabsList>
 
-            <div className="flex items-center justify-between gap-4 pt-1">
-              <div>
-                <span className="text-3xl sm:text-4xl font-black text-foreground font-mono">
-                  {elo}
-                </span>
-                <span className="text-xs text-muted-foreground block mt-0.5">Rating Points</span>
-              </div>
+        {/* Tab 1: Match History (Clean Shadcn Table) */}
+        <TabsContent value="matches">
+          <Card className="border border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-bold">Verified Match Records</CardTitle>
+              <CardDescription className="text-xs">
+                Official competitive duels settled with automated game verification and anti-cheat proof.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {matches && matches.length > 0 ? (
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-16 text-center">Result</TableHead>
+                        <TableHead>Game & Mode</TableHead>
+                        <TableHead>Match ID</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Prize Pool</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {matches.map((m) => {
+                        const isWin = m.winner_id === profile.id;
+                        const gameTitle = m.game_profiles?.display_name || catalogGame.displayName;
+                        const catalogItem = OFFICIAL_GAMES.find(
+                          (c) =>
+                            c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
+                            c.displayName.toLowerCase() === gameTitle.toLowerCase()
+                        ) || catalogGame;
 
-              <EloBadge elo={elo} size="lg" showLabel />
-            </div>
+                        return (
+                          <TableRow key={m.id} className="hover:bg-muted/30">
+                            <TableCell className="text-center">
+                              <Badge
+                                variant={isWin ? 'success' : 'destructive'}
+                                className="font-mono font-bold text-xs px-2"
+                              >
+                                {isWin ? 'WIN' : 'LOSS'}
+                              </Badge>
+                            </TableCell>
 
-            <div className="space-y-1.5 pt-2">
-              <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                <span>Tier Level Progress</span>
-                <span className="text-accent-400 font-bold">Next: {nextTier} ELO</span>
-              </div>
-              <div className="w-full h-2 bg-secondary rounded-full overflow-hidden p-0.5 border border-border">
-                <div
-                  className="h-full bg-primary rounded-full transition-all duration-500"
-                  style={{ width: `${eloPercent}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-muted-foreground font-mono block text-right">
-                {eloToNext > 0 ? `${eloToNext} points to level up` : 'Maximum tier reached'}
-              </span>
-            </div>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <GamePoster
+                                  game={catalogItem}
+                                  aspect="mini"
+                                  className="w-5 h-7 rounded flex-shrink-0"
+                                />
+                                <div>
+                                  <span className="font-bold text-xs text-foreground block">
+                                    {gameTitle}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground font-mono">
+                                    {m.format}
+                                  </span>
+                                </div>
+                              </div>
+                            </TableCell>
+
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              #{m.id.slice(0, 8)}
+                            </TableCell>
+
+                            <TableCell className="text-xs text-muted-foreground font-mono">
+                              {new Date(m.created_at).toLocaleDateString()}
+                            </TableCell>
+
+                            <TableCell className="text-xs font-bold font-mono text-foreground">
+                              {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Free Glory'}
+                            </TableCell>
+
+                            <TableCell>
+                              <Badge
+                                variant={m.status === 'SETTLED' ? 'success' : 'secondary'}
+                                className="text-[10px] font-mono"
+                              >
+                                {m.status}
+                              </Badge>
+                            </TableCell>
+
+                            <TableCell className="text-right">
+                              <Link href={`/matches/${m.id}`}>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                                  <span>Room</span>
+                                  <ArrowRight className="w-3 h-3" />
+                                </Button>
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="p-12 text-center text-muted-foreground space-y-3 bg-muted/20 rounded-xl border border-dashed border-border">
+                  <Swords className="w-8 h-8 mx-auto text-muted-foreground/60" />
+                  <h4 className="text-sm font-bold text-foreground">No Settled Duels Yet</h4>
+                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                    This player has not finished any competitive matches yet. Be the first to challenge them!
+                  </p>
+                  <div className="pt-2">
+                    <Link href={`/matches/new?opponent=${profile.id}`}>
+                      <Button variant="default" size="sm" className="text-xs font-bold gap-1.5">
+                        <Swords className="w-3.5 h-3.5" />
+                        <span>Send 1v1 Challenge</span>
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Card 2: Performance Summary Grid */}
-          <Card className="p-6 bg-card border-border shadow-md space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider">
-                Career Performance
-              </span>
-              <span className="text-xs font-mono text-muted-foreground">Settled Matches</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 bg-secondary/60 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
-                  Win Rate
-                </span>
-                <span className="text-base sm:text-lg font-black font-mono text-emerald-400">
-                  {winRate}%
-                </span>
-              </div>
-
-              <div className="p-3 bg-secondary/60 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
-                  Record
-                </span>
-                <span className="text-base sm:text-lg font-black font-mono text-foreground">
-                  {wins}W-{losses}L
-                </span>
-              </div>
-
-              <div className="p-3 bg-secondary/60 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
-                  Matches
-                </span>
-                <span className="text-base sm:text-lg font-black font-mono text-muted-foreground">
-                  {totalMatches}
-                </span>
-              </div>
-            </div>
-
-            {/* Recent Match Form Sequence */}
-            <div className="pt-2 space-y-2">
-              <span className="text-[11px] text-muted-foreground uppercase font-bold font-mono tracking-wider block">
-                Recent 5 Form
-              </span>
-              <div className="flex items-center gap-2">
-                {recentForm.length > 0 ? (
-                  recentForm.map((outcome, idx) => (
-                    <div
-                      key={idx}
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs font-mono border ${
-                        outcome === 'W'
-                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                          : 'bg-destructive/20 text-destructive border-destructive/40'
-                      }`}
-                    >
-                      {outcome}
-                    </div>
-                  ))
-                ) : (
-                  <span className="text-xs text-muted-foreground font-mono py-1">
-                    No settled duels recorded yet
-                  </span>
-                )}
-              </div>
-            </div>
-          </Card>
-
-          {/* Card 3: FairPlay Integrity */}
-          <Card className="p-6 bg-card border-border shadow-md space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-border">
-              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider">
-                FairPlay Trust
-              </span>
-              <Badge variant="success" className="text-[9px] font-mono">
-                CLEAN RECORD
-              </Badge>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black font-mono text-emerald-400">
-                {profile.trust_score}
-              </span>
-              <span className="text-xs text-muted-foreground font-mono">/ 1,000 Trust Score</span>
-            </div>
-
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Verified by automated match settlement and anti-cheat. Zero dispute anomalies or infractions on record.
-            </p>
-          </Card>
-        </div>
-
-        {/* RIGHT COLUMN: Recent Head-to-Head Records (8 cols) */}
-        <div className="lg:col-span-8 space-y-6 min-w-0">
-          <Card className="p-6 sm:p-8 bg-card border-border shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
-              <div>
-                <h3 className="text-lg font-black text-foreground uppercase tracking-tight">
-                  Recent Battle Records
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Official verified matches, duels, and tournament cups
-                </p>
-              </div>
-
-              <Badge variant="secondary" className="font-mono text-xs self-start sm:self-auto">
-                {matches?.length ?? 0} TOTAL MATCHES
-              </Badge>
-            </div>
-
-            {matches && matches.length > 0 ? (
-              <div className="space-y-3">
-                {matches.slice(0, 8).map((m) => {
-                  const isWin = m.winner_id === profile.id;
-                  const gameTitle = m.game_profiles?.display_name || catalogGame.displayName;
-                  const catalogItem = OFFICIAL_GAMES.find(
-                    (c) =>
-                      c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
-                      c.displayName.toLowerCase() === gameTitle.toLowerCase()
-                  ) || catalogGame;
-
-                  return (
-                    <div
-                      key={m.id}
-                      className="p-4 rounded-2xl bg-secondary/50 hover:bg-secondary border border-border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                    >
-                      {/* Left: Outcome Pip + Poster + Match Info */}
-                      <div className="flex items-center gap-4 min-w-0 flex-1">
-                        <span
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm font-mono flex-shrink-0 shadow-sm border ${
-                            isWin
-                              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                              : 'bg-destructive/20 text-destructive border-destructive/40'
-                          }`}
-                        >
-                          {isWin ? 'W' : 'L'}
-                        </span>
-
-                        <GamePoster
-                          game={catalogItem}
-                          aspect="thumb"
-                          className="w-10 h-14 rounded-xl flex-shrink-0 shadow-sm border border-border hidden sm:block"
-                        />
-
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-sm text-foreground group-hover:text-accent-400 transition-colors truncate">
-                              {gameTitle}
-                            </span>
-                            <Badge variant="outline" className="font-mono text-[9px]">
-                              {m.format}
-                            </Badge>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono flex-wrap">
-                            <span>#{m.id.slice(0, 8)}</span>
-                            <span>·</span>
-                            <span>{new Date(m.created_at).toLocaleDateString()}</span>
-                            <span>·</span>
-                            <span className="text-foreground font-bold">
-                              {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Glory & Elo'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right: Status Pill & View Button */}
-                      <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
-                        <Badge
-                          variant={m.status === 'SETTLED' ? 'success' : 'secondary'}
-                          className="font-mono text-[10px]"
-                        >
-                          {m.status}
-                        </Badge>
-
-                        <Link href={`/matches/${m.id}`}>
-                          <Button variant="secondary" size="sm" className="h-8 text-xs font-bold">
-                            View Room →
-                          </Button>
-                        </Link>
+        {/* Tab 2: Game Ratings (Grid of Official Arenas) */}
+        <TabsContent value="ratings">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {OFFICIAL_GAMES.map((game) => (
+              <Card key={game.id} className="p-4 border border-border bg-card flex flex-col justify-between hover:border-primary/50 transition">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <GamePoster
+                      game={game}
+                      aspect="thumb"
+                      className="w-12 h-16 rounded-lg flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <span className="text-xs font-bold text-foreground truncate block">
+                        {game.displayName}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-mono block">
+                        {game.platform}
+                      </span>
+                      <div className="mt-1">
+                        <EloBadge elo={elo} size="sm" />
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="p-12 text-center text-muted-foreground space-y-3 bg-secondary/30 rounded-2xl border border-dashed border-border">
-                <span className="text-4xl block">⚔️</span>
-                <h4 className="text-base font-bold text-foreground">No Settled Duels Yet</h4>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  This player has not finished any competitive matches yet. Be the first to challenge them to a 1v1 duel!
-                </p>
-                <div className="pt-2">
-                  <Link href={`/matches/new?opponent=${profile.id}`}>
-                    <Button variant="default" size="default" className="text-xs font-bold">
-                      ⚔️ Send 1v1 Challenge
+                  </div>
+
+                  <div className="space-y-1 text-xs font-mono">
+                    <div className="flex justify-between text-muted-foreground text-[11px]">
+                      <span>Tier Rank</span>
+                      <span className="text-foreground font-bold">{elo} Elo</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${eloPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-border mt-3 flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground text-[11px]">Official Ruleset</span>
+                  <Link href={`/games/${game.id}`}>
+                    <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px]">
+                      View Hub →
                     </Button>
                   </Link>
                 </div>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Tab 3: Badges & Trophies */}
+        <TabsContent value="badges">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="p-5 border border-border bg-card space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-            )}
+              <h4 className="text-sm font-bold text-foreground">Anti-Cheat Certified</h4>
+              <p className="text-xs text-muted-foreground">
+                Matches are continuously monitored with zero flagged telemetry or dispute penalties.
+              </p>
+            </Card>
+
+            <Card className="p-5 border border-border bg-card space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <h4 className="text-sm font-bold text-foreground">Arena Competitor</h4>
+              <p className="text-xs text-muted-foreground">
+                Official contender enrolled in Season 1 regional tournament ladders.
+              </p>
+            </Card>
+
+            <Card className="p-5 border border-border bg-card space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <Flame className="w-5 h-5" />
+              </div>
+              <h4 className="text-sm font-bold text-foreground">Instant Score Sync</h4>
+              <p className="text-xs text-muted-foreground">
+                Connected screen feed active for automated score capture and payout settlements.
+              </p>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab 4: Settlement Ledger */}
+        <TabsContent value="ledger">
+          <Card className="border border-border bg-card p-6 space-y-4">
+            <CardHeader className="p-0">
+              <CardTitle className="text-base font-bold">Escrow & Settlement Audit</CardTitle>
+              <CardDescription className="text-xs">
+                Zero-slippage skill gaming escrow. Every duel stake is held transparently until verified.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 pt-4">
+              <div className="p-4 rounded-xl bg-muted/40 border border-border flex items-center justify-between text-xs font-mono">
+                <div>
+                  <span className="text-muted-foreground block text-[10px] uppercase">FairPlay Ledger Guarantee</span>
+                  <span className="text-foreground font-bold">100% Automated Instant Settlements</span>
+                </div>
+                <Badge variant="success" className="font-mono text-[10px]">
+                  ACTIVE ESCROW
+                </Badge>
+              </div>
+            </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

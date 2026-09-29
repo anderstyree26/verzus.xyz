@@ -7,13 +7,32 @@ import { CalibrationTool } from '../../../components/CalibrationTool';
 import { apiClient } from '../../../lib/api';
 import { autoAnalyzeScreenshots, type AutoCalibrateResult } from '../../../lib/autoCalibrate';
 import type { GameType, Platform, ROI } from '@antigravity/core';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import {
+  Monitor,
+  Gamepad2,
+  Smartphone,
+  Globe,
+  Dices,
+  Sparkles,
+  UploadCloud,
+  Trash2,
+  CheckCircle2,
+  ArrowRight,
+  AlertCircle,
+  Crop,
+  ArrowLeft,
+} from 'lucide-react';
 
-const AVAILABLE_PLATFORMS: { value: Platform; label: string; icon: string }[] = [
-  { value: 'PC', label: 'PC', icon: '💻' },
-  { value: 'CONSOLE', label: 'Console', icon: '🎮' },
-  { value: 'MOBILE', label: 'Mobile', icon: '📱' },
-  { value: 'WEB', label: 'Web / Browser', icon: '🌐' },
-  { value: 'PHYSICAL', label: 'Physical Whiteboard', icon: '🎲' },
+const AVAILABLE_PLATFORMS: { value: Platform; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { value: 'PC', label: 'PC', icon: Monitor },
+  { value: 'CONSOLE', label: 'Console', icon: Gamepad2 },
+  { value: 'MOBILE', label: 'Mobile', icon: Smartphone },
+  { value: 'WEB', label: 'Web / Browser', icon: Globe },
+  { value: 'PHYSICAL', label: 'Physical Analog', icon: Dices },
 ];
 
 interface UploadedImage {
@@ -78,8 +97,6 @@ function NewGameProfileForm() {
 
     const updated = [...referenceImages, ...newImages];
     setReferenceImages(updated);
-
-    // Automatically run AI analysis on the uploaded images
     runAutoAnalysis(updated.map((img) => img.url));
   };
 
@@ -101,7 +118,6 @@ function NewGameProfileForm() {
     }
   };
 
-  // Run auto-analysis across reference images
   const runAutoAnalysis = async (urls: string[]) => {
     if (urls.length === 0) return;
     setAnalyzing(true);
@@ -111,18 +127,17 @@ function NewGameProfileForm() {
     try {
       const result: AutoCalibrateResult = await autoAnalyzeScreenshots(urls);
 
-      // Autofill fields
       setGameType(result.detectedGameType);
       setEndKeywords(result.detectedEndKeywords.join(', '));
       setRegexPattern(result.detectedRegexPattern);
       setRoi(result.detectedRoi);
 
       setAutoAnalysisMessage(
-        `✅ Analysis Complete (${result.confidence}% confidence): Auto-detected ${result.detectedGameType} format, ${result.detectedEndKeywords.length} end trigger keywords, and calibrated score bounding box. You can adjust any values below.`
+        `Auto-detection Complete (${result.confidence}% confidence): Detected ${result.detectedGameType} format, ${result.detectedEndKeywords.length} end trigger keywords, and calibrated score bounding box.`
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setAutoAnalysisMessage(`⚠️ Auto-scan note: ${msg} Default templates loaded.`);
+      setAutoAnalysisMessage(`Auto-scan note: ${msg} Standard templates loaded.`);
     } finally {
       setAnalyzing(false);
     }
@@ -164,12 +179,11 @@ function NewGameProfileForm() {
         }),
       });
 
-      // If admin auto-approve is checked, approve immediately
       if (autoApprove && created?.id) {
         try {
           await apiClient(`/games/${created.id}/approve`, { method: 'POST' });
         } catch {
-          // Non-blocking if current user is not full admin
+          // Non-blocking if current user is not admin
         }
       }
 
@@ -185,282 +199,287 @@ function NewGameProfileForm() {
   const activeImage = referenceImages[activeImageIndex]?.url || null;
 
   return (
-    <div className="max-w-3xl mx-auto my-6 p-4 sm:p-8 bg-surface-elevated border border-surface-border rounded-xl text-white shadow-xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-6 border-b border-surface-border">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Calibrate & Register Game Profile
-            </h1>
-            <span className="px-2 py-0.5 bg-accent/20 text-accent font-bold text-[10px] rounded uppercase tracking-wide">
-              ⚡ Smart Auto-Fill
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1">
-            Register game details, upload screenshots for automated detection, and fine-tune score boundaries.
-          </p>
-        </div>
+    <div className="max-w-3xl mx-auto my-6 space-y-6">
+      <Link
+        href="/games"
+        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition font-semibold"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        <span>Back to Games Registry</span>
+      </Link>
 
-        <Link
-          href="/admin/profiles"
-          className="text-xs text-gray-400 hover:text-white transition underline underline-offset-4 self-start sm:self-auto"
-        >
-          View Admin Queue →
-        </Link>
-      </div>
-
-      {error && (
-        <div className="mt-6 p-3 bg-red-950/60 border border-red-800 rounded text-xs text-red-300">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
-        {/* Step 1: Game Title */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-            1. Game Display Title <span className="text-accent">*</span>
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="e.g. Rocket League, Subway Surfers, Tekken 8"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full px-3 py-2.5 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent transition"
-          />
-        </div>
-
-        {/* Step 2: Platforms (Allowing more than one selection) */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-gray-300">
-              2. Supported Platforms (Select one or more) <span className="text-accent">*</span>
-            </label>
-            <span className="text-[11px] text-gray-400">
-              {selectedPlatforms.length} platform{selectedPlatforms.length > 1 ? 's' : ''} selected
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-            {AVAILABLE_PLATFORMS.map((p) => {
-              const isSelected = selectedPlatforms.includes(p.value);
-              return (
-                <button
-                  key={p.value}
-                  type="button"
-                  onClick={() => togglePlatform(p.value)}
-                  className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
-                    isSelected
-                      ? 'bg-accent/20 border-accent text-white shadow-[0_0_10px_rgba(139,92,246,0.3)]'
-                      : 'bg-surface border-surface-border text-gray-400 hover:border-gray-500 hover:text-gray-200'
-                  }`}
-                >
-                  <span>{p.icon}</span>
-                  <span>{p.label}</span>
-                  {isSelected && <span className="text-accent ml-1 font-bold">✓</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Step 3: Reference Screenshots & Auto-Fill */}
-        <div className="p-4 bg-surface rounded-lg border border-surface-border flex flex-col gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <Card className="bg-card border-border shadow-2xl">
+        <CardHeader className="border-b border-border pb-5">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
-                <span>📸</span>
-                <span>Reference Screenshots for Auto-Fill</span>
-              </h3>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Upload multiple screenshots (in-game HUD, victory screen, game over, or score board).
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="copper" className="flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  Auto-Calibration
+                </Badge>
+                <Badge variant="secondary" className="font-mono text-[10px]">
+                  NEW GAME TITLE
+                </Badge>
+              </div>
+              <CardTitle className="text-2xl font-black tracking-tight text-foreground">
+                Calibrate & Register Game Profile
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Register game details, upload screenshots for automated detection, and fine-tune score boundaries.
+              </CardDescription>
             </div>
 
-            {referenceImages.length > 0 && (
-              <button
-                type="button"
-                onClick={() => runAutoAnalysis(referenceImages.map((i) => i.url))}
-                disabled={analyzing}
-                className="px-3 py-1.5 bg-accent hover:bg-accent-600 font-bold text-xs rounded transition flex items-center gap-1.5 self-start sm:self-auto"
-              >
-                <span>{analyzing ? '⏳ Analyzing...' : '⚡ Re-run Auto-Detection'}</span>
-              </button>
+            {isAdminMode && (
+              <Badge variant="warning" className="font-mono text-[10px] flex-shrink-0">
+                ADMIN MODE
+              </Badge>
             )}
           </div>
+        </CardHeader>
 
-          {/* Upload Input Box */}
-          <label className="border-2 border-dashed border-surface-border hover:border-accent/60 rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer transition bg-surface-elevated/40 hover:bg-surface-elevated text-center">
-            <span className="text-2xl mb-1">🖼️</span>
-            <span className="text-xs font-semibold text-gray-200">
-              Click to browse or drop screenshots here
-            </span>
-            <span className="text-[11px] text-gray-500 mt-1">
-              Supports PNG, JPG, WebP. You can select multiple images at once.
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </label>
-
-          {/* Uploaded Thumbnails Carousel / Selector */}
-          {referenceImages.length > 0 && (
-            <div className="flex flex-col gap-2 mt-1">
-              <span className="text-[11px] text-gray-400 font-semibold">
-                Uploaded Screenshots ({referenceImages.length}) — Click thumbnail to display in calibration tool:
-              </span>
-              <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                {referenceImages.map((img, idx) => (
-                  <div
-                    key={img.id}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`relative w-24 h-16 rounded-md overflow-hidden flex-shrink-0 cursor-pointer border-2 transition ${
-                      activeImageIndex === idx ? 'border-accent shadow-md scale-105' : 'border-surface-border opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={(e) => removeImage(img.id, e)}
-                      className="absolute top-0.5 right-0.5 bg-black/80 hover:bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] transition"
-                      title="Remove image"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
+        <CardContent className="pt-6">
+          {error && (
+            <div className="mb-6 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
-          {/* Analysis Feedback Banner */}
-          {analyzing && (
-            <div className="p-3 bg-accent/15 border border-accent/40 rounded text-xs text-accent flex items-center gap-2">
-              <span className="animate-spin text-base">⏳</span>
-              <span>Scanning screenshots with client-side detection and calculating optimal score bounding boxes...</span>
-            </div>
-          )}
-
-          {autoAnalysisMessage && !analyzing && (
-            <div className="p-3 bg-green-950/60 border border-green-800 rounded text-xs text-green-300">
-              {autoAnalysisMessage}
-            </div>
-          )}
-        </div>
-
-        {/* Step 4: Autofilled & Fully Adjustable Fields */}
-        <div className="flex flex-col gap-5 pt-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-200">
-              Game Engine & Automated Verification Rules (Adjust anytime)
-            </h2>
-            <span className="text-[11px] text-gray-400">All fields editable</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-300 mb-1">
-                Score Extraction Rule
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Step 1: Game Title */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">
+                1. Game Display Title
               </label>
-              <select
-                value={gameType}
-                onChange={(e) => setGameType(e.target.value as GameType)}
-                className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-              >
-                <option value="HEAD_TO_HEAD">Head-to-Head Score (Direct side-by-side HUD)</option>
-                <option value="HIGH_SCORE">Highest Score Wins (Points / High score)</option>
-                <option value="BINARY_RESULT">Match Outcome (Win / Loss detected)</option>
-                <option value="LOW_TIME">Time Trial / Speedrun (Fastest duration wins)</option>
-                <option value="SURVIVAL">Survival / Endurance (Longest time wins)</option>
-                <option value="COMPOSITE_STAT">Composite Formula (Weighted stats)</option>
-                <option value="PROGRESSION">Rank Tier (Rank progression)</option>
-                <option value="PHYSICAL">Physical / Analog (Whiteboard / live camera)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-300 mb-1">
-                Custom Regex Extraction Pattern (Optional)
-              </label>
-              <input
+              <Input
                 type="text"
-                placeholder="e.g. ([0-9][0-9,\.]*)"
-                value={regexPattern}
-                onChange={(e) => setRegexPattern(e.target.value)}
-                className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white font-mono focus:outline-none focus:border-accent"
+                required
+                placeholder="e.g. Rocket League, Subway Surfers, Tekken 8"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="text-xs"
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1">
-              End Match Detection Keywords (Comma-separated)
-            </label>
-            <input
-              type="text"
-              placeholder="Game Over, Victory, Defeat, Final Score"
-              value={endKeywords}
-              onChange={(e) => setEndKeywords(e.target.value)}
-              className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-            />
-            <p className="text-[11px] text-gray-500 mt-1">
-              Trigger keywords that notify the engine that gameplay has concluded.
-            </p>
-          </div>
+            {/* Step 2: Platforms */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-foreground">
+                  2. Supported Platforms
+                </label>
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  {selectedPlatforms.length} selected
+                </span>
+              </div>
 
-          {/* Calibration ROI Drag Tool with Real Screenshot Background */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              Bounding Box Calibration (ROI)
-            </label>
-            <CalibrationTool
-              initialRoi={roi}
-              imageUrl={activeImage}
-              onChange={(newRoi) => setRoi(newRoi)}
-            />
-          </div>
-        </div>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {AVAILABLE_PLATFORMS.map((p) => {
+                  const isSelected = selectedPlatforms.includes(p.value);
+                  const Icon = p.icon;
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => togglePlatform(p.value)}
+                      className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition ${
+                        isSelected
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          : 'bg-secondary/60 border-border text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{p.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Admin Auto-Approve Option */}
-        {isAdminMode && (
-          <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="autoApprove"
-              checked={autoApprove}
-              onChange={(e) => setAutoApprove(e.target.checked)}
-              className="w-4 h-4 rounded text-accent focus:ring-accent"
-            />
-            <label htmlFor="autoApprove" className="text-xs text-gray-200 cursor-pointer">
-              <span className="font-bold text-white">Direct Admin Approval:</span> Automatically approve and mark as official upon saving.
-            </label>
-          </div>
-        )}
+            {/* Step 3: Reference Screenshots */}
+            <Card className="bg-secondary/40 border-border p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                    <Crop className="w-3.5 h-3.5" />
+                    <span>Reference Screenshots for Auto-Fill</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Upload gameplay HUD screenshots to automatically detect score positions.
+                  </p>
+                </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading || analyzing}
-          className="mt-2 w-full py-3 bg-accent hover:bg-accent-600 font-bold text-sm rounded-lg transition shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          <span>{loading ? 'Registering...' : 'Save & Register Game Profile'}</span>
-          <span>→</span>
-        </button>
-      </form>
+                {referenceImages.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => runAutoAnalysis(referenceImages.map((i) => i.url))}
+                    disabled={analyzing}
+                    className="text-xs font-bold gap-1 self-start sm:self-auto"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                    <span>{analyzing ? 'Analyzing...' : 'Re-run Detection'}</span>
+                  </Button>
+                )}
+              </div>
+
+              {/* Upload Input Box */}
+              <label className="border-2 border-dashed border-border hover:border-primary/60 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition bg-secondary/30 hover:bg-secondary/60 text-center">
+                <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
+                <span className="text-xs font-bold text-foreground">
+                  Click to browse or drop screenshots here
+                </span>
+                <span className="text-[11px] text-muted-foreground mt-1">
+                  Supports PNG, JPG, WebP. You can select multiple images at once.
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+
+              {/* Uploaded Thumbnails */}
+              {referenceImages.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <span className="text-[11px] text-muted-foreground font-mono font-bold block">
+                    Uploaded Screenshots ({referenceImages.length}): Click thumbnail to calibrate
+                  </span>
+                  <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                    {referenceImages.map((img, idx) => (
+                      <div
+                        key={img.id}
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`relative w-24 h-16 rounded-xl overflow-hidden flex-shrink-0 cursor-pointer border-2 transition ${
+                          activeImageIndex === idx
+                            ? 'border-primary shadow-md scale-105'
+                            : 'border-border opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img.url} alt={img.name} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={(e) => removeImage(img.id, e)}
+                          className="absolute top-1 right-1 bg-black/80 hover:bg-destructive text-white rounded-md w-4 h-4 flex items-center justify-center text-[10px] transition"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {autoAnalysisMessage && !analyzing && (
+                <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs text-foreground flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>{autoAnalysisMessage}</span>
+                </div>
+              )}
+            </Card>
+
+            {/* Step 4: Game Parameters */}
+            <div className="space-y-4 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-foreground block">
+                    Score Extraction Rule
+                  </label>
+                  <select
+                    value={gameType}
+                    onChange={(e) => setGameType(e.target.value as GameType)}
+                    className="w-full h-10 px-3 bg-secondary/70 border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-primary transition"
+                  >
+                    <option value="HEAD_TO_HEAD">Head-to-Head Score (Direct HUD)</option>
+                    <option value="HIGH_SCORE">Highest Score Wins (Points / High score)</option>
+                    <option value="BINARY_RESULT">Match Outcome (Win / Loss detected)</option>
+                    <option value="LOW_TIME">Time Trial / Speedrun (Fastest wins)</option>
+                    <option value="SURVIVAL">Survival / Endurance (Longest time)</option>
+                    <option value="COMPOSITE_STAT">Composite Formula (Weighted stats)</option>
+                    <option value="PROGRESSION">Rank Tier (Rank progression)</option>
+                    <option value="PHYSICAL">Physical / Analog (Whiteboard / camera)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-foreground block">
+                    Custom Regex Pattern (Optional)
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. ([0-9][0-9,\.]*)"
+                    value={regexPattern}
+                    onChange={(e) => setRegexPattern(e.target.value)}
+                    className="text-xs font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground block">
+                  End Match Detection Keywords (Comma-separated)
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Game Over, Victory, Defeat, Final Score"
+                  value={endKeywords}
+                  onChange={(e) => setEndKeywords(e.target.value)}
+                  className="text-xs"
+                />
+              </div>
+
+              {/* Calibration Tool */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground block">
+                  Score Region Boundary Calibration
+                </label>
+                <CalibrationTool
+                  initialRoi={roi}
+                  imageUrl={activeImage}
+                  onChange={(newRoi) => setRoi(newRoi)}
+                />
+              </div>
+            </div>
+
+            {/* Admin Auto-Approve Option */}
+            {isAdminMode && (
+              <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="autoApprove"
+                  checked={autoApprove}
+                  onChange={(e) => setAutoApprove(e.target.checked)}
+                  className="w-4 h-4 rounded text-primary focus:ring-primary accent-primary"
+                />
+                <label htmlFor="autoApprove" className="text-xs text-foreground cursor-pointer">
+                  <strong className="text-primary">Direct Admin Approval:</strong> Automatically approve and mark as official upon saving.
+                </label>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading || analyzing}
+              variant="default"
+              size="lg"
+              className="w-full font-bold text-xs uppercase tracking-wider shadow-md shadow-primary/20 gap-2"
+            >
+              <span>{loading ? 'Registering...' : 'Save & Register Game Profile'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 export default function NewGameProfilePage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-gray-400">Loading Game Calibrator...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-xs text-muted-foreground">Loading Game Calibrator...</div>}>
       <NewGameProfileForm />
     </Suspense>
   );

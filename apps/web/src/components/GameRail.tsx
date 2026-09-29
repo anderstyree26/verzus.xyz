@@ -4,6 +4,18 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Swords,
+  Trophy,
+  BarChart3,
+  Gamepad2,
+  Shield,
+  Settings,
+  ChevronsUpDown,
+  Flame,
+  LayoutDashboard,
+  Wallet,
+} from 'lucide-react';
 import { useGameStore } from '../lib/gameStore';
 import { apiClient } from '../lib/api';
 import type { GameProfile } from '@antigravity/core';
@@ -39,82 +51,95 @@ export function GameRail() {
 
   const activeCatalogGame = getGameById(activeGame?.id);
 
-  // Top 3 pinned games for quick switching
-  const pinnedGames = OFFICIAL_GAMES.slice(0, 3);
+  // Pinned top esports titles for quick 1-click switching
+  const pinnedGames = OFFICIAL_GAMES.slice(0, 4);
 
   const navItems = [
-    { href: '/challenges', label: 'Play Duels', icon: '⚔️', match: '/challenges' },
-    { href: '/tournaments', label: 'Tournaments', icon: '🏆', match: '/tournaments' },
-    { href: '/leaderboards', label: 'Ladders & Rank', icon: '🥇', match: '/leaderboards' },
-    { href: '/games', label: 'Explore Games', icon: '🕹️', match: '/games' },
+    { href: '/', label: 'Overview', icon: LayoutDashboard, exact: true },
+    { href: '/challenges', label: 'Play Duels', icon: Swords },
+    { href: '/tournaments', label: 'Tournaments', icon: Trophy },
+    { href: '/leaderboards', label: 'Ladders & Rank', icon: BarChart3 },
+    { href: '/games', label: 'Explore Games', icon: Gamepad2 },
+    { href: '/dashboard', label: 'Wallet & Cashier', icon: Wallet },
   ];
 
   return (
     <>
-      <aside className="hidden lg:flex w-64 flex-shrink-0 bg-background border-r border-border flex-col justify-between p-4 select-none h-screen sticky top-0 overflow-y-auto scrollbar-none z-30 pb-24 space-y-6">
+      <aside className="hidden lg:flex w-64 flex-shrink-0 bg-background border-r border-border flex-col justify-between p-4 select-none h-screen sticky top-0 overflow-y-auto scrollbar-none z-30 pb-20 space-y-6">
         <div className="space-y-6">
           {/* Brand Logo & Name */}
           <Link
             href="/"
             className="flex items-center gap-3 px-2 py-1 text-foreground hover:opacity-90 transition group"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-black text-primary-foreground text-base shadow-sm transition-transform group-hover:scale-105">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-black text-primary-foreground text-sm shadow-sm transition-transform group-hover:scale-105">
               VX
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-base tracking-tight text-foreground leading-tight">VERZUS</span>
-              <span className="text-[10px] font-mono text-accent-400 uppercase tracking-wider leading-none">Esports Arena</span>
+              <span className="font-extrabold text-sm tracking-tight text-foreground leading-tight flex items-center gap-1.5">
+                VERZUS
+                <Badge variant="outline" className="text-[9px] px-1 py-0 font-mono text-primary border-primary/30">
+                  PRO
+                </Badge>
+              </span>
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider leading-none">
+                Esports Arena
+              </span>
             </div>
           </Link>
 
-          {/* Active Game Card with Poster Thumbnail */}
-          <Card className="p-3 bg-card border-border space-y-2">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono tracking-wider px-1">
+          {/* Active Game Selector (Faceit-Style Trigger, opens clean dialog modal, no top scrollbars!) */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono tracking-wider px-2">
               Active Arena
             </span>
             <button
               type="button"
               onClick={() => setGameModalOpen(true)}
-              className="flex items-center justify-between p-2 rounded-xl bg-secondary/80 hover:bg-secondary border border-border hover:border-primary/50 transition group text-left w-full"
-              title="Click to switch game"
+              className="flex items-center justify-between p-2 rounded-xl bg-card hover:bg-muted/80 border border-border hover:border-primary/50 transition group text-left w-full shadow-sm"
+              title="Click to switch game arena"
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <GamePoster
                   game={activeCatalogGame}
                   aspect="thumb"
-                  className="w-10 h-14 rounded-lg flex-shrink-0 shadow-sm"
+                  className="w-9 h-12 rounded-lg flex-shrink-0 shadow-sm"
                 />
                 <div className="min-w-0 flex-1">
-                  <span className="text-xs font-black text-foreground truncate block group-hover:text-accent-400 transition-colors">
+                  <span className="text-xs font-bold text-foreground truncate block group-hover:text-primary transition-colors">
                     {activeCatalogGame.displayName}
                   </span>
-                  <span className="text-[10px] text-muted-foreground font-mono block mt-1">
+                  <span className="text-[10px] text-muted-foreground font-mono block mt-0.5">
                     {activeCatalogGame.platform} · {activeCatalogGame.shortName}
                   </span>
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground group-hover:text-accent-400 flex-shrink-0 ml-1">⇄</span>
+              <ChevronsUpDown className="w-4 h-4 text-muted-foreground group-hover:text-primary flex-shrink-0 ml-1 transition-colors" />
             </button>
-          </Card>
+          </div>
 
           {/* Primary Navigation Links */}
           <div className="space-y-1">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono tracking-wider px-3 mb-2 block">
-              Arena Navigation
+            <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono tracking-wider px-2 mb-1.5 block">
+              Menu
             </span>
             {navItems.map((item) => {
-              const isActive = pathname.startsWith(item.match);
+              const Icon = item.icon;
+              const isActive = item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                      ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <span className="text-base select-none">{item.icon}</span>
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -123,16 +148,17 @@ export function GameRail() {
 
           <Separator />
 
-          {/* Pinned Favorite Games with Mini Posters */}
+          {/* Quick Game Switcher (Pinned Favorites) */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between px-3">
-              <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono tracking-wider">
-                Favorites
+            <div className="flex items-center justify-between px-2">
+              <span className="text-[10px] uppercase font-bold text-muted-foreground font-mono tracking-wider flex items-center gap-1">
+                <Flame className="w-3 h-3 text-primary" />
+                Featured
               </span>
               <button
                 type="button"
                 onClick={() => setGameModalOpen(true)}
-                className="text-xs text-accent-400 hover:underline font-bold"
+                className="text-[11px] text-primary hover:underline font-semibold"
               >
                 All ({OFFICIAL_GAMES.length})
               </button>
@@ -146,17 +172,17 @@ export function GameRail() {
                     key={game.id}
                     type="button"
                     onClick={() => setActiveGame(game)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs transition border text-left w-full ${
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition border text-left w-full ${
                       isSelected
-                        ? 'bg-secondary border-primary text-foreground font-bold'
-                        : 'bg-transparent hover:bg-secondary border-transparent text-muted-foreground hover:text-foreground'
+                        ? 'bg-secondary border-primary/40 text-foreground font-semibold'
+                        : 'bg-transparent hover:bg-muted/70 border-transparent text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 truncate">
+                    <div className="flex items-center gap-2 truncate">
                       <GamePoster
                         game={game}
                         aspect="mini"
-                        className="w-5 h-7 rounded flex-shrink-0"
+                        className="w-4 h-6 rounded flex-shrink-0"
                       />
                       <span className="truncate text-xs">{game.displayName}</span>
                     </div>
@@ -171,29 +197,29 @@ export function GameRail() {
         </div>
 
         {/* Bottom Utility Links */}
-        <div className="pt-3 border-t border-border flex items-center justify-between px-3 text-xs">
+        <div className="pt-3 border-t border-border flex items-center justify-between px-2 text-xs">
           <Link
             href="/admin"
             className={`flex items-center gap-1.5 transition ${
-              pathname.startsWith('/admin') ? 'text-accent-400 font-bold' : 'text-muted-foreground hover:text-foreground'
+              pathname.startsWith('/admin') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <span>🛡️</span>
+            <Shield className="w-3.5 h-3.5" />
             <span>Admin</span>
           </Link>
           <Link
             href="/settings"
             className={`flex items-center gap-1.5 transition ${
-              pathname.startsWith('/settings') ? 'text-accent-400 font-bold' : 'text-muted-foreground hover:text-foreground'
+              pathname.startsWith('/settings') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <span>⚙️</span>
+            <Settings className="w-3.5 h-3.5" />
             <span>Settings</span>
           </Link>
         </div>
       </aside>
 
-      {/* FACEIT-Style Game Poster Selection Modal */}
+      {/* FACEIT-Style Game Selection Modal (clean dialog popup, replaces top scrollbars) */}
       <GameSelectionModal
         open={gameModalOpen}
         onClose={() => setGameModalOpen(false)}

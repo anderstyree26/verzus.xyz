@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiClient } from '../../../../lib/api';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../../components/ui/card';
+import { Badge } from '../../../../components/ui/badge';
+import { Button } from '../../../../components/ui/button';
+import { Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function JoinByRoomCodePage() {
   const params = useParams();
@@ -26,19 +31,42 @@ export default function JoinByRoomCodePage() {
   }, [code, router]);
 
   return (
-    <div className="max-w-md mx-auto my-16 p-8 bg-surface-elevated border border-surface-border rounded-xl text-center">
-      <h2 className="text-xl font-bold">Joining Room #{code}</h2>
-      <p className="text-xs text-gray-400 mt-1">Connecting to private match lobby...</p>
+    <div className="max-w-md mx-auto my-16 space-y-4">
+      <Card className="bg-card border-border shadow-2xl p-6 text-center">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Badge variant="copper" className="font-mono text-[10px]">
+            ROOM CODE #{code}
+          </Badge>
+        </div>
+        <CardTitle className="text-xl font-black text-foreground">
+          Entering Private Arena
+        </CardTitle>
+        <CardDescription className="text-xs text-muted-foreground mt-1">
+          Synchronizing match state and establishing peer connectivity...
+        </CardDescription>
 
-      {error ? (
-        <div className="mt-4 p-3 bg-red-950/60 border border-red-800 rounded text-xs text-red-300">
-          {error}
-        </div>
-      ) : (
-        <div className="mt-6 flex justify-center">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
+        <CardContent className="pt-6">
+          {error ? (
+            <div className="space-y-4">
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive flex items-center gap-2 text-left">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+              <Link href="/challenges">
+                <Button variant="outline" size="sm" className="w-full text-xs font-bold gap-1.5">
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Return to Challenges</span>
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 py-6">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              <span className="text-xs font-mono text-muted-foreground">Validating credentials...</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { Trophy, BarChart3, Swords, Users, ShieldCheck, Flame } from 'lucide-react';
 import { LeaderboardTable } from '../../components/LeaderboardTable';
 import { EloBadge } from '../../components/EloBadge';
 import { apiClient } from '../../lib/api';
@@ -93,14 +94,14 @@ export default function LeaderboardsPage() {
   const userElo = userProfile?.rating ?? 1000;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto min-w-0">
+    <div className="space-y-6 max-w-7xl mx-auto min-w-0 pb-16">
       {/* 1. Global Ladders Hero */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-6 sm:p-8 border border-border rounded-3xl shadow-xl">
+      <Card className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 sm:p-8 border border-border bg-card shadow-xl">
         <div className="flex items-center gap-4 sm:gap-6 min-w-0">
           <GamePoster
             game={selectedGame}
             aspect="thumb"
-            className="w-14 h-18 sm:w-16 sm:h-22 rounded-2xl shadow-xl border border-border flex-shrink-0"
+            className="w-14 h-18 sm:w-16 sm:h-22 rounded-xl shadow-xl border border-border flex-shrink-0"
           />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -109,7 +110,7 @@ export default function LeaderboardsPage() {
                 {selectedGame.platform}
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
               {selectedGame.displayName} Standings
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -119,10 +120,10 @@ export default function LeaderboardsPage() {
         </div>
 
         {/* User's Current Standings Chip */}
-        <Card className="p-4 bg-secondary/60 border-border flex items-center gap-4 flex-shrink-0">
+        <div className="p-4 bg-muted/50 border border-border rounded-xl flex items-center gap-4 flex-shrink-0">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-bold text-muted-foreground">Your Rank</span>
-            <span className="text-xl font-black text-foreground font-mono">
+            <span className="text-xl font-bold text-foreground font-mono">
               {userRank ? `#${userRank}` : 'Unranked'}
             </span>
           </div>
@@ -134,10 +135,10 @@ export default function LeaderboardsPage() {
               <span className="font-mono font-bold text-sm text-foreground">{userElo}</span>
             </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
-      {/* Active Game Ladder Context Bar (Replaces horizontal scroll) */}
+      {/* Active Game Ladder Context Bar */}
       <GameContextBar
         title={`${selectedGame.displayName} Elo Leaderboard`}
         subtitle={`Official competitive ladder standings & MMR for ${selectedGame.displayName}`}
@@ -145,9 +146,9 @@ export default function LeaderboardsPage() {
         onSelectGame={(g) => handleSelectGame(g)}
       />
 
-      {/* 3. Global Ladder Table */}
+      {/* Global Ladder Table */}
       {isLoading ? (
-        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-2xl">
+        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-xl">
           Calculating Elo standings for {selectedGame.displayName}...
         </div>
       ) : (

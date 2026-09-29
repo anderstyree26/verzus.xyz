@@ -1,24 +1,39 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useCapturePipeline } from '../hooks/useCapturePipeline';
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import {
+  Monitor,
+  Coins,
+  Copy,
+  Check,
+  Bell,
+  Swords,
+  Play,
+  Square,
+  ShieldCheck,
+  AlertCircle,
+  Gamepad2,
+  Share2,
+} from 'lucide-react';
+import { useCapturePipeline as useMatchCapture } from '../hooks/useCapturePipeline';
 import { LiveScore } from './LiveScore';
+import { GamePoster } from './GamePoster';
+import { MatchPermissionsModal } from './MatchPermissionsModal';
 import { notifyUser, requestNotificationPermission } from '../lib/notifications';
 import { useGameAccountsStore } from '../lib/gameAccountsStore';
 import { getGameById } from '../lib/gamesCatalog';
-import { GamePoster } from './GamePoster';
-import { MatchPermissionsModal } from './MatchPermissionsModal';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import type { GameProfile } from '@antigravity/core';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Input } from './ui/input';
-import type { GameProfile } from '@antigravity/core';
 
-export interface MatchRoomProps {
+interface MatchRoomProps {
   matchId: string;
   profile: GameProfile;
   playerAId: string;
-  playerBId?: string | null;
+  playerBId: string | null;
   currentUserId: string;
   status: string;
   roomCode?: string | null;
@@ -33,59 +48,52 @@ export function MatchRoom({
   status,
   roomCode,
 }: MatchRoomProps) {
-  const [editingTag, setEditingTag] = useState(false);
-  const [tagInput, setTagInput] = useState('');
+  const catalogGame = getGameById(profile.id);
+  const capture = useMatchCapture(matchId, profile);
+  const { getGamertag, getGamertagLabel, setGamertag } = useGameAccountsStore();
+
+  const isPlayerA = currentUserId === playerAId;
+  const isPlayerB = currentUserId === playerBId;
+  const isParticipant = isPlayerA || isPlayerB;
+
+  const gameTagLabel = getGamertagLabel(profile.id);
+  const myGamertag = getGamertag(profile.id);
+
+  // Ready states
+  const [isReadyA, setIsReadyA] = useState(false);
+  const [isReadyB, setIsReadyB] = useState(false);
+  const [coinResult, setCoinResult] = useState<'A' | 'B' | null>(null);
+  const [isFlipping, setIsFlipping] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedTagA, setCopiedTagA] = useState(false);
   const [copiedTagB, setCopiedTagB] = useState(false);
-  const [coinResult, setCoinResult] = useState<'A' | 'B' | null>(null);
-  const [isFlipping, setIsFlipping] = useState(false);
-  const [isReadyA, setIsReadyA] = useState(false);
-  const [isReadyB, setIsReadyB] = useState(false);
-  const [notificationsGranted, setNotificationsGranted] = useState(false);
+
+  // Edit gamertag inline
+  const [editingTag, setEditingTag] = useState(false);
+  const [tagInput, setTagInput] = useState(myGamertag || '');
+
+  // Pre-Match Permission Gate Modal
   const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
+  const [notificationsGranted, setNotificationsGranted] = useState(false);
 
-  // In-Game Gamertag account store
-  const { getGamertag, getGamertagLabel, setGamertag } = useGameAccountsStore();
-  const gameTagLabel = getGamertagLabel(profile.id);
-  const myGamertag = getGamertag(profile.id);
-  const catalogGame = getGameById(profile.id);
+  // Track state transitions for audio notifications
+  const prevPlayerB = useRef(playerBId);
+  const prevCaptureStatus = useRef(capture.status);
 
-  const isPlayerA = currentUserId === playerAId;
-  const isPlayerB = Boolean(playerBId && currentUserId === playerBId);
-  const isParticipant = isPlayerA || isPlayerB;
-
-  // Background automated game sync pipeline
-  const capture = useCapturePipeline(matchId, profile);
-
-  // Track state transitions to trigger reactive audio / push alerts
-  const prevPlayerB = useRef<string | null | undefined>(playerBId);
-  const prevCaptureStatus = useRef<string>(capture.status);
-  const prevScore = useRef<string | null>(null);
-
+  // Check initial notification permission
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationsGranted(Notification.permission === 'granted');
     }
   }, []);
 
-  const handleEnableNotifications = async () => {
-    const granted = await requestNotificationPermission();
-    setNotificationsGranted(granted);
-    if (granted) {
-      notifyUser('Alerts Enabled', {
-        body: 'You will receive sound and browser alerts for match events.',
-        sound: 'score',
-      });
-    }
-  };
-
   // 1. Notify on Opponent Join
   useEffect(() => {
     if (!prevPlayerB.current && playerBId) {
-      notifyUser('Challenger Joined!', {
-        body: 'An opponent has entered the matchroom. Check in-game gamertags and get ready!',
+      notifyUser('Opponent Joined Arena!', {
+        body: `Player #${playerBId.slice(0, 8)} has entered the match room. Get ready to duel!`,
         sound: 'connect',
+        type: 'match',
       });
     }
     prevPlayerB.current = playerBId;
@@ -108,45 +116,46 @@ export function MatchRoom({
     prevCaptureStatus.current = capture.status;
   }, [capture.status, profile.displayName]);
 
-  // 3. Notify on score progress
-  useEffect(() => {
-    if (capture.lastScore && capture.lastScore !== prevScore.current) {
-      if (document.hidden) {
-        notifyUser('Score Progression Update', {
-          body: `Latest verified score: ${capture.lastScore}`,
-          sound: 'score',
-        });
-      }
-      prevScore.current = capture.lastScore;
-    }
-  }, [capture.lastScore]);
-
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
       setCopiedLink(true);
+      notifyUser('Match Link Copied', { sound: 'score' });
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
   const handleCopyTag = (tag: string, side: 'A' | 'B') => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(tag);
-      if (side === 'A') {
-        setCopiedTagA(true);
-        setTimeout(() => setCopiedTagA(false), 2000);
-      } else {
-        setCopiedTagB(true);
-        setTimeout(() => setCopiedTagB(false), 2000);
-      }
+    navigator.clipboard.writeText(tag);
+    if (side === 'A') {
+      setCopiedTagA(true);
+      setTimeout(() => setCopiedTagA(false), 2000);
+    } else {
+      setCopiedTagB(true);
+      setTimeout(() => setCopiedTagB(false), 2000);
     }
+    notifyUser(`${gameTagLabel} Copied!`, {
+      body: `"${tag}" copied to clipboard. Paste into your game friends list.`,
+      sound: 'score',
+    });
   };
 
   const handleSaveGamertag = (e: React.FormEvent) => {
     e.preventDefault();
-    if (tagInput.trim()) {
-      setGamertag(profile.id, tagInput.trim());
-      setEditingTag(false);
+    if (!tagInput.trim()) return;
+    setGamertag(profile.id, tagInput.trim());
+    setEditingTag(false);
+    notifyUser(`${gameTagLabel} Saved`, { sound: 'score' });
+  };
+
+  const handleEnableNotifications = async () => {
+    const granted = await requestNotificationPermission();
+    setNotificationsGranted(granted);
+    if (granted) {
+      notifyUser('Notifications Enabled', {
+        body: 'You will receive desktop alerts when opponents join or match outcomes finalize.',
+        sound: 'connect',
+      });
     }
   };
 
@@ -185,12 +194,12 @@ export function MatchRoom({
   const playerBTag = !isPlayerA && isParticipant ? myGamertag || 'Unlinked Gamertag' : 'Challenger';
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto min-w-0">
+    <div className="space-y-6 max-w-5xl mx-auto min-w-0 pb-16">
       {/* Optional Notification Opt-In Banner */}
       {!notificationsGranted && (
-        <Card className="p-4 bg-secondary/80 border-border flex items-center justify-between text-xs">
+        <Card className="p-4 bg-muted/50 border-border flex items-center justify-between text-xs">
           <div className="flex items-center gap-3 text-foreground">
-            <span className="text-xl">🔔</span>
+            <Bell className="w-4 h-4 text-primary" />
             <span>
               <strong>Enable Match Alerts:</strong> Receive audio & background notifications when your opponent joins or match finishes.
             </span>
@@ -199,6 +208,7 @@ export function MatchRoom({
             onClick={handleEnableNotifications}
             variant="default"
             size="sm"
+            className="text-xs"
           >
             Enable Alerts
           </Button>
@@ -206,12 +216,12 @@ export function MatchRoom({
       )}
 
       {/* Top Header Matchroom Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-card p-6 sm:p-8 border border-border rounded-3xl shadow-xl">
+      <Card className="p-6 sm:p-8 border border-border bg-card shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4 sm:gap-6 min-w-0">
           <GamePoster
             game={catalogGame}
             aspect="thumb"
-            className="w-14 h-18 sm:w-16 sm:h-22 rounded-2xl shadow-xl border border-border flex-shrink-0"
+            className="w-14 h-18 sm:w-16 sm:h-22 rounded-xl shadow-xl border border-border flex-shrink-0"
           />
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -220,25 +230,25 @@ export function MatchRoom({
                 {profile.platform || 'UNIVERSAL'}
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
               Arena Matchroom #{matchId.slice(0, 8)}
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Connect in-game via gamertags below, coin toss for side, and play.
+              Connect in-game via gamertags below, coin toss for side, and duel.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 flex-shrink-0 flex-wrap sm:flex-nowrap">
           {roomCode && (
-            <div className="flex items-center gap-2 bg-secondary border border-border px-3.5 py-2 rounded-xl text-xs">
-              <span className="text-muted-foreground font-semibold uppercase">Room:</span>
-              <span className="font-mono font-black text-foreground">{roomCode}</span>
+            <div className="flex items-center gap-2 bg-muted border border-border px-3 py-1.5 rounded-lg text-xs">
+              <span className="text-muted-foreground font-semibold uppercase text-[10px]">Room:</span>
+              <span className="font-mono font-bold text-foreground">{roomCode}</span>
               <button
                 onClick={handleCopyLink}
-                className="ml-1 text-accent-400 hover:underline font-bold"
+                className="ml-1 text-primary hover:underline font-semibold"
               >
-                {copiedLink ? '✓ Copied' : 'Share'}
+                {copiedLink ? 'Copied' : 'Share'}
               </button>
             </div>
           )}
@@ -248,7 +258,7 @@ export function MatchRoom({
             <button
               type="button"
               onClick={() => setPermissionsModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/80 hover:bg-secondary border border-border text-xs transition"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 border border-border text-xs transition"
               title="Click to check or update game feed and notification permissions"
             >
               <span className={`w-2 h-2 rounded-full ${capture.status === 'CAPTURING' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
@@ -262,21 +272,21 @@ export function MatchRoom({
             </button>
           )}
 
-          <Badge variant={capture.status === 'CAPTURING' ? 'success' : 'copper'} className="py-1 px-3 text-xs">
+          <Badge variant={capture.status === 'CAPTURING' ? 'success' : 'copper'} className="py-1 px-2.5 text-xs font-bold">
             {capture.status === 'CAPTURING' ? '● VERIFYING LIVE' : status}
           </Badge>
         </div>
-      </div>
+      </Card>
 
       {/* Head-to-Head Competitor Roster with In-Game Gamertags */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-card border border-border p-6 rounded-3xl shadow-xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
         {/* Side A (Host) */}
-        <Card className="flex flex-col items-center md:items-start p-5 bg-secondary/60 border-border">
+        <Card className="flex flex-col items-center md:items-start p-5 bg-card border border-border">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-7 h-7 rounded-lg bg-primary text-primary-foreground font-black text-xs flex items-center justify-center shadow-sm">
+            <span className="w-6 h-6 rounded-md bg-primary text-primary-foreground font-bold text-xs flex items-center justify-center shadow-sm">
               A
             </span>
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Host Competitor</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Host</span>
           </div>
 
           <div className="font-mono text-sm font-bold text-foreground truncate max-w-[200px]">
@@ -284,7 +294,7 @@ export function MatchRoom({
           </div>
 
           {/* Verified In-Game Gamertag */}
-          <div className="mt-3 p-2.5 bg-background border border-border rounded-xl w-full flex items-center justify-between text-xs">
+          <div className="mt-3 p-2.5 bg-muted/60 border border-border rounded-lg w-full flex items-center justify-between text-xs">
             <div className="flex flex-col min-w-0">
               <span className="text-[9px] text-muted-foreground font-bold uppercase">{gameTagLabel}</span>
               <span className="font-mono font-bold text-foreground truncate max-w-[120px]">{playerATag}</span>
@@ -293,9 +303,10 @@ export function MatchRoom({
               size="sm"
               variant="secondary"
               onClick={() => handleCopyTag(playerATag, 'A')}
-              className="h-7 px-2 text-[10px]"
+              className="h-7 px-2 text-[10px] gap-1"
             >
-              {copiedTagA ? '✓' : 'Copy'}
+              {copiedTagA ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              <span>{copiedTagA ? 'Copied' : 'Copy'}</span>
             </Button>
           </div>
 
@@ -309,19 +320,19 @@ export function MatchRoom({
           </div>
         </Card>
 
-        {/* Center VS & Coin Toss Actions */}
+        {/* Center VS & Actions */}
         <div className="flex flex-col items-center justify-center text-center p-2">
-          <div className="text-3xl sm:text-4xl font-black tracking-tighter text-accent-400">
+          <div className="text-3xl sm:text-4xl font-black tracking-tight text-primary">
             VS
           </div>
           <div className="text-xs text-muted-foreground font-mono mt-0.5">BEST OF 1 DUEL</div>
 
           {isParticipant && (
-            <div className="mt-4 flex flex-col gap-2.5 w-full max-w-[220px]">
+            <div className="mt-4 flex flex-col gap-2 w-full max-w-[200px]">
               <Button
                 onClick={toggleReady}
                 variant={(isPlayerA ? isReadyA : isReadyB) ? 'outline' : 'default'}
-                className="w-full"
+                className="w-full text-xs font-bold"
               >
                 {(isPlayerA ? isReadyA : isReadyB) ? '✓ Ready Confirmed' : 'Mark Ready'}
               </Button>
@@ -331,19 +342,20 @@ export function MatchRoom({
                 disabled={isFlipping}
                 variant="secondary"
                 size="sm"
-                className="w-full"
+                className="w-full text-xs font-medium gap-1.5"
               >
-                {isFlipping ? 'Flipping...' : '🪙 Coin Toss for Host/Map'}
+                <Coins className="w-3.5 h-3.5 text-primary" />
+                <span>{isFlipping ? 'Flipping...' : 'Coin Toss'}</span>
               </Button>
             </div>
           )}
         </div>
 
         {/* Side B (Opponent) */}
-        <Card className="flex flex-col items-center md:items-end p-5 bg-secondary/60 border-border text-right">
+        <Card className="flex flex-col items-center md:items-end p-5 bg-card border border-border text-right">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Challenger</span>
-            <span className="w-7 h-7 rounded-lg bg-secondary border border-border text-foreground font-black text-xs flex items-center justify-center shadow-sm">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Challenger</span>
+            <span className="w-6 h-6 rounded-md bg-secondary border border-border text-foreground font-bold text-xs flex items-center justify-center shadow-sm">
               B
             </span>
           </div>
@@ -353,14 +365,15 @@ export function MatchRoom({
           </div>
 
           {/* Opponent In-Game Gamertag */}
-          <div className="mt-3 p-2.5 bg-background border border-border rounded-xl w-full flex items-center justify-between text-xs text-left">
+          <div className="mt-3 p-2.5 bg-muted/60 border border-border rounded-lg w-full flex items-center justify-between text-xs text-left">
             <Button
               size="sm"
               variant="secondary"
               onClick={() => handleCopyTag(playerBTag, 'B')}
-              className="h-7 px-2 text-[10px]"
+              className="h-7 px-2 text-[10px] gap-1"
             >
-              {copiedTagB ? '✓' : 'Copy'}
+              {copiedTagB ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              <span>{copiedTagB ? 'Copied' : 'Copy'}</span>
             </Button>
             <div className="flex flex-col text-right min-w-0">
               <span className="text-[9px] text-muted-foreground font-bold uppercase">{gameTagLabel}</span>
@@ -381,17 +394,18 @@ export function MatchRoom({
 
       {/* Gamertag Setup Prompt */}
       {isParticipant && !myGamertag && !editingTag && (
-        <Card className="p-5 bg-amber-500/10 border-amber-500/30 flex items-center justify-between text-xs">
+        <Card className="p-4 bg-amber-500/10 border-amber-500/30 flex items-center justify-between text-xs">
           <div className="flex items-center gap-3 text-amber-200">
-            <span className="text-xl">🎮</span>
+            <Gamepad2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
             <span>
-              <strong>Link your {gameTagLabel}:</strong> Connect your in-game handle so your opponent can invite you to the live match lobby.
+              <strong>Link your {gameTagLabel}:</strong> Connect your in-game handle so your opponent can invite you to the match lobby.
             </span>
           </div>
           <Button
             onClick={() => setEditingTag(true)}
             variant="default"
             size="sm"
+            className="text-xs"
           >
             + Set Handle
           </Button>
@@ -399,36 +413,36 @@ export function MatchRoom({
       )}
 
       {editingTag && (
-        <form onSubmit={handleSaveGamertag} className="p-4 bg-card border border-border rounded-2xl flex items-center gap-3 text-xs">
+        <form onSubmit={handleSaveGamertag} className="p-4 bg-card border border-border rounded-xl flex items-center gap-3 text-xs">
           <span className="text-foreground font-bold">{gameTagLabel}:</span>
           <Input
             type="text"
             placeholder="e.g. s1mple_pro"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
-            className="flex-1 font-mono"
+            className="flex-1 font-mono h-9"
             autoFocus
           />
-          <Button type="submit" variant="default" size="sm">
+          <Button type="submit" variant="default" size="sm" className="h-9">
             Save
           </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={() => setEditingTag(false)}>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setEditingTag(false)} className="h-9">
             Cancel
           </Button>
         </form>
       )}
 
-      {/* Clean Live Head-to-Head Scoreboard */}
+      {/* Live Head-to-Head Scoreboard */}
       <LiveScore matchId={matchId} />
 
-      {/* Seamless Background Verification (ZERO Technical Bounding Box Clutter) */}
+      {/* Seamless Background Verification */}
       {isParticipant && (
-        <Card className="p-6 sm:p-8 space-y-4 shadow-xl">
+        <Card className="p-6 sm:p-8 space-y-4 border border-border bg-card shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${capture.status === 'CAPTURING' ? 'bg-emerald-500 animate-pulse' : 'bg-primary'}`} />
-                <h3 className="text-base sm:text-lg font-black tracking-tight text-foreground">
+                <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
                   {capture.status === 'CAPTURING' ? 'Game Window Connected & Active' : 'Automatic Match Verification'}
                 </h3>
               </div>
@@ -445,17 +459,19 @@ export function MatchRoom({
                   onClick={capture.stopCapture}
                   variant="destructive"
                   size="default"
+                  className="gap-2 font-bold"
                 >
-                  Conclude & Settle
+                  <Square className="w-4 h-4" />
+                  <span>Conclude & Settle</span>
                 </Button>
               ) : (
                 <Button
                   onClick={() => setPermissionsModalOpen(true)}
                   variant="default"
-                  size="lg"
-                  className="gap-2"
+                  size="default"
+                  className="gap-2 font-bold shadow-sm"
                 >
-                  <span>📺</span>
+                  <Monitor className="w-4 h-4" />
                   <span>Connect Game Window</span>
                 </Button>
               )}
@@ -464,7 +480,7 @@ export function MatchRoom({
 
           {/* Background Running Status Banner */}
           {capture.status === 'CAPTURING' && (
-            <div className="p-3.5 bg-background border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs">
+            <div className="p-3 bg-muted/60 border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs">
               <span className="flex items-center gap-2 text-emerald-400 font-mono font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                 Anti-Cheat Verification Active
@@ -476,7 +492,7 @@ export function MatchRoom({
           )}
 
           {capture.error && (
-            <div className="p-3.5 bg-destructive/15 border border-destructive/30 text-destructive text-xs rounded-xl">
+            <div className="p-3 bg-destructive/10 border border-destructive/30 text-destructive text-xs rounded-xl">
               {capture.error}
             </div>
           )}

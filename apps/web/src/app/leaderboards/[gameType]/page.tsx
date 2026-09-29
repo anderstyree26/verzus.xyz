@@ -6,6 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import { LeaderboardTable } from '../../../components/LeaderboardTable';
 import { apiClient } from '../../../lib/api';
 import { OFFICIAL_GAMES, getGameById } from '../../../lib/gamesCatalog';
+import { Card } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
+import { ArrowLeft, Swords } from 'lucide-react';
 
 interface LeaderboardEntry {
   userId: string;
@@ -34,26 +37,27 @@ export default function GameLeaderboardDynamicPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto my-6">
       <div className="flex items-center justify-between">
         <Link
           href="/leaderboards"
-          className="text-xs text-gray-400 hover:text-white flex items-center gap-1 font-bold"
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1.5 font-bold transition"
         >
-          ← All Game Ladders
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>All Game Ladders</span>
         </Link>
-        <Link
-          href={`/matches/new?profileId=${matchedGame.id}`}
-          className="px-4 py-2 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-md shadow-[#C86228]/20"
-        >
-          ⚔️ Play {matchedGame.displayName} Duel
+        <Link href={`/matches/new?profileId=${matchedGame.id}`}>
+          <Button variant="default" size="sm" className="font-bold text-xs uppercase tracking-wider gap-1.5 shadow-md shadow-primary/20">
+            <Swords className="w-3.5 h-3.5" />
+            <span>Play {matchedGame.displayName} Duel</span>
+          </Button>
         </Link>
       </div>
 
       {isLoading ? (
-        <div className="p-12 text-center text-gray-400 font-mono text-xs bg-[#111319] border border-[#202430] rounded-2xl animate-pulse">
+        <Card className="p-12 text-center text-muted-foreground font-mono text-xs bg-card border-border animate-pulse">
           Loading {matchedGame.displayName} rankings...
-        </div>
+        </Card>
       ) : (
         <LeaderboardTable
           entries={entries ?? []}

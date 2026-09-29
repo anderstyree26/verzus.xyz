@@ -2,10 +2,15 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { Trophy, BarChart3, Swords, Gamepad2, ArrowRight } from 'lucide-react';
 import { apiClient } from '../../lib/api';
 import { EloBadge } from '../../components/EloBadge';
 import { OFFICIAL_GAMES, type CatalogGame } from '../../lib/gamesCatalog';
 import { useGameStore } from '../../lib/gameStore';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { GamePoster } from '../../components/GamePoster';
 
 interface RatingItem {
   id: string;
@@ -45,41 +50,39 @@ export default function MyRatingsPage() {
   const defaultUserElo = userProfile?.rating ?? 1000;
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto">
+    <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-16">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 bg-[#111319] border border-[#202430] rounded-2xl shadow-xl">
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 sm:p-8 border border-border bg-card shadow-xl">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#161922] border border-[#202430] flex items-center justify-center text-3xl font-black text-[#D97736] shadow-inner">
-            🥇
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 shadow-sm">
+            <Trophy className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-[#C86228]/15 text-[#D97736] border border-[#C86228]/30 text-[10px] font-bold uppercase tracking-wider rounded">
-                Skill Index
-              </span>
+              <Badge variant="copper">Skill Index</Badge>
+              <Badge variant="secondary" className="font-mono text-[10px]">
+                Season 1 Active
+              </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mt-1">
               My Competitive Ratings & Tiers
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               Level 1 to 10 skill rankings across each esports title. All outcomes verified by automated instant match sync.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/leaderboards"
-            className="px-5 py-3 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2"
-          >
-            <span>🏆</span>
+        <Link href="/leaderboards">
+          <Button variant="secondary" size="default" className="gap-2 font-bold shadow-sm">
+            <BarChart3 className="w-4 h-4" />
             <span>Global Ladders</span>
-          </Link>
-        </div>
-      </div>
+          </Button>
+        </Link>
+      </Card>
 
       {isLoading ? (
-        <div className="p-12 text-center text-gray-400 font-mono text-xs bg-[#111319] border border-[#202430] rounded-2xl animate-pulse">
+        <div className="p-12 text-center text-muted-foreground font-mono text-xs bg-card border border-border rounded-xl animate-pulse">
           Loading your competitive ratings...
         </div>
       ) : (
@@ -93,59 +96,66 @@ export default function MyRatingsPage() {
             const winRate = gamesPlayed > 0 ? ((wins / gamesPlayed) * 100).toFixed(1) : '0.0';
 
             return (
-              <div
+              <Card
                 key={game.id}
-                className="p-5 bg-[#111319] border border-[#202430] hover:border-[#C86228]/50 rounded-2xl flex flex-col justify-between gap-4 text-white shadow-xl transition-all group"
+                className="p-5 border border-border bg-card hover:border-primary/50 rounded-xl flex flex-col justify-between gap-4 shadow-md transition-all group"
               >
                 <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl">{game.icon}</span>
-                    <EloBadge elo={rating} size="sm" />
-                  </div>
-
-                  <h3 className="text-base font-black text-white group-hover:text-[#D97736] transition-colors mt-2">
-                    {game.displayName}
-                  </h3>
-                  <span className="text-[10px] text-gray-500 uppercase font-mono tracking-wider">
-                    {game.platform} · {game.shortName}
-                  </span>
-
-                  <div className="mt-3 flex items-baseline justify-between border-b border-[#202430] pb-2">
-                    <span className="text-xs text-gray-400 font-mono">Elo Rating:</span>
-                    <span className="text-xl font-black font-mono text-white">{rating}</span>
-                  </div>
-
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] font-mono">
-                    <div>
-                      <span className="text-gray-500 block text-[9px] uppercase">Record</span>
-                      <span className="text-green-400 font-bold">{wins}W</span>
-                      <span className="text-gray-500 mx-1">-</span>
-                      <span className="text-red-400 font-bold">{losses}L</span>
-                    </div>
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <GamePoster
+                      game={game}
+                      aspect="thumb"
+                      className="w-12 h-16 rounded-lg flex-shrink-0 shadow-sm border border-border"
+                    />
                     <div className="text-right">
-                      <span className="text-gray-500 block text-[9px] uppercase">Win Rate</span>
-                      <span className="text-gray-300 font-bold">{winRate}%</span>
+                      <EloBadge elo={rating} size="md" showLabel />
+                      <span className="text-[10px] text-muted-foreground font-mono block mt-1">
+                        {game.platform}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                      {game.displayName}
+                    </h3>
+                    <span className="text-[10px] text-muted-foreground font-mono block uppercase">
+                      {game.gameType.replace('_', ' ')}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border text-center">
+                    <div className="p-2 bg-muted/40 rounded-lg">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground block">
+                        Win Rate
+                      </span>
+                      <span className="text-xs font-mono font-bold text-emerald-400">
+                        {winRate}%
+                      </span>
+                    </div>
+                    <div className="p-2 bg-muted/40 rounded-lg">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground block">
+                        Record
+                      </span>
+                      <span className="text-xs font-mono font-bold text-foreground">
+                        {wins}W-{losses}L
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-2 border-t border-[#202430]">
-                  <Link
-                    href={`/matches/new?profileId=${game.id}`}
-                    onClick={() => setActiveGame(game)}
-                    className="flex-1 py-2 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition text-center shadow-sm"
-                  >
-                    Play Duel
-                  </Link>
-                  <Link
-                    href={`/leaderboards/${game.id}`}
-                    onClick={() => setActiveGame(game)}
-                    className="px-3 py-2 bg-[#161922] hover:bg-[#202430] border border-[#202430] text-gray-300 hover:text-white font-bold text-xs uppercase rounded-lg transition text-center"
-                  >
-                    Ladder
+                <div className="pt-2 border-t border-border flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    {gamesPlayed} Played
+                  </span>
+                  <Link href={`/games/${game.id}`} onClick={() => setActiveGame(game)}>
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1 px-2 font-bold">
+                      <span>Queue</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Button>
                   </Link>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>

@@ -1,5 +1,12 @@
 'use client';
 
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import { Users, Swords } from 'lucide-react';
+import Link from 'next/link';
+
 interface Friend {
   id: string;
   requesterId: string;
@@ -15,33 +22,72 @@ interface FriendListProps {
 export function FriendList({ friends, currentUserId }: FriendListProps) {
   if (friends.length === 0) {
     return (
-      <div className="p-6 text-center bg-surface-elevated border border-surface-border rounded-lg text-gray-400 text-sm">
-        No friends yet. Send a request to play private challenges!
-      </div>
+      <Card className="p-12 text-center bg-card border-border">
+        <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-50" />
+        <h3 className="font-bold text-foreground text-sm uppercase tracking-wider">
+          No Friends Added Yet
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+          Send a request using a player's ID above to start challenging friends to private duels.
+        </p>
+      </Card>
     );
   }
 
   return (
-    <div className="p-5 bg-surface-elevated border border-surface-border rounded-lg flex flex-col gap-3">
-      <h3 className="text-sm uppercase font-bold text-gray-400 tracking-wider">Friends List</h3>
-      <div className="divide-y divide-surface-border">
+    <Card className="bg-card border-border shadow-xl">
+      <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-sm uppercase font-mono font-bold text-foreground tracking-wider">
+            Connected Competitors
+          </CardTitle>
+          <span className="text-xs text-muted-foreground">
+            {friends.length} player{friends.length > 1 ? 's' : ''} on your roster
+          </span>
+        </div>
+        <Badge variant="secondary" className="font-mono text-[10px]">
+          READY TO DUEL
+        </Badge>
+      </CardHeader>
+
+      <CardContent className="p-0 divide-y divide-border">
         {friends.map((f) => {
           const friendId = f.requesterId === currentUserId ? f.addresseeId : f.requesterId;
+          const initials = friendId.slice(0, 2).toUpperCase();
+
           return (
-            <div key={f.id} className="py-2.5 flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-surface border border-surface-border flex items-center justify-center font-bold text-xs text-accent">
-                  {friendId.slice(0, 2).toUpperCase()}
+            <div key={f.id} className="p-4 flex items-center justify-between gap-3 hover:bg-secondary/30 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="w-10 h-10 border border-border">
+                  <AvatarFallback className="bg-secondary text-primary font-bold text-xs font-mono">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm text-foreground truncate">
+                      Player #{friendId.slice(0, 8)}
+                    </span>
+                    <Badge variant="success" className="text-[9px] font-mono px-1 py-0">
+                      ONLINE
+                    </Badge>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-mono block">
+                    ID: {friendId}
+                  </span>
                 </div>
-                <span className="font-semibold text-white">Player #{friendId.slice(0, 6)}</span>
               </div>
-              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded font-medium">
-                Online
-              </span>
+
+              <Link href={`/matches/new?opponent=${friendId}`}>
+                <Button variant="secondary" size="sm" className="font-bold text-xs gap-1.5 flex-shrink-0 hover:bg-primary hover:text-primary-foreground transition-all">
+                  <Swords className="w-3.5 h-3.5" />
+                  <span>Challenge</span>
+                </Button>
+              </Link>
             </div>
           );
         })}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,6 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import {
+  Monitor,
+  Bell,
+  ShieldCheck,
+  Check,
+  Loader2,
+  X,
+  Smartphone,
+  Laptop,
+  CheckCircle2,
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -87,35 +98,35 @@ export function MatchPermissionsModal({
       case 'windows':
         return {
           label: 'Windows PC (Desktop)',
-          icon: '💻',
+          icon: Laptop,
           screenTip: 'In the browser sharing popup, select your game window (or entire screen) so scores record automatically.',
           pushTip: 'Windows action center alerts will notify you during full-screen gameplay.',
         };
       case 'mac':
         return {
           label: 'macOS (Desktop / Safari / Chrome)',
-          icon: '🍎',
+          icon: Laptop,
           screenTip: 'Select the game window in System Screen Recording permissions if prompted.',
           pushTip: 'Notification banner alerts will ping you when your opponent joins or match finishes.',
         };
       case 'android':
         return {
           label: 'Android Mobile / Tablet',
-          icon: '📱',
+          icon: Smartphone,
           screenTip: 'Allow screen cast / window sharing permission when prompted by Chrome/browser.',
           pushTip: 'System lockscreen & heads-up push notifications enabled.',
         };
       case 'ios':
         return {
           label: 'iOS / iPadOS (Safari & PWA)',
-          icon: '📱',
+          icon: Smartphone,
           screenTip: 'Allow screen broadcast / share in Safari to sync match score feed.',
           pushTip: 'Web push notifications enabled for match room pings.',
         };
       default:
         return {
           label: 'Universal Browser Platform',
-          icon: '🎮',
+          icon: Laptop,
           screenTip: 'Select your game window or display to enable automated score sync and anti-cheat verification.',
           pushTip: 'Browser push notifications will keep you updated in real time.',
         };
@@ -123,6 +134,7 @@ export function MatchPermissionsModal({
   };
 
   const platformInfo = getPlatformDetails();
+  const PlatformIcon = platformInfo.icon;
   const screenDone = isCapturing;
   const notifsDone = localNotifsGranted;
   const allGranted = screenDone && notifsDone;
@@ -133,13 +145,13 @@ export function MatchPermissionsModal({
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
     >
-      <Card className="w-full max-w-lg bg-card border-border shadow-2xl p-6 space-y-6">
+      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-              <h3 className="text-lg font-black text-foreground uppercase tracking-tight">
+              <h3 className="text-lg font-bold text-foreground tracking-tight">
                 Pre-Match Permissions
               </h3>
             </div>
@@ -150,7 +162,7 @@ export function MatchPermissionsModal({
 
           <div className="flex items-center gap-2 flex-shrink-0">
             <Badge variant="secondary" className="font-mono text-[10px] gap-1">
-              <span>{platformInfo.icon}</span>
+              <PlatformIcon className="w-3 h-3" />
               <span>{platformInfo.label}</span>
             </Badge>
           </div>
@@ -160,16 +172,16 @@ export function MatchPermissionsModal({
         <div className="space-y-4">
           {/* Permission 1: Game Feed Capture */}
           <div
-            className={`p-4 rounded-2xl border transition-all ${
+            className={`p-4 rounded-xl border transition-all ${
               screenDone
                 ? 'bg-emerald-500/10 border-emerald-500/40'
-                : 'bg-secondary/60 border-border hover:border-primary/40'
+                : 'bg-muted/40 border-border hover:border-primary/40'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base select-none">📺</span>
+                  <Monitor className="w-4 h-4 text-primary" />
                   <span className="text-xs font-bold text-foreground">
                     1. Game Window Feed & Anti-Cheat
                   </span>
@@ -180,116 +192,114 @@ export function MatchPermissionsModal({
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Streams your {gameName} HUD in the background to automatically record final scores and win conditions. Never captures personal windows.
+                  {platformInfo.screenTip}
                 </p>
-                <p className="text-[10px] text-primary/80 font-mono mt-1">
-                  💡 {platformInfo.screenTip}
-                </p>
+                <div className="text-[10px] font-mono text-muted-foreground flex items-center gap-1 mt-1">
+                  <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                  <span>Privacy guarantee: processed locally in memory. Zero video stored.</span>
+                </div>
               </div>
 
-              <div className="flex-shrink-0">
-                {screenDone ? (
-                  <Button variant="outline" size="sm" disabled className="text-xs text-emerald-400 border-emerald-500/40 font-mono">
-                    ✓ Connected
-                  </Button>
+              <Button
+                size="sm"
+                variant={screenDone ? 'secondary' : 'default'}
+                disabled={screenDone || requestingScreen}
+                onClick={handleGrantScreen}
+                className="flex-shrink-0 text-xs h-8"
+              >
+                {requestingScreen ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : screenDone ? (
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Check className="w-3 h-3" /> Ready
+                  </span>
                 ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    disabled={requestingScreen}
-                    onClick={handleGrantScreen}
-                    className="text-xs font-bold shadow-sm"
-                  >
-                    {requestingScreen ? 'Selecting...' : 'Grant Feed'}
-                  </Button>
+                  'Connect Feed'
                 )}
-              </div>
+              </Button>
             </div>
           </div>
 
           {/* Permission 2: Push Notifications */}
           <div
-            className={`p-4 rounded-2xl border transition-all ${
+            className={`p-4 rounded-xl border transition-all ${
               notifsDone
                 ? 'bg-emerald-500/10 border-emerald-500/40'
-                : 'bg-secondary/60 border-border hover:border-primary/40'
+                : 'bg-muted/40 border-border hover:border-primary/40'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base select-none">🔔</span>
+                  <Bell className="w-4 h-4 text-primary" />
                   <span className="text-xs font-bold text-foreground">
-                    2. Device Push & Audio Alerts
+                    2. Device Alerts & Match Pings
                   </span>
                   {notifsDone && (
                     <Badge variant="success" className="font-mono text-[9px] py-0 px-1.5">
-                      ACTIVE ✓
+                      ALLOWED ✓
                     </Badge>
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Pings you with audio and system alerts when your opponent accepts, matches start, or prize money is deposited to your wallet.
+                  {platformInfo.pushTip}
                 </p>
-                <p className="text-[10px] text-primary/80 font-mono mt-1">
-                  💡 {platformInfo.pushTip}
-                </p>
+                <div className="text-[10px] font-mono text-muted-foreground flex items-center gap-1 mt-1">
+                  <span>Audio chime & pop-up toasts active during match duels.</span>
+                </div>
               </div>
 
-              <div className="flex-shrink-0">
-                {notifsDone ? (
-                  <Button variant="outline" size="sm" disabled className="text-xs text-emerald-400 border-emerald-500/40 font-mono">
-                    ✓ Active
-                  </Button>
+              <Button
+                size="sm"
+                variant={notifsDone ? 'secondary' : 'default'}
+                disabled={notifsDone || requestingNotifs}
+                onClick={handleGrantNotifications}
+                className="flex-shrink-0 text-xs h-8"
+              >
+                {requestingNotifs ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : notifsDone ? (
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <Check className="w-3 h-3" /> Enabled
+                  </span>
                 ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    disabled={requestingNotifs}
-                    onClick={handleGrantNotifications}
-                    className="text-xs font-bold shadow-sm"
-                  >
-                    {requestingNotifs ? 'Enabling...' : 'Enable Alerts'}
-                  </Button>
+                  'Enable Alerts'
                 )}
-              </div>
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Modal Footer / Completion */}
-        <div className="pt-2 border-t border-border flex items-center justify-between gap-3">
-          <div className="text-[11px] text-muted-foreground font-mono">
-            {allGranted ? (
-              <span className="text-emerald-400 font-bold flex items-center gap-1">
-                <span>✓</span> Both permissions verified
-              </span>
-            ) : (
-              <span>
-                {screenDone ? 1 : 0} of 2 permissions granted
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">
-              Later
-            </Button>
-            <Button
-              variant={allGranted ? 'default' : 'secondary'}
-              size="sm"
-              disabled={!screenDone}
-              onClick={() => {
-                onComplete();
-                onClose();
-              }}
-              className="text-xs font-bold gap-1"
-            >
-              <span>{allGranted ? 'Ready to Duel →' : 'Continue with Feed →'}</span>
-            </Button>
-          </div>
+        {/* Status Indicator */}
+        <div className="p-3 bg-muted/50 rounded-xl border border-border flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Permissions Status:</span>
+          <span
+            className={`font-bold font-mono ${
+              allGranted ? 'text-emerald-400' : 'text-amber-400'
+            }`}
+          >
+            {allGranted ? 'All Systems Verified' : `${[screenDone, notifsDone].filter(Boolean).length}/2 Permissions Ready`}
+          </span>
         </div>
-      </Card>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">
+            Cancel
+          </Button>
+
+          <Button
+            variant={allGranted ? 'default' : 'secondary'}
+            size="sm"
+            onClick={onComplete}
+            disabled={!allGranted}
+            className="text-xs gap-1.5 font-bold"
+          >
+            <span>Proceed to Duel</span>
+            <CheckCircle2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

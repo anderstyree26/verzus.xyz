@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { apiClient } from '../lib/api';
+import { Card } from './ui/card';
+import { Badge } from './ui/badge';
 
 interface LiveScoreProps {
   matchId: string;
@@ -59,28 +61,30 @@ export function LiveScore({ matchId, initialScoreA = null, initialScoreB = null 
   }, [matchId]);
 
   return (
-    <div className="flex items-center justify-between p-6 bg-surface-elevated border border-surface-border rounded-lg text-white">
+    <Card className="flex items-center justify-between p-6 bg-card border-border shadow-xl">
       <div className="flex-1 text-center">
-        <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Player A</span>
-        <div className="text-4xl font-extrabold font-mono text-accent mt-1">
+        <span className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Player A</span>
+        <div className="text-4xl font-black font-mono text-primary mt-1">
           {scoreA ?? '—'}
         </div>
       </div>
 
       <div className="flex flex-col items-center px-4">
-        <span className="text-lg font-bold text-gray-500">VS</span>
+        <span className="text-xs font-black text-muted-foreground font-mono">VS</span>
         <div className="flex items-center gap-1.5 mt-2">
-          <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
-          <span className="text-[11px] text-gray-400 uppercase font-mono">{isLive ? 'Realtime' : 'Polling'}</span>
+          <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+          <Badge variant="secondary" className="text-[9px] font-mono px-1 py-0 uppercase">
+            {isLive ? 'Realtime' : 'Polling'}
+          </Badge>
         </div>
       </div>
 
       <div className="flex-1 text-center">
-        <span className="text-xs uppercase tracking-wider text-gray-400 font-semibold">Player B</span>
-        <div className="text-4xl font-extrabold font-mono text-white mt-1">
+        <span className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Player B</span>
+        <div className="text-4xl font-black font-mono text-foreground mt-1">
           {scoreB ?? '—'}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

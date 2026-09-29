@@ -15,7 +15,8 @@ export class WalletError extends AntigravityError {
       | 'INSUFFICIENT_FUNDS'
       | 'INVALID_AMOUNT'
       | 'NOT_IMPLEMENTED'
-      | 'IDEMPOTENCY_CONFLICT',
+      | 'IDEMPOTENCY_CONFLICT'
+      | 'PAYOUT_FAILED',
     message: string,
     meta?: Record<string, unknown>,
   ) {

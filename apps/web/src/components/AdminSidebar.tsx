@@ -8,10 +8,22 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 
+import {
+  BarChart3,
+  ShieldAlert,
+  Gamepad2,
+  Zap,
+  Users,
+  Trophy,
+  Gem,
+  Activity,
+  ArrowLeft,
+} from 'lucide-react';
+
 interface AdminNavItem {
   href: string;
   label: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   badge?: string | null;
   badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'copper' | 'warning' | 'success';
   exact?: boolean;
@@ -47,32 +59,32 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
         {
           href: '/admin',
           label: 'Overview',
-          icon: '📊',
+          icon: BarChart3,
           badge: null,
           exact: true,
         },
         {
           href: '/admin/review',
-          label: 'HITL Review Queue',
-          icon: '🛡️',
+          label: 'Audit & Review Queue',
+          icon: ShieldAlert,
           badge: pendingCount > 0 ? `${pendingCount}` : null,
           badgeVariant: 'warning',
         },
       ],
     },
     {
-      group: 'Game Registry & OCR',
+      group: 'Game Registry & Calibration',
       items: [
         {
           href: '/admin/profiles',
           label: 'Game Profiles',
-          icon: '🕹️',
+          icon: Gamepad2,
           badge: null,
         },
         {
           href: '/games/new?mode=admin',
-          label: 'Auto-Calibrate OCR',
-          icon: '⚡',
+          label: 'Automated Calibration',
+          icon: Zap,
           badge: 'NEW',
           badgeVariant: 'copper' as const,
         },
@@ -84,19 +96,19 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
         {
           href: '/admin/users',
           label: 'Users & Anti-Cheat',
-          icon: '👥',
+          icon: Users,
           badge: null,
         },
         {
           href: '/admin/seasons',
           label: 'Seasons & Resets',
-          icon: '🏆',
+          icon: Trophy,
           badge: null,
         },
         {
           href: '/admin/sponsors',
           label: 'Sponsor Liquidity',
-          icon: '💎',
+          icon: Gem,
           badge: null,
         },
       ],
@@ -115,8 +127,8 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
             onClick={onNavClick}
             className="flex items-center gap-3 px-2 py-1 text-foreground hover:opacity-90 transition group"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black text-lg shadow-sm transition-transform group-hover:scale-105">
-              🛡️
+            <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-black shadow-sm transition-transform group-hover:scale-105">
+              <ShieldAlert className="w-5 h-5" />
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1.5">
@@ -134,7 +146,7 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
           <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-secondary/60 border border-border text-[10px] font-mono text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              OCR Calibration
+              Verification Engine
             </span>
             <span className="text-emerald-400 font-bold">ONLINE</span>
           </div>
@@ -156,6 +168,7 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
                   const isActive = item.exact
                     ? pathname === item.href
                     : pathname === item.href || pathname.startsWith(baseHref);
+                  const Icon = item.icon;
 
                   return (
                     <Link
@@ -169,7 +182,7 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-sm select-none flex-shrink-0">{item.icon}</span>
+                        <Icon className="w-4 h-4 flex-shrink-0" />
                         <span className="truncate">{item.label}</span>
                       </div>
 
@@ -198,7 +211,7 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
             size="sm"
             className="w-full justify-start text-xs font-bold gap-2 text-muted-foreground hover:text-foreground"
           >
-            <span>🎮</span>
+            <ArrowLeft className="w-4 h-4" />
             <span>Return to Arena</span>
           </Button>
         </Link>

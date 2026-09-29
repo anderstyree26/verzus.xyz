@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
+import { Zap } from 'lucide-react';
 
 export default function AdminProfilesPage() {
   const { data: profiles, refetch, isLoading } = useQuery<GameProfile[]>({
@@ -40,13 +41,13 @@ export default function AdminProfilesPage() {
             Approve Game Profiles
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Review community-submitted archetypes, ROI coordinate boxes, and OCR calibration metadata.
+            Review community-submitted archetypes, coordinate regions, and game calibration metadata.
           </p>
         </div>
 
         <Link href="/games/new?mode=admin" className="flex-shrink-0">
           <Button variant="default" size="default" className="font-bold text-xs gap-1.5 shadow-md shadow-primary/20">
-            <span>⚡</span>
+            <Zap className="w-3.5 h-3.5" />
             <span>Auto-Calibrate New Game</span>
           </Button>
         </Link>

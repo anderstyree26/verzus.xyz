@@ -50,7 +50,7 @@ export function ChallengeCard({
         </div>
 
         <div>
-          <CardTitle className="text-base group-hover:text-accent-400 transition-colors truncate">
+          <CardTitle className="text-base group-hover:text-primary transition-colors truncate">
             {gameTitle}
           </CardTitle>
           <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-wider mt-0.5 block">
@@ -69,7 +69,7 @@ export function ChallengeCard({
           </div>
           <div className="text-right">
             <span className="text-[10px] uppercase font-bold text-muted-foreground block">Prize Pool</span>
-            <span className="font-mono font-bold text-accent-400">
+            <span className="font-mono font-bold text-primary">
               {prizePool === 0 ? 'Honor & ELO' : formatEUR(prizePool)}
             </span>
           </div>

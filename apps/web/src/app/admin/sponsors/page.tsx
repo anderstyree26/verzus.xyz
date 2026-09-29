@@ -9,6 +9,7 @@ import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { formatEUR } from '../../../lib/currency';
+import { Plus } from 'lucide-react';
 
 interface Sponsor {
   id: string;
@@ -77,7 +78,7 @@ export default function AdminSponsorsPage() {
           onClick={() => setIsCreating(true)}
           className="font-bold text-xs gap-1.5 flex-shrink-0 shadow-md shadow-primary/20"
         >
-          <span>+</span>
+          <Plus className="w-3.5 h-3.5" />
           <span>Add Brand Sponsor</span>
         </Button>
       </div>

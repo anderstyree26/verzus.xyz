@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { Plus } from 'lucide-react';
 
 interface Season {
   id: string;
@@ -74,7 +75,7 @@ export default function AdminSeasonsPage() {
           onClick={() => setIsCreating(true)}
           className="font-bold text-xs gap-1.5 flex-shrink-0 shadow-md shadow-primary/20"
         >
-          <span>+</span>
+          <Plus className="w-3.5 h-3.5" />
           <span>Create New Season</span>
         </Button>
       </div>

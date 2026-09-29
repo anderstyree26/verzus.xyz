@@ -1,5 +1,9 @@
 'use client';
 
+import { Card } from './ui/card';
+import { Badge } from './ui/badge';
+import { Trophy, Swords } from 'lucide-react';
+
 interface MatchNode {
   id: string;
   bracket_round: number;
@@ -29,56 +33,78 @@ export function BracketView({ matches }: BracketViewProps) {
 
   if (matches.length === 0) {
     return (
-      <div className="p-8 text-center bg-surface-elevated border border-surface-border rounded-lg text-gray-400">
-        Tournament bracket has not been generated yet.
-      </div>
+      <Card className="p-12 text-center bg-card border-border text-muted-foreground">
+        <Swords className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-50" />
+        <p className="text-sm font-bold text-foreground">Tournament bracket has not been generated yet.</p>
+        <p className="text-xs text-muted-foreground mt-1">Brackets seed automatically when tournament check-in concludes.</p>
+      </Card>
     );
   }
 
   return (
-    <div className="p-6 bg-surface-elevated border border-surface-border rounded-lg overflow-x-auto">
-      <div className="flex gap-8 min-w-[700px] items-stretch">
+    <Card className="p-6 bg-card border-border shadow-xl overflow-x-auto">
+      <div className="flex gap-8 min-w-[700px] items-stretch pb-2">
         {roundNumbers.map((r) => (
           <div key={r} className="flex-1 flex flex-col justify-around gap-6">
-            <h4 className="text-xs uppercase font-bold tracking-wider text-accent border-b border-surface-border pb-1">
-              Round {r}
-            </h4>
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <h4 className="text-xs uppercase font-black tracking-wider text-primary font-mono">
+                Round {r}
+              </h4>
+              <Badge variant="secondary" className="text-[9px] font-mono">
+                {rounds[r]?.length ?? 0} {rounds[r]?.length === 1 ? 'Match' : 'Matches'}
+              </Badge>
+            </div>
 
             <div className="flex flex-col justify-around gap-4 h-full">
-              {rounds[r]?.map((match) => (
-                <div
-                  key={match.id}
-                  className="bg-surface border border-surface-border rounded-md p-3 text-xs flex flex-col gap-1.5 shadow-sm"
-                >
-                  <div
-                    className={`flex justify-between items-center py-1 px-2 rounded ${
-                      match.winner && match.winner === match.player_a
-                        ? 'bg-accent/20 text-accent font-bold'
-                        : 'text-gray-300'
-                    }`}
-                  >
-                    <span>{match.player_a ? `Player ${match.player_a.slice(0, 6)}` : 'TBD'}</span>
-                    {match.winner === match.player_a && <span>🏆</span>}
-                  </div>
+              {rounds[r]?.map((match) => {
+                const isPlayerAWinner = match.winner && match.winner === match.player_a;
+                const isPlayerBWinner = match.winner && match.winner === match.player_b;
 
-                  <div className="h-px bg-surface-border" />
-
+                return (
                   <div
-                    className={`flex justify-between items-center py-1 px-2 rounded ${
-                      match.winner && match.winner === match.player_b
-                        ? 'bg-accent/20 text-accent font-bold'
-                        : 'text-gray-300'
-                    }`}
+                    key={match.id}
+                    className="bg-secondary/70 border border-border hover:border-primary/40 rounded-xl p-3 text-xs flex flex-col gap-2 shadow-sm transition-all"
                   >
-                    <span>{match.player_b ? `Player ${match.player_b.slice(0, 6)}` : 'TBD'}</span>
-                    {match.winner === match.player_b && <span>🏆</span>}
+                    {/* Player A */}
+                    <div
+                      className={`flex justify-between items-center py-1.5 px-2.5 rounded-lg transition-colors ${
+                        isPlayerAWinner
+                          ? 'bg-primary/15 text-primary font-bold border border-primary/30'
+                          : 'text-foreground'
+                      }`}
+                    >
+                      <span className="font-mono truncate">
+                        {match.player_a ? `Player #${match.player_a.slice(0, 6)}` : 'TBD'}
+                      </span>
+                      {isPlayerAWinner && (
+                        <Trophy className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 ml-1" />
+                      )}
+                    </div>
+
+                    <div className="h-px bg-border" />
+
+                    {/* Player B */}
+                    <div
+                      className={`flex justify-between items-center py-1.5 px-2.5 rounded-lg transition-colors ${
+                        isPlayerBWinner
+                          ? 'bg-primary/15 text-primary font-bold border border-primary/30'
+                          : 'text-foreground'
+                      }`}
+                    >
+                      <span className="font-mono truncate">
+                        {match.player_b ? `Player #${match.player_b.slice(0, 6)}` : 'TBD'}
+                      </span>
+                      {isPlayerBWinner && (
+                        <Trophy className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 ml-1" />
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }

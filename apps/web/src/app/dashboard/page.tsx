@@ -3,6 +3,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Swords,
+  BarChart3,
+  CreditCard,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Gift,
+  ShieldCheck,
+  CheckCircle2,
+  Trophy,
+  Clock,
+  ArrowRight,
+  Wallet,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
 import { EloBadge } from '../../components/EloBadge';
 import { GamePoster } from '../../components/GamePoster';
 import { CashierModal } from '../../components/CashierModal';
@@ -13,8 +29,18 @@ import { getGameById, OFFICIAL_GAMES } from '../../lib/gamesCatalog';
 import { notifyUser } from '../../lib/notifications';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/table';
+import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 
 interface MatchItem {
   id: string;
@@ -56,7 +82,6 @@ interface UserProfileData {
 
 export default function DashboardPage() {
   const { activeGame } = useGameStore();
-  const [activeTab, setActiveTab] = useState<'matches' | 'stats' | 'transactions'>('matches');
   const [cashierModalOpen, setCashierModalOpen] = useState(false);
   const [cashierMode, setCashierMode] = useState<'deposit' | 'withdraw'>('deposit');
   const [faucetLoading, setFaucetLoading] = useState(false);
@@ -142,9 +167,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto w-full min-w-0 pb-16">
-      {/* 1. MASTER INTRO CARD: Identity + Competitive Ledger Integrated Directly (Zero Side Squeezing) */}
-      <Card className="relative overflow-hidden border-border bg-card shadow-2xl">
-        {/* Subtle key art backdrop */}
+      {/* 1. MASTER INTRO CARD: Identity + Integrated Competitive Ledger */}
+      <Card className="relative overflow-hidden border border-border bg-card shadow-xl">
         <div className="h-44 sm:h-52 bg-gradient-to-r from-stone-950 via-stone-900 to-primary/20 w-full relative overflow-hidden">
           {catalogGame.bannerUrl && (
             <div
@@ -160,16 +184,17 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Integrated Intro Card Content */}
         <div className="px-6 sm:px-8 pb-8 relative z-10 space-y-6">
           {/* Identity Header Row */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-16 sm:-mt-20">
             {/* Player Avatar & Handle */}
             <div className="flex flex-col sm:flex-row sm:items-end gap-5 min-w-0">
               <div className="relative flex-shrink-0">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr from-stone-900 via-stone-800 to-primary text-primary-foreground font-black text-3xl sm:text-4xl flex items-center justify-center shadow-2xl border-4 border-card ring-2 ring-primary/30">
-                  {username.slice(0, 2).toUpperCase()}
-                </div>
+                <Avatar className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-card bg-primary text-primary-foreground text-3xl font-extrabold shadow-2xl">
+                  <AvatarFallback className="rounded-2xl bg-gradient-to-tr from-stone-900 to-primary">
+                    {username.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="absolute -bottom-2 -right-2">
                   <EloBadge elo={elo} size="md" />
                 </div>
@@ -187,10 +212,10 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight truncate">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight truncate">
                     @{username}
                   </h1>
-                  <span className="font-mono text-sm text-accent-400 font-bold">
+                  <span className="font-mono text-sm text-primary font-bold">
                     {elo} ELO
                   </span>
                 </div>
@@ -200,8 +225,9 @@ export default function DashboardPage() {
             {/* Quick Match Launchers */}
             <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap flex-shrink-0">
               <Link href={`/matches/new?profileId=${catalogGame.id}`}>
-                <Button variant="default" size="default" className="font-bold text-xs gap-1.5 shadow-md shadow-primary/20">
-                  <span>⚔️ Host 1v1 Duel</span>
+                <Button variant="default" size="default" className="font-bold text-xs gap-1.5 shadow-sm">
+                  <Swords className="w-4 h-4" />
+                  <span>Host 1v1 Duel</span>
                 </Button>
               </Link>
               <Link href="/challenges">
@@ -214,7 +240,7 @@ export default function DashboardPage() {
 
           <Separator />
 
-          {/* 2. COMPETITIVE LEDGER (Part of Intro Card - Full Width, Spacious, Never Squeezed) */}
+          {/* COMPETITIVE LEDGER (Full Width, Part of Intro Card) */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -224,23 +250,23 @@ export default function DashboardPage() {
                 </h3>
               </div>
               <span className="text-[11px] text-muted-foreground font-mono">
-                Standardized in € EUR worldwide · Zero exchange-rate slippage
+                Standardized in € EUR · Zero exchange-rate slippage
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Real Cash Box */}
-              <div className="p-5 rounded-2xl bg-secondary/60 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted-foreground uppercase font-mono">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase font-mono">
                       Cash Balance
                     </span>
                     <Badge variant="success" className="text-[9px] font-mono">
                       REAL MONEY
                     </Badge>
                   </div>
-                  <div className="text-3xl font-black font-mono text-emerald-400">
+                  <div className="text-3xl font-bold font-mono text-emerald-400">
                     {loadingBalance ? '...' : formatEUR(cashEur)}
                   </div>
                   <p className="text-[11px] text-muted-foreground font-mono">
@@ -253,33 +279,35 @@ export default function DashboardPage() {
                     variant="default"
                     size="sm"
                     onClick={openDeposit}
-                    className="font-bold text-xs gap-1"
+                    className="font-bold text-xs gap-1 h-8 shadow-sm"
                   >
-                    <span>+ Deposit €</span>
+                    <ArrowDownLeft className="w-3.5 h-3.5" />
+                    <span>Deposit</span>
                   </Button>
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={openWithdraw}
-                    className="font-bold text-xs gap-1"
+                    className="font-bold text-xs gap-1 h-8"
                   >
-                    <span>↑ Withdraw</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    <span>Withdraw</span>
                   </Button>
                 </div>
               </div>
 
               {/* Free Demo Points Box */}
-              <div className="p-5 rounded-2xl bg-secondary/60 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-5 rounded-xl bg-muted/40 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted-foreground uppercase font-mono">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase font-mono">
                       Demo Play Points
                     </span>
                     <Badge variant="copper" className="text-[9px] font-mono">
                       FREE PLAY
                     </Badge>
                   </div>
-                  <div className="text-3xl font-black font-mono text-accent-400">
+                  <div className="text-3xl font-bold font-mono text-primary">
                     {loadingBalance ? '...' : formatPoints(points)} <span className="text-xs text-muted-foreground font-sans">PTS</span>
                   </div>
                   <p className="text-[11px] text-muted-foreground font-mono">
@@ -293,9 +321,10 @@ export default function DashboardPage() {
                     size="sm"
                     disabled={faucetLoading}
                     onClick={handleClaimFaucet}
-                    className="font-bold text-xs gap-1"
+                    className="font-bold text-xs gap-1.5 h-8"
                   >
-                    <span>{faucetLoading ? 'Claiming...' : '🚰 +1,000 PTS'}</span>
+                    <Gift className="w-3.5 h-3.5 text-primary" />
+                    <span>{faucetLoading ? 'Claiming...' : '+1,000 PTS'}</span>
                   </Button>
                 </div>
               </div>
@@ -304,271 +333,256 @@ export default function DashboardPage() {
         </div>
       </Card>
 
-      {/* 2. BODY CONTENT: Clean Full-Width Navigation Tabs */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 border-b border-border pb-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('matches')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
-              activeTab === 'matches'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-            }`}
-          >
-            ⚔️ Match History ({matches?.length ?? 0})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
-              activeTab === 'stats'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-            }`}
-          >
-            🥇 Career Stats & Form
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('transactions')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
-              activeTab === 'transactions'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-            }`}
-          >
-            💳 Ledger Transactions ({historyData?.length ?? 0})
-          </button>
-        </div>
+      {/* 2. BODY CONTENT: Clean Full-Width Shadcn Tabs */}
+      <Tabs defaultValue="matches" className="space-y-6">
+        <TabsList className="h-10 bg-muted/70 p-1 border border-border">
+          <TabsTrigger value="matches" className="text-xs font-semibold gap-1.5">
+            <Swords className="w-3.5 h-3.5" />
+            <span>Match History</span>
+            <Badge variant="secondary" className="text-[10px] ml-1 px-1 py-0">
+              {matches?.length ?? 0}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="stats" className="text-xs font-semibold gap-1.5">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Career Performance</span>
+          </TabsTrigger>
+          <TabsTrigger value="transactions" className="text-xs font-semibold gap-1.5">
+            <CreditCard className="w-3.5 h-3.5" />
+            <span>Ledger Transactions</span>
+            <Badge variant="secondary" className="text-[10px] ml-1 px-1 py-0">
+              {historyData?.length ?? 0}
+            </Badge>
+          </TabsTrigger>
+        </TabsList>
 
         {/* Tab 1: Match History */}
-        {activeTab === 'matches' && (
-          <Card className="p-6 sm:p-8 bg-card border-border shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-foreground uppercase tracking-tight">
-                  Recent Head-to-Head Duels & Tournament Matches
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Scores verified automatically by automated instant game sync
+        <TabsContent value="matches">
+          <Card className="border border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-bold">Recent Head-to-Head Duels & Tournament Matches</CardTitle>
+              <CardDescription className="text-xs">
+                Scores verified automatically by background instant game sync.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingMatches ? (
+                <p className="py-12 text-center text-xs text-muted-foreground font-mono animate-pulse">
+                  Loading match records...
                 </p>
-              </div>
-            </div>
+              ) : matches && matches.length > 0 ? (
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-16 text-center">Result</TableHead>
+                        <TableHead>Game</TableHead>
+                        <TableHead>Match ID</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Prize</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {matches.map((m) => {
+                        const isWin = m.winner_id === userProfile?.id;
+                        const gameTitle = m.game_profiles?.display_name || catalogGame.displayName;
+                        const catalogItem = OFFICIAL_GAMES.find(
+                          (c) =>
+                            c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
+                            c.displayName.toLowerCase() === gameTitle.toLowerCase()
+                        ) || catalogGame;
 
-            {loadingMatches ? (
-              <p className="py-12 text-center text-xs text-muted-foreground font-mono animate-pulse">
-                Loading match records...
-              </p>
-            ) : matches && matches.length > 0 ? (
-              <div className="space-y-3">
-                {matches.map((m) => {
-                  const gameTitle = m.game_profiles?.display_name || catalogGame.displayName;
-                  const catalogItem = OFFICIAL_GAMES.find(
-                    (c) =>
-                      c.id.toLowerCase() === m.profile_id?.toLowerCase() ||
-                      c.displayName.toLowerCase() === gameTitle.toLowerCase()
-                  ) || catalogGame;
+                        return (
+                          <TableRow key={m.id} className="hover:bg-muted/30">
+                            <TableCell className="text-center">
+                              <Badge
+                                variant={m.status === 'SETTLED' ? (isWin ? 'success' : 'destructive') : 'secondary'}
+                                className="font-mono text-xs px-2"
+                              >
+                                {m.status === 'SETTLED' ? (isWin ? 'WIN' : 'LOSS') : 'LIVE'}
+                              </Badge>
+                            </TableCell>
 
-                  const isWin = m.winner_id === userProfile?.id;
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <GamePoster
+                                  game={catalogItem}
+                                  aspect="mini"
+                                  className="w-5 h-7 rounded flex-shrink-0"
+                                />
+                                <span className="font-bold text-xs text-foreground">
+                                  {gameTitle}
+                                </span>
+                              </div>
+                            </TableCell>
 
-                  return (
-                    <div
-                      key={m.id}
-                      className="p-4 rounded-2xl bg-secondary/50 hover:bg-secondary border border-border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-                    >
-                      <div className="flex items-center gap-4 min-w-0 flex-1">
-                        <span
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm font-mono flex-shrink-0 shadow-sm border ${
-                            m.status === 'SETTLED'
-                              ? isWin
-                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                                : 'bg-destructive/20 text-destructive border-destructive/40'
-                              : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                          }`}
-                        >
-                          {m.status === 'SETTLED' ? (isWin ? 'W' : 'L') : '⏳'}
-                        </span>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              #{m.id.slice(0, 8)}
+                            </TableCell>
 
-                        <GamePoster
-                          game={catalogItem}
-                          aspect="thumb"
-                          className="w-10 h-14 rounded-xl flex-shrink-0 shadow-sm border border-border hidden sm:block"
-                        />
+                            <TableCell className="text-xs text-muted-foreground font-mono">
+                              {new Date(m.created_at).toLocaleDateString()}
+                            </TableCell>
 
-                        <div className="min-w-0 flex-1 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-sm text-foreground group-hover:text-accent-400 transition-colors truncate">
-                              {gameTitle}
-                            </span>
-                            <Badge variant="outline" className="font-mono text-[9px]">
-                              {m.format}
-                            </Badge>
-                            {m.room_code && (
-                              <span className="px-1.5 py-0.5 bg-card text-muted-foreground font-mono text-[10px] rounded border border-border">
-                                {m.room_code}
-                              </span>
-                            )}
-                          </div>
+                            <TableCell className="text-xs font-bold font-mono text-foreground">
+                              {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Free Glory'}
+                            </TableCell>
 
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono flex-wrap">
-                            <span>#{m.id.slice(0, 8)}</span>
-                            <span>·</span>
-                            <span>{new Date(m.created_at).toLocaleDateString()}</span>
-                            <span>·</span>
-                            <span className="text-accent-400 font-bold">
-                              {m.prize_pool > 0 ? formatEUR(m.prize_pool) : 'Glory & Elo'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                            <TableCell>
+                              <Badge variant="outline" className="text-[10px] font-mono">
+                                {m.status}
+                              </Badge>
+                            </TableCell>
 
-                      <div className="flex items-center gap-3 self-end sm:self-auto flex-shrink-0">
-                        <Badge
-                          variant={
-                            m.status === 'SETTLED'
-                              ? 'success'
-                              : m.status === 'OPEN'
-                              ? 'warning'
-                              : 'secondary'
-                          }
-                          className="font-mono text-[10px]"
-                        >
-                          {m.status}
-                        </Badge>
-
-                        <Link href={`/matches/${m.id}`}>
-                          <Button variant="secondary" size="sm" className="h-8 text-xs font-bold">
-                            Matchroom →
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-16 text-center text-muted-foreground space-y-3 bg-secondary/30 rounded-2xl border border-dashed border-border">
-                <span className="text-4xl block">🎮</span>
-                <h4 className="text-base font-bold text-foreground">No Competitive Matches on Record</h4>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  Queue your first 1v1 duel or join a tournament cup to build your competitive match history.
-                </p>
-                <div className="pt-2">
-                  <Link href="/challenges">
-                    <Button variant="default" size="default" className="text-xs font-bold">
-                      Enter Matchmaking Queue
-                    </Button>
-                  </Link>
+                            <TableCell className="text-right">
+                              <Link href={`/matches/${m.id}`}>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                                  <span>Room</span>
+                                  <ArrowRight className="w-3 h-3" />
+                                </Button>
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="p-12 text-center text-muted-foreground space-y-3 bg-muted/20 rounded-xl border border-dashed border-border">
+                  <Swords className="w-8 h-8 mx-auto text-muted-foreground/60" />
+                  <h4 className="text-sm font-bold text-foreground">No Matches Logged Yet</h4>
+                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                    Queue for your first competitive match to start building your verified match history!
+                  </p>
+                  <div className="pt-2">
+                    <Link href={`/matches/new?profileId=${catalogGame.id}`}>
+                      <Button variant="default" size="sm" className="font-bold">
+                        Host First Duel
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </CardContent>
           </Card>
-        )}
+        </TabsContent>
 
         {/* Tab 2: Career Stats & Form */}
-        {activeTab === 'stats' && (
+        <TabsContent value="stats">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="p-6 bg-card border-border shadow-md space-y-3">
-              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider block">
+            <Card className="p-6 border border-border bg-card space-y-3">
+              <span className="text-xs uppercase font-bold text-muted-foreground font-mono">
                 Win Rate
               </span>
-              <div className="text-4xl font-black font-mono text-emerald-400">
+              <div className="text-4xl font-bold font-mono text-emerald-400">
                 {winRate}%
               </div>
-              <p className="text-xs text-muted-foreground font-mono">
-                {wins} Victories out of {totalMatches} settled matches
+              <p className="text-xs text-muted-foreground">
+                {wins} victories in {totalMatches} settled competitive duels.
               </p>
             </Card>
 
-            <Card className="p-6 bg-card border-border shadow-md space-y-3">
-              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider block">
-                Recent Match Form
+            <Card className="p-6 border border-border bg-card space-y-3">
+              <span className="text-xs uppercase font-bold text-muted-foreground font-mono">
+                Head-to-Head Record
+              </span>
+              <div className="text-4xl font-bold font-mono text-foreground">
+                {wins}W - {losses}L
+              </div>
+              <p className="text-xs text-muted-foreground">
+                All records verified via real-time automated scoring.
+              </p>
+            </Card>
+
+            <Card className="p-6 border border-border bg-card space-y-3">
+              <span className="text-xs uppercase font-bold text-muted-foreground font-mono">
+                Recent 5 Form
               </span>
               <div className="flex items-center gap-2 pt-1">
                 {recentForm.length > 0 ? (
                   recentForm.map((outcome, idx) => (
-                    <div
+                    <span
                       key={idx}
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm font-mono border ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs font-mono border ${
                         outcome === 'W'
                           ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
                           : 'bg-destructive/20 text-destructive border-destructive/40'
                       }`}
                     >
                       {outcome}
-                    </div>
+                    </span>
                   ))
                 ) : (
-                  <span className="text-xs text-muted-foreground font-mono">No matches played</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    No matches settled yet
+                  </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground font-mono">
-                Outcome of your last 5 matches
-              </p>
-            </Card>
-
-            <Card className="p-6 bg-card border-border shadow-md space-y-3">
-              <span className="text-xs uppercase font-bold text-muted-foreground font-mono tracking-wider block">
-                FairPlay Trust Score
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black font-mono text-emerald-400">{trustScore}</span>
-                <span className="text-xs text-muted-foreground font-mono">/ 1,000</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Automated match verification active. 0 dispute infractions.
+              <p className="text-xs text-muted-foreground pt-1">
+                Most recent match outcomes.
               </p>
             </Card>
           </div>
-        )}
+        </TabsContent>
 
         {/* Tab 3: Ledger Transactions */}
-        {activeTab === 'transactions' && (
-          <Card className="p-6 sm:p-8 bg-card border-border shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-foreground uppercase tracking-tight">
-                  Escrow & Wallet Ledger
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  History of deposits, withdrawals, match prize pools, and entry stakes
-                </p>
-              </div>
-            </div>
-
-            {historyData && historyData.length > 0 ? (
-              <div className="divide-y divide-border overflow-hidden bg-secondary/40 rounded-2xl border border-border">
-                {historyData.map((tx) => (
-                  <div key={tx.id} className="py-3.5 px-4 flex justify-between items-center text-xs">
-                    <div className="space-y-0.5">
-                      <p className="font-bold capitalize text-foreground text-sm">
-                        {tx.reason.replace(/_/g, ' ')}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground font-mono">
-                        {new Date(tx.createdAt).toLocaleString()} · ID: #{tx.id.slice(0, 8)}
-                      </p>
-                    </div>
-                    <div
-                      className={`font-mono font-bold text-sm ${
-                        tx.amount > 0 ? 'text-emerald-400' : 'text-destructive'
-                      }`}
-                    >
-                      {tx.amount > 0 ? `+${tx.amount.toLocaleString()}` : tx.amount.toLocaleString()} PTS
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="py-12 text-center text-xs text-muted-foreground font-mono">
-                No ledger transactions recorded yet.
-              </p>
-            )}
+        <TabsContent value="transactions">
+          <Card className="border border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-bold">Ledger Transactions & Audit Trail</CardTitle>
+              <CardDescription className="text-xs">
+                Complete cryptographic settlement history of deposits, stakes, and prize payouts.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {historyData && historyData.length > 0 ? (
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead>Transaction</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Balance After</TableHead>
+                        <TableHead className="text-right">Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="font-mono text-xs">
+                      {historyData.map((tx) => {
+                        const isPositive = tx.amount > 0;
+                        return (
+                          <TableRow key={tx.id} className="hover:bg-muted/30">
+                            <TableCell className="font-sans font-medium text-foreground">
+                              {tx.reason}
+                            </TableCell>
+                            <TableCell className={`font-bold ${isPositive ? 'text-emerald-400' : 'text-foreground'}`}>
+                              {isPositive ? `+${tx.amount}` : tx.amount} PTS
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {tx.balanceAfter} PTS
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground">
+                              {new Date(tx.createdAt).toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground font-mono text-xs">
+                  No ledger activity logged yet.
+                </div>
+              )}
+            </CardContent>
           </Card>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
 
-      {/* Geo-Aware Cashier Modal (Deposit & Withdrawal) */}
+      {/* Cashier Modal */}
       <CashierModal
         open={cashierModalOpen}
         onClose={() => setCashierModalOpen(false)}

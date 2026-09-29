@@ -3,6 +3,17 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Swords,
+  Users,
+  Trophy,
+  ShieldCheck,
+  Zap,
+  Coins,
+  ArrowRight,
+  Gamepad2,
+  Sparkles,
+} from 'lucide-react';
 import { apiClient } from '../../../lib/api';
 import { useGameStore } from '../../../lib/gameStore';
 import { usePartyStore } from '../../../lib/partyStore';
@@ -12,6 +23,11 @@ import { OFFICIAL_GAMES, getGameById } from '../../../lib/gamesCatalog';
 import { useWalletModeStore } from '../../../lib/walletModeStore';
 import { useGameAccountsStore } from '../../../lib/gameAccountsStore';
 import type { GameProfile, MatchFormat } from '@antigravity/core';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
+import { Badge } from '../../../components/ui/badge';
+import { Input } from '../../../components/ui/input';
+import { Separator } from '../../../components/ui/separator';
 
 const STAKE_PRESETS_REAL = [0, 1, 2.5, 5, 10, 20];
 const STAKE_PRESETS_DEMO = [0, 100, 250, 500, 1000, 2500];
@@ -97,36 +113,36 @@ function NewMatchForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto my-6 p-6 sm:p-8 bg-[#111319] border border-[#202430] rounded-2xl text-white shadow-2xl">
+    <Card className="max-w-2xl mx-auto my-6 p-6 sm:p-8 border border-border bg-card shadow-2xl">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-6 border-b border-[#202430]">
-        <div className="w-12 h-12 rounded-xl bg-[#C86228] flex items-center justify-center font-black text-white text-lg shadow-sm">
-          VX
+      <div className="flex items-center gap-3 pb-6 border-b border-border">
+        <div className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-base shadow-sm">
+          <Swords className="w-5 h-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-white">Create Arena Duel</h1>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Create Arena Duel</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Host a competitive duel or challenge with automated instant score verification.
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-950/60 border border-red-800 rounded-lg text-xs text-red-300">
+        <div className="mt-4 p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-xs text-destructive">
           {error}
         </div>
       )}
 
       <form onSubmit={handleCreate} className="mt-6 flex flex-col gap-6">
-        {/* Game Archetype Picker */}
+        {/* Game Picker */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
-            1. Select Esports Title <span className="text-[#C86228]">*</span>
+          <label className="block text-xs font-semibold text-foreground mb-1.5">
+            1. Select Esports Title <span className="text-primary">*</span>
           </label>
           <select
             value={profileId}
             onChange={(e) => handleGameSelect(e.target.value)}
-            className="w-full px-4 py-3 bg-[#161922] border border-[#202430] rounded-xl text-sm font-semibold text-white focus:outline-none focus:border-[#C86228] transition"
+            className="w-full px-3.5 py-2.5 bg-muted border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary transition"
           >
             <option value="">Select a competitive game...</option>
             {allAvailableGames.map((p) => {
@@ -144,7 +160,7 @@ function NewMatchForm() {
 
         {/* Match Mode */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
+          <label className="block text-xs font-semibold text-foreground mb-1.5">
             2. Match Mode
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -153,12 +169,15 @@ function NewMatchForm() {
               onClick={() => setMode('1v1')}
               className={`p-3 rounded-xl border text-left transition ${
                 mode === '1v1'
-                  ? 'bg-[#C86228]/15 border-[#C86228] text-white'
-                  : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
+                  ? 'bg-primary/10 border-primary text-foreground shadow-sm'
+                  : 'bg-muted/40 border-border text-muted-foreground hover:text-foreground'
               }`}
             >
-              <div className="text-sm font-bold">1v1 Solo Duel</div>
-              <div className="text-[11px] text-gray-400 mt-0.5">Head-to-head individual combat</div>
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <Swords className="w-3.5 h-3.5 text-primary" />
+                1v1 Solo Duel
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">Head-to-head individual match</div>
             </button>
 
             <button
@@ -166,26 +185,27 @@ function NewMatchForm() {
               onClick={() => setMode('PARTY')}
               className={`p-3 rounded-xl border text-left transition ${
                 mode === 'PARTY'
-                  ? 'bg-[#C86228]/15 border-[#C86228] text-white'
-                  : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
+                  ? 'bg-primary/10 border-primary text-foreground shadow-sm'
+                  : 'bg-muted/40 border-border text-muted-foreground hover:text-foreground'
               }`}
             >
-              <div className="text-sm font-bold flex items-center gap-1.5">
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-primary" />
                 Party vs Party
                 {members.length > 1 && (
-                  <span className="px-1.5 py-0.2 bg-[#C86228] text-white text-[10px] font-bold rounded">
+                  <Badge variant="default" className="text-[9px] px-1 py-0 ml-1">
                     {members.length} Squad
-                  </span>
+                  </Badge>
                 )}
               </div>
-              <div className="text-[11px] text-gray-400 mt-0.5">Queue with your current party</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">Queue with current squad</div>
             </button>
           </div>
         </div>
 
         {/* Match Series Format */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-2">
+          <label className="block text-xs font-semibold text-foreground mb-1.5">
             3. Series Format
           </label>
           <div className="grid grid-cols-3 gap-3">
@@ -194,41 +214,40 @@ function NewMatchForm() {
                 key={f}
                 type="button"
                 onClick={() => setFormat(f)}
-                className={`py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition ${
+                className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg border transition ${
                   format === f
-                    ? 'bg-[#C86228] border-[#C86228] text-white shadow-sm'
-                    : 'bg-[#161922] border-[#202430] text-gray-400 hover:text-white'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-muted/40 border-border text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Best of {f.replace('BO', '')}
               </button>
             ))}
           </div>
-          <p className="text-[11px] text-gray-400 mt-2">
-            {format === 'BO1' && '⚡ Sudden-death single game. Winner takes matchroom victory.'}
-            {format === 'BO3' && '⚔️ Best of 3 games. First player to 2 game wins claims victory.'}
-            {format === 'BO5' && '🏆 Championship format. First player to 3 game wins claims victory.'}
+          <p className="text-[11px] text-muted-foreground mt-2">
+            {format === 'BO1' && 'Single game sudden-death duel. Winner takes matchroom victory.'}
+            {format === 'BO3' && 'Best of 3 games. First player to 2 game wins claims victory.'}
+            {format === 'BO5' && 'Championship format. First player to 3 game wins claims victory.'}
           </p>
         </div>
 
-        {/* Active Ledger Entry Stakes & Prize Pool */}
+        {/* Entry Stakes & Prize Pool */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
+              <label className="block text-xs font-semibold text-foreground">
                 4. Entry Stake
               </label>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                walletMode === 'REAL'
-                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                  : 'bg-purple-500/15 border-purple-500/40 text-purple-300'
-              }`}>
-                {walletMode === 'REAL' ? '🟢 REAL CASH (€ EUR)' : '🟣 DEMO PLAY (PTS)'}
-              </span>
+              <Badge
+                variant={walletMode === 'REAL' ? 'success' : 'secondary'}
+                className="font-mono text-[10px]"
+              >
+                {walletMode === 'REAL' ? 'REAL CASH (€ EUR)' : 'DEMO PLAY (PTS)'}
+              </Badge>
             </div>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground">
               Guaranteed Prize:{' '}
-              <strong className="text-[#D97736] font-mono">
+              <strong className="text-primary font-mono">
                 {prizePool > 0
                   ? walletMode === 'REAL'
                     ? formatEUR(prizePool)
@@ -238,130 +257,55 @@ function NewMatchForm() {
             </span>
           </div>
 
-          {walletMode === 'DEMO' && (
-            <div className="mb-2 p-2 bg-purple-950/40 border border-purple-800/60 rounded-lg text-[11px] text-purple-300 flex items-center gap-2">
-              <span>🎮</span>
-              <span><strong>Demo Practice Match:</strong> Staking points with zero financial risk. Switch to Real Cash in the top bar to play for real Euros.</span>
-            </div>
-          )}
-
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
             {(walletMode === 'REAL' ? STAKE_PRESETS_REAL : STAKE_PRESETS_DEMO).map((fee) => (
-              <button
+              <Button
                 key={fee}
                 type="button"
+                variant={entryFee === fee && customFee === '' ? 'default' : 'secondary'}
+                size="sm"
                 onClick={() => {
                   setEntryFee(fee);
                   setCustomFee('');
                 }}
-                className={`py-2 text-xs font-bold rounded-lg border transition ${
-                  entryFee === fee && customFee === ''
-                    ? 'bg-[#C86228] border-[#C86228] text-white shadow-sm'
-                    : 'bg-[#161922] border-[#202430] text-gray-300 hover:border-gray-500'
-                }`}
+                className="font-mono text-xs"
               >
                 {fee === 0
                   ? 'FREE'
                   : walletMode === 'REAL'
-                  ? formatEUR(fee)
-                  : `${formatPoints(fee)} PTS`}
-              </button>
+                  ? `€${fee}`
+                  : `${fee} PTS`}
+              </Button>
             ))}
           </div>
+        </div>
 
-          {/* Legal / Fair Play Disclaimer */}
-          <div className="mt-3 p-3 bg-[#0B0C10] border border-[#202430] rounded-lg flex items-start gap-2.5 text-[11px] text-gray-400">
-            <span className="text-[#D97736] text-base leading-none">⚖️</span>
-            <span>
-              <strong>Skill-Based Peer-to-Peer Competition:</strong> Entry stakes are held in escrow. The winner claims the pre-determined guaranteed prize pool. 10% platform fee is deducted for hosting & automated background verification.
-            </span>
+        {/* FairPlay Guarantee Notice */}
+        <div className="p-3 bg-muted/40 border border-border rounded-xl flex items-center justify-between text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Automated Match Verification · 100% Anti-Cheat Escrow</span>
           </div>
+          <span className="font-mono text-[10px]">Instant Settlement</span>
         </div>
 
-        {/* In-Game Gamertag Onboarding for Selected Game */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
-              5. Your {getGamertagLabel(profileId)} (In-Game Handle)
-            </label>
-            {getGamertag(profileId) && (
-              <span className="text-xs text-green-400 font-mono">
-                Linked: <strong>{getGamertag(profileId)}</strong>
-              </span>
-            )}
-          </div>
-          <input
-            type="text"
-            placeholder={`Enter your in-game ${getGamertagLabel(profileId)} so opponent can invite you...`}
-            value={gamertagInput || getGamertag(profileId) || ''}
-            onChange={(e) => {
-              setGamertagInput(e.target.value);
-              setGamertag(profileId, e.target.value);
-            }}
-            className="w-full px-4 py-2.5 bg-[#161922] border border-[#202430] rounded-xl text-sm font-mono text-white focus:outline-none focus:border-[#C86228]"
-          />
-        </div>
-
-        {/* Geo / Regional Eligibility */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
-              5. Regional / Country Restriction
-            </label>
-            <button
-              type="button"
-              onClick={() => setIsCountryRestricted(!isCountryRestricted)}
-              className="text-xs text-[#D97736] hover:underline font-semibold"
-            >
-              {isCountryRestricted ? 'Switch to Worldwide' : '+ Restrict to Specific Country'}
-            </button>
-          </div>
-
-          {isCountryRestricted ? (
-            <CountrySelect
-              value={targetCountry}
-              onChange={(c) => setTargetCountry(c.code)}
-              label="Eligible Country"
-              placeholder="Select country eligible for this duel..."
-            />
-          ) : (
-            <div className="p-3 bg-[#161922] border border-[#202430] rounded-xl text-xs text-gray-300 flex items-center gap-2">
-              <span className="text-base">🌍</span>
-              <span><strong>Worldwide Open:</strong> Players from all 249 recognized territories can join.</span>
-            </div>
-          )}
-        </div>
-
-        {/* Opponent Selection */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1">
-            6. Opponent (Optional)
-          </label>
-          <input
-            type="text"
-            placeholder="Friend UUID or leave empty to list on Public Duel Board"
-            value={opponentId}
-            onChange={(e) => setOpponentId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-[#161922] border border-[#202430] rounded-xl text-sm text-white focus:outline-none focus:border-[#C86228]"
-          />
-        </div>
-
-        {/* Launch Button */}
-        <button
+        {/* Submit Button */}
+        <Button
           type="submit"
           disabled={loading}
-          className="mt-2 w-full py-3.5 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-sm uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#C86228]/20 disabled:opacity-50"
+          className="w-full h-11 font-bold text-sm uppercase tracking-wider shadow-md gap-2"
         >
-          {loading ? 'Initializing Arena Lobby...' : 'Launch Arena Duel'}
-        </button>
+          <Swords className="w-4 h-4" />
+          <span>{loading ? 'Creating Duel...' : 'Launch Matchroom'}</span>
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }
 
 export default function NewMatchPage() {
   return (
-    <Suspense fallback={<div className="text-center py-16 text-gray-400 text-sm font-mono">Loading VS Match creator...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-muted-foreground font-mono text-xs">Loading form...</div>}>
       <NewMatchForm />
     </Suspense>
   );

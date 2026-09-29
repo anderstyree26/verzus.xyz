@@ -3,6 +3,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Rocket,
+  LogIn,
+  Gamepad2,
+  Zap,
+  Coins,
+  Trophy,
+  Swords,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  Flame,
+  TrendingUp,
+  ChevronsUpDown,
+  Plus,
+} from 'lucide-react';
 import { useGameStore } from '../lib/gameStore';
 import { EloBadge } from '../components/EloBadge';
 import { ChallengeCard } from '../components/ChallengeCard';
@@ -15,7 +31,7 @@ import { getGameById, OFFICIAL_GAMES } from '../lib/gamesCatalog';
 import { notifyUser } from '../lib/notifications';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
-import { Card, CardHeader, CardContent } from '../components/ui/card';
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '../components/ui/card';
 
 interface ChallengeItem {
   id: string;
@@ -157,13 +173,12 @@ export default function HomePage() {
   const activeOpenCount = activeChallenges.length;
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto min-w-0">
-      {/* 1. If GUEST: High-Impact FACEIT-Style Hero Onboarding Banner */}
+    <div className="flex flex-col gap-8 max-w-7xl mx-auto min-w-0">
+      {/* 1. If GUEST: High-Impact FACEIT-Style Hero Banner */}
       {!isAuthenticated && !loadingProfile && (
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-10 shadow-2xl">
-          {/* Subtle background art glow */}
+        <Card className="relative overflow-hidden border border-border bg-card p-6 sm:p-10 shadow-2xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-accent-400/5 rounded-full filter blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-primary/5 rounded-full filter blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="space-y-4 max-w-2xl">
@@ -177,60 +192,63 @@ export default function HomePage() {
                 </Badge>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground uppercase leading-none">
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground uppercase leading-tight">
                 Play Competitive Duels. <br />
-                <span className="text-accent-400">Win Real Prizes.</span>
+                <span className="text-primary">Win Real Prizes.</span>
               </h1>
 
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Connect your game, queue 1v1 matches or squad tournaments, and let automated game sync verify scores in the background. No manual screenshot uploads or disputed matches.
+                Connect your game, queue 1v1 duels or squad tournaments, and let automated game sync verify scores in the background. No manual screenshot uploads or disputed matches.
               </p>
 
               <div className="flex items-center gap-3 pt-2 flex-wrap sm:flex-nowrap">
                 <Link href="/signup">
-                  <Button variant="default" size="lg" className="font-black text-xs uppercase tracking-wider">
-                    🚀 Create Free Account
+                  <Button variant="default" size="lg" className="font-bold text-xs uppercase tracking-wider gap-2">
+                    <Rocket className="w-4 h-4" />
+                    <span>Create Free Account</span>
                   </Button>
                 </Link>
                 <Link href="/login">
-                  <Button variant="secondary" size="lg" className="font-bold text-xs uppercase tracking-wider">
-                    Sign In
+                  <Button variant="secondary" size="lg" className="font-bold text-xs uppercase tracking-wider gap-2">
+                    <LogIn className="w-4 h-4" />
+                    <span>Sign In</span>
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
                   size="lg"
                   onClick={() => setGameModalOpen(true)}
-                  className="font-bold text-xs uppercase tracking-wider gap-1.5"
+                  className="font-bold text-xs uppercase tracking-wider gap-2"
                 >
-                  <span>🕹️ Explore Arenas</span>
+                  <Gamepad2 className="w-4 h-4" />
+                  <span>Explore Arenas</span>
                 </Button>
               </div>
             </div>
 
-            {/* 3 Supported Key Pillars */}
+            {/* 3 Pillars */}
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 flex-shrink-0">
-              <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
+              <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-1">
                 <div className="font-bold text-xs text-foreground flex items-center gap-2">
-                  <span>⚡</span> Instant Match Sync
+                  <Zap className="w-4 h-4 text-primary" /> Instant Match Sync
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">
                   Background feed validates results seamlessly. Zero player effort.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
+              <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-1">
                 <div className="font-bold text-xs text-foreground flex items-center gap-2">
-                  <span>💰</span> Euro (€) Escrow
+                  <Coins className="w-4 h-4 text-emerald-400" /> Euro (€) Escrow
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">
                   Compete for real cash or play free with community demo points.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-secondary/70 border border-border space-y-1">
+              <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-1">
                 <div className="font-bold text-xs text-foreground flex items-center gap-2">
-                  <span>🥇</span> Level 1-10 ELO
+                  <Trophy className="w-4 h-4 text-amber-400" /> Level 1-10 ELO
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">
                   FairPlay matchmaking calibrated to your verified skill rating.
@@ -238,15 +256,14 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
-      {/* 2. Active Game Arena Header with Game Poster (FACEIT Hub Style) */}
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-2xl">
-        {/* Background banner art backdrop */}
+      {/* 2. Active Game Arena Header with Game Poster */}
+      <Card className="relative overflow-hidden border border-border bg-card p-6 sm:p-8 shadow-xl">
         {catalogGame.bannerUrl && (
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-15 filter blur-sm pointer-events-none"
+            className="absolute inset-0 bg-cover bg-center opacity-15 filter blur-xs pointer-events-none"
             style={{ backgroundImage: `url(${catalogGame.bannerUrl})` }}
           />
         )}
@@ -257,13 +274,13 @@ export default function HomePage() {
             <GamePoster
               game={catalogGame}
               aspect="thumb"
-              className="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl shadow-2xl border border-border flex-shrink-0"
+              className="w-16 h-22 sm:w-20 sm:h-28 rounded-xl shadow-xl border border-border flex-shrink-0"
             />
             <div className="flex flex-col gap-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="copper">Official Arena</Badge>
                 <Badge variant="secondary" className="font-mono text-[10px]">
-                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${activeOpenCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-gray-500'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${activeOpenCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground'}`} />
                   {activeOpenCount > 0 ? `${activeOpenCount} DUELS READY` : 'READY TO PLAY'}
                 </Badge>
                 <Badge variant="outline" className="font-mono text-[10px]">
@@ -271,7 +288,7 @@ export default function HomePage() {
                 </Badge>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground uppercase mt-0.5 truncate">
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground uppercase mt-0.5 truncate">
                 {gameTitle}
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground">
@@ -283,14 +300,16 @@ export default function HomePage() {
           {/* Primary Action Launchers */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
             <Link href={`/matches/new?profileId=${gameId}`} onClick={handleHostDuelClick}>
-              <Button variant="default" size="lg" className="w-full sm:w-auto font-bold">
-                ⚔️ HOST 1v1 DUEL
+              <Button variant="default" size="lg" className="w-full sm:w-auto font-bold gap-2">
+                <Swords className="w-4 h-4" />
+                <span>Host 1v1 Duel</span>
               </Button>
             </Link>
 
             <Link href="/tournaments">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto font-bold">
-                🏆 BROWSE CUPS
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto font-bold gap-2">
+                <Trophy className="w-4 h-4" />
+                <span>Browse Cups</span>
               </Button>
             </Link>
 
@@ -298,13 +317,14 @@ export default function HomePage() {
               variant="outline"
               size="lg"
               onClick={() => setGameModalOpen(true)}
-              className="w-full sm:w-auto font-bold gap-1.5"
+              className="w-full sm:w-auto font-bold gap-2"
             >
-              <span>⇄ SWITCH ARENA</span>
+              <ChevronsUpDown className="w-4 h-4" />
+              <span>Switch Arena</span>
             </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* 3. Main 2-Column Responsive Hub */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -312,12 +332,12 @@ export default function HomePage() {
         <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary" />
+              <Swords className="w-4 h-4 text-primary" />
               <h2 className="text-base font-bold tracking-tight text-foreground uppercase truncate">
                 {gameTitle} Duels & Challenges
               </h2>
             </div>
-            <Link href="/challenges" className="text-xs text-accent-400 hover:underline font-bold flex-shrink-0">
+            <Link href="/challenges" className="text-xs text-primary hover:underline font-semibold flex-shrink-0">
               View All Open ({totalOpenCount}) →
             </Link>
           </div>
@@ -345,8 +365,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            /* Clean Empty State with Game Poster */
-            <div className="p-8 sm:p-10 bg-card border border-border rounded-2xl flex flex-col items-center justify-center text-center gap-4">
+            <div className="p-8 sm:p-10 bg-card border border-border rounded-xl flex flex-col items-center justify-center text-center gap-4">
               <GamePoster
                 game={catalogGame}
                 aspect="thumb"
@@ -359,8 +378,9 @@ export default function HomePage() {
                 </p>
               </div>
               <Link href={`/matches/new?profileId=${gameId}`} onClick={handleHostDuelClick}>
-                <Button variant="default" size="default">
-                  + Host Open Duel
+                <Button variant="default" size="sm" className="gap-1.5 font-bold">
+                  <Plus className="w-4 h-4" />
+                  <span>Host Open Duel</span>
                 </Button>
               </Link>
             </div>
@@ -369,11 +389,11 @@ export default function HomePage() {
 
         {/* Right Column (1 Col): Real Competitor Profile or Guest Callout */}
         <div className="flex flex-col gap-4 min-w-0">
-          <Card className="flex flex-col gap-4 p-4 sm:p-5">
+          <Card className="flex flex-col gap-4 p-5 border border-border bg-card">
             <CardHeader className="p-0 pb-3 border-b border-border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-stone-800 to-primary flex items-center justify-center font-black text-primary-foreground text-sm shadow-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
                     {userProfile?.username ? userProfile.username.slice(0, 1).toUpperCase() : '👤'}
                   </div>
                   <div className="min-w-0">
@@ -398,10 +418,10 @@ export default function HomePage() {
                     Rating: <strong className="text-foreground">{elo} ELO</strong>
                   </span>
                   <span className="text-muted-foreground text-[11px]">
-                    Next Tier: <strong className="text-accent-400">{nextLevelThreshold}</strong>
+                    Next Tier: <strong className="text-primary">{nextLevelThreshold}</strong>
                   </span>
                 </div>
-                <div className="w-full h-2 bg-secondary border border-border rounded-full overflow-hidden p-0.5">
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden p-0.5 border border-border">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-500"
                     style={{ width: `${eloProgressPercent}%` }}
@@ -413,7 +433,7 @@ export default function HomePage() {
               </div>
 
               {/* Real Match Stats Grid */}
-              <div className="grid grid-cols-3 gap-2 p-3 bg-secondary/60 border border-border rounded-xl text-center text-xs">
+              <div className="grid grid-cols-3 gap-2 p-3 bg-muted/40 border border-border rounded-xl text-center text-xs">
                 <div>
                   <span className="text-[10px] text-muted-foreground font-bold uppercase block">Win Rate</span>
                   <span className="font-mono font-bold text-emerald-400 text-xs sm:text-sm">{winRate}%</span>
@@ -442,10 +462,10 @@ export default function HomePage() {
                         key={i}
                         className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-[10px] font-mono ${
                           res === 'W'
-                            ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/40'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                             : res === 'L'
                             ? 'bg-destructive/20 text-destructive border border-destructive/40'
-                            : 'bg-secondary text-muted-foreground'
+                            : 'bg-muted text-muted-foreground'
                         }`}
                       >
                         {res}
@@ -477,7 +497,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Auth Prompt Modal (For Guests Attempting Gated Actions) */}
+      {/* Auth Prompt Modal */}
       <AuthPromptModal
         open={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

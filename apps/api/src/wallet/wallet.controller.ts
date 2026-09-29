@@ -27,11 +27,30 @@ export class WalletController {
     );
   }
 
+  @Post('deposit')
+  async deposit(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { amount: number; currency?: string; paymentHandleToken?: string; method?: string },
+  ) {
+    return this.walletService.deposit(
+      user.id,
+      body.amount,
+      body.currency || 'EUR',
+      body.paymentHandleToken,
+      body.method || 'PAYSAFE',
+    );
+  }
+
   @Post('payout')
   async requestPayout(
     @CurrentUser() user: AuthUser,
     @Body() body: { amount: number; method: PayoutMethod },
   ) {
     return this.walletService.requestPayout(user.id, body.amount, body.method);
+  }
+
+  @Get('paysafe/config')
+  getPaysafeConfig() {
+    return this.walletService.getPaysafeConfig();
   }
 }

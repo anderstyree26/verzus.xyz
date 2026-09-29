@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FriendList } from '../../components/FriendList';
 import { apiClient } from '../../lib/api';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Users, UserPlus } from 'lucide-react';
 
 interface FriendItem {
   id: string;
@@ -48,29 +53,55 @@ export default function FriendsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Friends & Connections</h1>
-        <p className="text-sm text-gray-400">Connect with fellow competitors to launch private lobbies.</p>
-      </div>
+    <div className="flex flex-col gap-6 max-w-3xl mx-auto my-6">
+      {/* Page Header */}
+      <Card className="p-6 sm:p-8 bg-card border-border shadow-xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-secondary border border-border flex items-center justify-center text-primary flex-shrink-0">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="copper">COMMUNITY & SOCIAL</Badge>
+              <Badge variant="secondary" className="font-mono text-[10px]">
+                {friends?.length || 0} CONNECTIONS
+              </Badge>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+              Friends & Squad Connections
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Connect with competitors to challenge them to private 1v1 duels or party lobbies.
+            </p>
+          </div>
+        </div>
+      </Card>
 
-      <form onSubmit={handleAddFriend} className="p-4 bg-surface-elevated border border-surface-border rounded-lg flex gap-3">
-        <input
-          type="text"
-          placeholder="Enter player user UUID..."
-          value={addresseeId}
-          onChange={(e) => setAddresseeId(e.target.value)}
-          className="flex-1 px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 bg-accent hover:bg-accent-600 font-bold text-xs rounded-md transition disabled:opacity-50"
-        >
-          {loading ? 'Sending...' : 'Add Friend'}
-        </button>
-      </form>
+      {/* Add Friend Input */}
+      <Card className="p-5 bg-card border-border shadow-sm">
+        <form onSubmit={handleAddFriend} className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              placeholder="Enter player user UUID or Gamer ID..."
+              value={addresseeId}
+              onChange={(e) => setAddresseeId(e.target.value)}
+              className="text-xs"
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={loading || !addresseeId.trim()}
+            variant="default"
+            className="font-bold text-xs gap-1.5 shadow-md shadow-primary/20 flex-shrink-0"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>{loading ? 'Sending...' : 'Send Friend Request'}</span>
+          </Button>
+        </form>
+      </Card>
 
+      {/* Friends List */}
       <FriendList friends={friends ?? []} currentUserId={me?.id ?? ''} />
     </div>
   );

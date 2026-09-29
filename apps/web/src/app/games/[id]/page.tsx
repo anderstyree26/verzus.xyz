@@ -4,6 +4,20 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import {
+  Swords,
+  Trophy,
+  BarChart3,
+  BookOpen,
+  Plus,
+  ChevronsUpDown,
+  ShieldCheck,
+  Zap,
+  Users,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+} from 'lucide-react';
 import { apiClient } from '../../../lib/api';
 import { getGameById, OFFICIAL_GAMES, type CatalogGame } from '../../../lib/gamesCatalog';
 import { useGameStore } from '../../../lib/gameStore';
@@ -12,9 +26,19 @@ import { EloBadge } from '../../../components/EloBadge';
 import { ChallengeCard } from '../../../components/ChallengeCard';
 import { GamePoster } from '../../../components/GamePoster';
 import { GameSelectionModal } from '../../../components/GameSelectionModal';
+import { TournamentCard } from '../../../components/TournamentCard';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../../../components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../../components/ui/table';
 import { formatEUR } from '../../../lib/currency';
 import type { GameProfile } from '@antigravity/core';
 
@@ -57,10 +81,9 @@ export default function GameHubPage() {
   const { setActiveGame } = useGameStore();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'duels' | 'tournaments' | 'ladders'>('duels');
   const [feeFilter, setFeeFilter] = useState<'ALL' | 'FREE' | 'CASH'>('ALL');
 
-  // Query database profiles
+  // Query database profile
   const { data: profile } = useQuery<GameProfile>({
     queryKey: ['game-profile-hub', id],
     queryFn: () => apiClient<GameProfile>(`/games/${id}`),
@@ -133,22 +156,22 @@ export default function GameHubPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto w-full min-w-0 pb-16">
-      {/* 1. HERO ARENA BANNER (Decluttered & Clean) */}
-      <Card className="relative overflow-hidden border-border bg-card shadow-2xl">
+      {/* 1. HERO ARENA BANNER */}
+      <Card className="relative overflow-hidden border border-border bg-card shadow-xl">
         {catalogItem.bannerUrl && (
           <div
             className="absolute inset-0 bg-cover bg-center opacity-25 filter blur-xs"
             style={{ backgroundImage: `url(${catalogItem.bannerUrl})` }}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/70 to-card/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/75 to-card/25" />
 
         <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4 sm:gap-6 min-w-0">
             <GamePoster
               game={catalogItem}
               aspect="thumb"
-              className="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl shadow-2xl border border-border flex-shrink-0"
+              className="w-16 h-22 sm:w-20 sm:h-28 rounded-xl shadow-2xl border border-border flex-shrink-0"
             />
 
             <div className="space-y-1.5 min-w-0">
@@ -158,17 +181,19 @@ export default function GameHubPage() {
                   {resolvedProfile.platform || 'UNIVERSAL'}
                 </Badge>
                 {myGamertag ? (
-                  <Badge variant="success" className="font-mono text-[10px]">
-                    {gamertagLabel}: {myGamertag}
+                  <Badge variant="success" className="font-mono text-[10px] gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>{gamertagLabel}: {myGamertag}</span>
                   </Badge>
                 ) : (
-                  <Badge variant="warning" className="font-mono text-[10px]">
-                    ⚠️ {gamertagLabel} Not Linked
+                  <Badge variant="warning" className="font-mono text-[10px] gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    <span>{gamertagLabel} Not Linked</span>
                   </Badge>
                 )}
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight truncate leading-tight uppercase">
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight truncate leading-tight uppercase">
                 {resolvedProfile.displayName} Arena
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
@@ -178,294 +203,283 @@ export default function GameHubPage() {
           </div>
 
           {/* Primary Action Buttons */}
-          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap flex-shrink-0">
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap flex-shrink-0">
             <Button
               variant="outline"
-              size="default"
+              size="sm"
               onClick={() => setModalOpen(true)}
-              className="font-bold text-xs gap-1.5"
+              className="font-bold text-xs gap-1.5 h-9"
             >
-              <span>⇄ Switch Arena</span>
+              <ChevronsUpDown className="w-4 h-4" />
+              <span>Switch Arena</span>
             </Button>
 
             <Link href={`/matches/new?profileId=${resolvedProfile.id}`}>
-              <Button variant="default" size="default" className="font-bold text-xs gap-1.5 shadow-md shadow-primary/20">
-                <span>⚔️ Create 1v1 Duel</span>
+              <Button variant="default" size="sm" className="font-bold text-xs gap-1.5 h-9 shadow-sm">
+                <Swords className="w-4 h-4" />
+                <span>Create 1v1 Duel</span>
               </Button>
             </Link>
 
             <Link href={`/tournaments/new?profileId=${resolvedProfile.id}`}>
-              <Button variant="secondary" size="default" className="font-bold text-xs gap-1.5">
-                <span>🏆 Create Cup</span>
+              <Button variant="secondary" size="sm" className="font-bold text-xs gap-1.5 h-9">
+                <Trophy className="w-4 h-4" />
+                <span>Create Cup</span>
               </Button>
             </Link>
           </div>
         </div>
       </Card>
 
-      {/* 2. DECLUTTERED TAB WORKSPACE: Join vs Create is Crystal Clear */}
-      <div className="space-y-6">
-        {/* Navigation Tabs */}
+      {/* 2. DECLUTTERED SHADCN TABS WORKSPACE */}
+      <Tabs defaultValue="duels" className="space-y-6">
         <div className="flex items-center justify-between border-b border-border pb-3 flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveTab('duels')}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                activeTab === 'duels'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-              }`}
-            >
-              ⚔️ Open Duels ({challenges?.length || 0})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('tournaments')}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                activeTab === 'tournaments'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-              }`}
-            >
-              🏆 Tournaments ({tournaments?.length || 0})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('ladders')}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                activeTab === 'ladders'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-              }`}
-            >
-              🥇 Ladder Rankings
-            </button>
-          </div>
+          <TabsList className="h-10 bg-muted/70 p-1 border border-border">
+            <TabsTrigger value="duels" className="text-xs font-semibold gap-1.5">
+              <Swords className="w-3.5 h-3.5" />
+              <span>Open Duels</span>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1 py-0">
+                {challenges?.length || 0}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="tournaments" className="text-xs font-semibold gap-1.5">
+              <Trophy className="w-3.5 h-3.5" />
+              <span>Tournaments</span>
+              <Badge variant="secondary" className="text-[10px] ml-1 px-1 py-0">
+                {tournaments?.length || 0}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="ladders" className="text-xs font-semibold gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Ladder Rankings</span>
+            </TabsTrigger>
+            <TabsTrigger value="rules" className="text-xs font-semibold gap-1.5">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Rules & Calibration</span>
+            </TabsTrigger>
+          </TabsList>
 
-          {activeTab === 'duels' && (
-            <div className="flex items-center bg-secondary border border-border rounded-xl p-1 gap-1 text-xs">
-              {(['ALL', 'FREE', 'CASH'] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setFeeFilter(m)}
-                  className={`px-3 py-1 rounded-lg font-bold text-xs transition ${
-                    feeFilter === m
-                      ? 'bg-primary text-primary-foreground shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {m === 'ALL' ? 'All Stakes' : m === 'FREE' ? 'Free Play' : 'Cash (€)'}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Quick Filter Capsule for Duels */}
+          <div className="flex items-center bg-muted p-1 rounded-lg border border-border text-xs">
+            {(['ALL', 'FREE', 'CASH'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setFeeFilter(m)}
+                className={`px-3 py-1 rounded-md text-[10px] font-bold tracking-wider transition ${
+                  feeFilter === m
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {m === 'ALL' ? 'ALL STAKES' : m === 'FREE' ? 'DEMO (0 PTS)' : 'REAL CASH (€)'}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* TAB 1: DUELS */}
-        {activeTab === 'duels' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-foreground uppercase tracking-tight">
-                  Available 1v1 Duels
+        {/* Tab 1: Duels & Challenges */}
+        <TabsContent value="duels">
+          {loadingChallenges ? (
+            <div className="p-12 text-center text-muted-foreground font-mono text-xs bg-card border border-border rounded-xl animate-pulse">
+              Querying live match pool...
+            </div>
+          ) : filteredChallenges.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredChallenges.map((c) => (
+                <ChallengeCard
+                  key={c.id}
+                  id={c.id}
+                  gameTitle={c.game_profiles?.display_name || resolvedProfile.displayName}
+                  gameType={c.game_profiles?.game_type || resolvedProfile.gameType}
+                  entryFee={c.entry_fee ?? 0}
+                  prizePool={c.prize_pool ?? 0}
+                  creatorName={c.created_by?.slice(0, 8) || 'Player'}
+                  format={c.format || 'BO1'}
+                  countryCode={c.country_code}
+                  mode={c.mode || '1v1'}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="p-10 text-center border border-border bg-card flex flex-col items-center justify-center gap-4">
+              <Swords className="w-10 h-10 text-muted-foreground/60" />
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-foreground">
+                  No Open {feeFilter !== 'ALL' ? feeFilter : ''} Duels in {resolvedProfile.displayName}
                 </h3>
-                <p className="text-xs text-muted-foreground">
-                  Select any open challenger to join immediately, or host your own custom match.
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Host an open challenge or queue up against matchmaking opponents.
                 </p>
               </div>
-
               <Link href={`/matches/new?profileId=${resolvedProfile.id}`}>
-                <Button variant="default" size="sm" className="font-bold text-xs">
-                  + Host Custom Match
+                <Button variant="default" size="sm" className="gap-1.5 font-bold">
+                  <Plus className="w-4 h-4" />
+                  <span>Host New Duel</span>
                 </Button>
               </Link>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Tab 2: Tournaments */}
+        <TabsContent value="tournaments">
+          {loadingTournaments ? (
+            <div className="p-12 text-center text-muted-foreground font-mono text-xs bg-card border border-border rounded-xl animate-pulse">
+              Loading brackets...
             </div>
-
-            {loadingChallenges ? (
-              <div className="p-12 text-center text-muted-foreground font-mono text-xs animate-pulse bg-card border border-border rounded-2xl">
-                Scanning open matchmaking pool for {resolvedProfile.displayName}...
-              </div>
-            ) : filteredChallenges.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredChallenges.map((c) => (
-                  <ChallengeCard
-                    key={c.id}
-                    id={c.id}
-                    gameTitle={c.game_profiles?.display_name || resolvedProfile.displayName}
-                    gameType={c.game_profiles?.game_type || resolvedProfile.gameType}
-                    entryFee={c.entry_fee ?? 0}
-                    prizePool={c.prize_pool ?? 0}
-                    creatorName={c.created_by ? c.created_by.slice(0, 8) : 'Challenger'}
-                    format={c.format}
-                    countryCode={c.country_code}
-                    mode={c.mode}
-                  />
-                ))}
-              </div>
-            ) : (
-              <Card className="p-12 text-center space-y-4 bg-secondary/30">
-                <span className="text-4xl block">⚔️</span>
-                <div>
-                  <h4 className="font-bold text-base text-foreground">No Open Duels Right Now</h4>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                    Be the first competitor to open a challenge in {resolvedProfile.displayName}. Set your own stake in € EUR or play for free.
-                  </p>
-                </div>
-                <Link href={`/matches/new?profileId=${resolvedProfile.id}`}>
-                  <Button variant="default" size="default">
-                    + Host First Duel
-                  </Button>
-                </Link>
-              </Card>
-            )}
-          </div>
-        )}
-
-        {/* TAB 2: TOURNAMENTS */}
-        {activeTab === 'tournaments' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-foreground uppercase tracking-tight">
-                  Single-Elimination Cups & Tournaments
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Bracket cups with automated progression and verified escrow payouts.
+          ) : tournaments && tournaments.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tournaments.map((t) => (
+                <TournamentCard
+                  key={t.id}
+                  tournament={{
+                    id: t.id,
+                    name: t.name,
+                    status: t.status as any,
+                    entryFee: t.entry_fee,
+                    prizePool: t.prize_pool,
+                    maxParticipants: t.size,
+                    currentParticipants: 0,
+                    startsAt: new Date().toISOString(),
+                    gameProfileId: resolvedProfile.id,
+                  }}
+                  game={catalogItem}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="p-10 text-center border border-border bg-card flex flex-col items-center justify-center gap-4">
+              <Trophy className="w-10 h-10 text-muted-foreground/60" />
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-foreground">No Active Cups Scheduled</h3>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Create a custom single-elimination cup for your squad and community.
                 </p>
               </div>
-
               <Link href={`/tournaments/new?profileId=${resolvedProfile.id}`}>
-                <Button variant="default" size="sm" className="font-bold text-xs">
-                  + Host Tournament
+                <Button variant="default" size="sm" className="gap-1.5 font-bold">
+                  <Plus className="w-4 h-4" />
+                  <span>Host Tournament Cup</span>
                 </Button>
               </Link>
-            </div>
+            </Card>
+          )}
+        </TabsContent>
 
-            {loadingTournaments ? (
-              <div className="p-12 text-center text-muted-foreground font-mono text-xs animate-pulse bg-card border border-border rounded-2xl">
-                Loading tournaments...
-              </div>
-            ) : tournaments && tournaments.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tournaments.map((t) => (
-                  <Card key={t.id} className="p-5 flex flex-col justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="copper" className="font-mono text-[9px]">
-                          {t.format}
-                        </Badge>
-                        <Badge variant={t.status === 'ENROLLING' ? 'success' : 'secondary'} className="font-mono text-[9px]">
-                          {t.status}
-                        </Badge>
-                      </div>
+        {/* Tab 3: Ladder Rankings */}
+        <TabsContent value="ladders">
+          <Card className="border border-border bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base font-bold">{resolvedProfile.displayName} Competitive Ladder</CardTitle>
+              <CardDescription className="text-xs">
+                Official Season 1 Elo standings. Play verified duels to increase rank.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {ladderEntries && ladderEntries.length > 0 ? (
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-16">Rank</TableHead>
+                        <TableHead>Competitor</TableHead>
+                        <TableHead>Rating</TableHead>
+                        <TableHead>Win Rate</TableHead>
+                        <TableHead>Record</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {ladderEntries.slice(0, 15).map((entry, idx) => {
+                        const winRate = entry.gamesPlayed > 0
+                          ? ((entry.wins / entry.gamesPlayed) * 100).toFixed(1)
+                          : '0.0';
 
-                      <h4 className="font-bold text-sm text-foreground truncate">
-                        {t.name}
-                      </h4>
-
-                      <div className="text-xs font-mono text-muted-foreground space-y-0.5">
-                        <p>Bracket: {t.size} Competitors</p>
-                        <p>Prize: <strong className="text-emerald-400">{formatEUR(t.prize_pool)}</strong></p>
-                      </div>
-                    </div>
-
-                    <Link href={`/tournaments/${t.id}`}>
-                      <Button variant="default" size="sm" className="w-full font-bold text-xs">
-                        Join Tournament →
-                      </Button>
-                    </Link>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card className="p-12 text-center space-y-4 bg-secondary/30">
-                <span className="text-4xl block">🏆</span>
-                <div>
-                  <h4 className="font-bold text-base text-foreground">No Cups Scheduled Yet</h4>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                    Host an 8 or 16 player knockout cup in {resolvedProfile.displayName} with guaranteed escrow rewards.
-                  </p>
+                        return (
+                          <TableRow key={entry.userId} className="hover:bg-muted/30">
+                            <TableCell className="font-bold font-mono text-sm">
+                              #{idx + 1}
+                            </TableCell>
+                            <TableCell>
+                              <Link
+                                href={`/profile/${entry.username || entry.userId}`}
+                                className="font-bold text-xs text-foreground hover:text-primary transition"
+                              >
+                                @{entry.username || entry.userId.slice(0, 8)}
+                              </Link>
+                            </TableCell>
+                            <TableCell>
+                              <EloBadge elo={entry.rating} size="sm" showLabel />
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-emerald-400 font-bold">
+                              {winRate}%
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                              {entry.wins}W - {entry.losses}L
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Link href={`/matches/new?profileId=${resolvedProfile.id}&opponent=${entry.userId}`}>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                                  <span>Challenge</span>
+                                  <ArrowRight className="w-3 h-3" />
+                                </Button>
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </div>
-                <Link href={`/tournaments/new?profileId=${resolvedProfile.id}`}>
-                  <Button variant="default" size="default">
-                    + Host New Cup
+              ) : (
+                <div className="p-8 text-center text-muted-foreground text-xs font-mono">
+                  No ranked matches logged for this title yet. Be the first to establish a rating!
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab 4: Rules & Calibration */}
+        <TabsContent value="rules">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="p-6 border border-border bg-card space-y-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h4 className="text-sm font-bold text-foreground">Automated Match Verification</h4>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Matches are automatically verified by client-side game feed detection. Zero manual screenshots or referee delays required.
+              </p>
+              <div className="p-3 bg-muted/40 rounded-lg text-xs font-mono space-y-1">
+                <div className="text-muted-foreground">Extraction Mode: <span className="text-foreground font-bold">{resolvedProfile.gameType}</span></div>
+                <div className="text-muted-foreground">Supported Platforms: <span className="text-foreground font-bold">{resolvedProfile.platform || 'Cross-Platform PC / Console'}</span></div>
+              </div>
+            </Card>
+
+            <Card className="p-6 border border-border bg-card space-y-3">
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-primary" />
+                <h4 className="text-sm font-bold text-foreground">Anti-Cheat & Dispute Arbitrage</h4>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                If scores differ between opponents or confidence falls below threshold, match enters HITL dispute review where reviewers audit cryptographic evidence hashes.
+              </p>
+              <div className="pt-2">
+                <Link href={`/matches/new?profileId=${resolvedProfile.id}`}>
+                  <Button variant="default" size="sm" className="text-xs font-bold gap-1.5">
+                    <Swords className="w-3.5 h-3.5" />
+                    <span>Launch 1v1 Arena</span>
                   </Button>
                 </Link>
-              </Card>
-            )}
-          </div>
-        )}
-
-        {/* TAB 3: LADDER RANKINGS */}
-        {activeTab === 'ladders' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-black text-base sm:text-lg text-foreground uppercase tracking-tight">
-                  {resolvedProfile.displayName} Competitive Elo Standings
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Top verified players ranked by competitive MMR
-                </p>
               </div>
-
-              <Link href={`/leaderboards/${resolvedProfile.gameType.toLowerCase()}`}>
-                <Button variant="secondary" size="sm" className="font-bold text-xs">
-                  Full Ladder →
-                </Button>
-              </Link>
-            </div>
-
-            {loadingLadder ? (
-              <div className="p-12 text-center text-muted-foreground font-mono text-xs animate-pulse bg-card border border-border rounded-2xl">
-                Computing ladder rankings...
-              </div>
-            ) : !ladderEntries || ladderEntries.length === 0 ? (
-              <Card className="p-12 text-center space-y-2 bg-secondary/30">
-                <span className="text-3xl block">🥇</span>
-                <p className="font-bold text-sm text-foreground">No Rated Records Yet</p>
-                <p className="text-xs text-muted-foreground">Play your first verified duel in this arena to claim rank #1!</p>
-              </Card>
-            ) : (
-              <Card className="p-4 sm:p-6 bg-card border-border shadow-md divide-y divide-border">
-                {ladderEntries.slice(0, 10).map((entry, idx) => (
-                  <div
-                    key={entry.userId}
-                    className="py-3 px-2 flex items-center justify-between gap-4 hover:bg-secondary/40 rounded-xl transition"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className={`w-6 h-6 rounded-lg font-black text-xs flex items-center justify-center flex-shrink-0 ${
-                        idx === 0 ? 'bg-amber-500 text-black' : idx === 1 ? 'bg-gray-300 text-black' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-secondary text-muted-foreground'
-                      }`}>
-                        {idx + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <Link href={`/profile/${entry.username || entry.userId}`} className="font-bold text-xs sm:text-sm text-foreground hover:text-accent-400 truncate block">
-                          @{entry.username || `player_${entry.userId.slice(0, 6)}`}
-                        </Link>
-                        <span className="text-[10px] text-muted-foreground font-mono">
-                          {entry.wins}W · {entry.losses}L
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <EloBadge elo={entry.rating} size="sm" />
-                      <span className="font-mono font-bold text-xs sm:text-sm text-foreground">
-                        {entry.rating} <span className="text-[10px] text-muted-foreground font-sans">ELO</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </Card>
-            )}
+            </Card>
           </div>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
 
-      {/* Global Game Selection Modal (Popup only, NEVER a top scroll list) */}
+      {/* Game Selection Modal */}
       <GameSelectionModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

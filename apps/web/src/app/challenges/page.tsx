@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { Swords, Plus, Filter, Globe, Coins, ShieldCheck } from 'lucide-react';
 import { ChallengeCard } from '../../components/ChallengeCard';
 import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
@@ -100,10 +101,10 @@ export default function ChallengesPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       {/* Top Banner & Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-6 sm:p-8 border border-border rounded-3xl shadow-xl">
+      <Card className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 sm:p-8 border border-border bg-card shadow-xl">
         <div className="flex items-center gap-4 sm:gap-6 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-secondary border border-border flex items-center justify-center text-2xl font-black text-accent-400 flex-shrink-0 shadow-inner">
-            ⚔️
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary flex-shrink-0 shadow-sm">
+            <Swords className="w-6 h-6" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -114,7 +115,7 @@ export default function ChallengesPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
               Duel Matchmaking Queue
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -133,13 +134,14 @@ export default function ChallengesPage() {
           }}
           className="flex-shrink-0"
         >
-          <Button variant="default" size="lg" className="w-full sm:w-auto">
-            + Create Duel
+          <Button variant="default" size="default" className="w-full sm:w-auto gap-2 font-bold shadow-sm">
+            <Plus className="w-4 h-4" />
+            <span>Create Duel</span>
           </Button>
         </Link>
-      </div>
+      </Card>
 
-      {/* Active Game Arena Context Bar (Replaces horizontal scroll) */}
+      {/* Active Game Arena Context Bar */}
       <GameContextBar
         title={filterGameOnly ? `${activeGame?.displayName || 'Arena'} Duels` : 'All Competitive Duels'}
         subtitle={filterGameOnly ? `Real-time 1v1 matchmaking for ${activeGame?.displayName || 'Active Game'}` : 'Browsing open duels across all supported esports titles'}
@@ -148,14 +150,14 @@ export default function ChallengesPage() {
       />
 
       {/* Filter Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-card border border-border rounded-2xl text-xs">
+      <Card className="p-4 border border-border bg-card flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-secondary border border-border rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-muted border border-border rounded-lg p-1 gap-1">
             {(['ALL', 'FREE', 'CASH'] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setFeeFilter(mode)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-3 py-1 rounded-md text-xs font-bold transition ${
                   feeFilter === mode
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -168,11 +170,13 @@ export default function ChallengesPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs font-semibold">Region:</span>
+          <span className="text-muted-foreground text-xs font-semibold flex items-center gap-1">
+            <Globe className="w-3.5 h-3.5" /> Region:
+          </span>
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            className="px-3 py-2 bg-secondary border border-border text-foreground rounded-xl text-xs focus:outline-none focus:border-primary"
+            className="px-3 py-1.5 bg-muted border border-border text-foreground rounded-lg text-xs focus:outline-none focus:border-primary"
           >
             <option value="All">Global (All Regions)</option>
             {GLOBAL_REGIONS.map((r) => (
@@ -182,11 +186,11 @@ export default function ChallengesPage() {
             ))}
           </select>
         </div>
-      </div>
+      </Card>
 
-      {/* Challenge Grid with consistent gap-6 */}
+      {/* Challenge Grid */}
       {isLoading ? (
-        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-2xl">
+        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-xl">
           Fetching live matchmaking board...
         </div>
       ) : filteredChallenges.length > 0 ? (
@@ -208,8 +212,8 @@ export default function ChallengesPage() {
           ))}
         </div>
       ) : (
-        <Card className="p-16 text-center flex flex-col items-center justify-center gap-4">
-          <div className="text-4xl">⚔️</div>
+        <Card className="p-16 text-center border border-border bg-card flex flex-col items-center justify-center gap-4">
+          <Swords className="w-10 h-10 text-muted-foreground/60" />
           <CardTitle className="text-xl">No Open Duels in this Queue</CardTitle>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             {filterGameOnly && activeGame
@@ -220,22 +224,23 @@ export default function ChallengesPage() {
             {filterGameOnly && (
               <Button
                 variant="secondary"
-                size="default"
+                size="sm"
                 onClick={() => setFilterGameOnly(false)}
               >
                 View All Games
               </Button>
             )}
             <Link href={activeGame ? `/matches/new?profileId=${activeGame.id}` : '/matches/new'}>
-              <Button variant="default" size="default">
-                Post a Match
+              <Button variant="default" size="sm" className="gap-1.5 font-bold">
+                <Plus className="w-4 h-4" />
+                <span>Post a Match</span>
               </Button>
             </Link>
           </div>
         </Card>
       )}
 
-      {/* Auth Prompt Modal for Unauthenticated Competitors */}
+      {/* Auth Prompt Modal */}
       <AuthPromptModal
         open={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

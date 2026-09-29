@@ -7,18 +7,37 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 
-interface TournamentCardProps {
+interface TournamentItemData {
   id: string;
   name: string;
-  format: string;
-  size: number;
-  entryFee: number;
-  prizePool: number;
-  status: string;
+  format?: string;
+  size?: number;
+  maxParticipants?: number;
+  entryFee?: number;
+  prizePool?: number;
+  status?: any;
+  gameProfileId?: string;
+  currentParticipants?: number;
+  enrolledCount?: number;
+  region?: string;
+  countryCode?: string;
+  startsAt?: string;
+}
+
+export interface TournamentCardProps {
+  id?: string;
+  name?: string;
+  format?: string;
+  size?: number;
+  entryFee?: number;
+  prizePool?: number;
+  status?: string;
   gameTitle?: string;
   region?: string;
   countryCode?: string;
   enrolledCount?: number;
+  tournament?: TournamentItemData;
+  game?: { displayName?: string; shortName?: string };
 }
 
 export function TournamentCard({
@@ -32,9 +51,23 @@ export function TournamentCard({
   gameTitle,
   region = 'Worldwide',
   countryCode,
-  enrolledCount = 0,
+  enrolledCount,
+  tournament,
+  game,
 }: TournamentCardProps) {
-  const country = countryCode ? getCountryByCode(countryCode) : null;
+  const resolvedId = id || tournament?.id || '';
+  const resolvedName = name || tournament?.name || 'Tournament';
+  const resolvedFormat = format || tournament?.format || 'SINGLE_ELIM';
+  const resolvedSize = size ?? tournament?.size ?? tournament?.maxParticipants ?? 8;
+  const resolvedEntryFee = entryFee ?? tournament?.entryFee ?? 0;
+  const resolvedPrizePool = prizePool ?? tournament?.prizePool ?? 0;
+  const resolvedStatus = status || tournament?.status || 'REGISTRATION';
+  const resolvedGameTitle = gameTitle || game?.displayName || '';
+  const resolvedRegion = region || tournament?.region || 'Worldwide';
+  const resolvedCountryCode = countryCode || tournament?.countryCode;
+  const resolvedEnrolledCount = enrolledCount ?? tournament?.currentParticipants ?? tournament?.enrolledCount ?? 0;
+
+  const country = resolvedCountryCode ? getCountryByCode(resolvedCountryCode) : null;
 
   return (
     <Card className="flex flex-col justify-between hover:border-primary/50 transition-all duration-200 group">
@@ -42,33 +75,33 @@ export function TournamentCard({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             <Badge variant="copper">
-              {format.replace(/_/g, ' ')}
+              {resolvedFormat.replace(/_/g, ' ')}
             </Badge>
             <Badge variant="secondary" className="flex items-center gap-1 font-mono text-[10px]">
-              {country ? `${country.flag} ${country.name}` : `🌍 ${region}`}
+              {country ? `${country.flag} ${country.name}` : `🌍 ${resolvedRegion}`}
             </Badge>
           </div>
 
           <Badge
             variant={
-              status === 'REGISTRATION' || status === 'OPEN'
+              resolvedStatus === 'REGISTRATION' || resolvedStatus === 'OPEN'
                 ? 'success'
-                : status === 'ACTIVE' || status === 'IN_PROGRESS'
+                : resolvedStatus === 'ACTIVE' || resolvedStatus === 'IN_PROGRESS'
                 ? 'copper'
                 : 'secondary'
             }
           >
-            {status.replace(/_/g, ' ')}
+            {resolvedStatus.replace(/_/g, ' ')}
           </Badge>
         </div>
 
         <div>
-          <CardTitle className="text-base group-hover:text-accent-400 transition-colors line-clamp-1">
-            {name}
+          <CardTitle className="text-base group-hover:text-primary transition-colors line-clamp-1">
+            {resolvedName}
           </CardTitle>
-          {gameTitle && (
+          {resolvedGameTitle && (
             <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block mt-1">
-              {gameTitle}
+              {resolvedGameTitle}
             </span>
           )}
         </div>
@@ -79,24 +112,24 @@ export function TournamentCard({
           <div>
             <span className="text-[9px] uppercase font-bold text-muted-foreground block">Slots</span>
             <span className="font-mono font-bold text-foreground">
-              {enrolledCount > 0 ? `${enrolledCount}/${size}` : `${size} Cap`}
+              {resolvedEnrolledCount > 0 ? `${resolvedEnrolledCount}/${resolvedSize}` : `${resolvedSize} Cap`}
             </span>
           </div>
           <div>
             <span className="text-[9px] uppercase font-bold text-muted-foreground block">Entry Fee</span>
             <span className="font-mono font-bold text-foreground">
-              {entryFee === 0 ? <span className="text-emerald-400">FREE</span> : formatEUR(entryFee)}
+              {resolvedEntryFee === 0 ? <span className="text-emerald-400">FREE</span> : formatEUR(resolvedEntryFee)}
             </span>
           </div>
           <div>
             <span className="text-[9px] uppercase font-bold text-muted-foreground block">Prize Pool</span>
-            <span className="font-mono font-bold text-accent-400">
-              {prizePool === 0 ? 'Trophies' : formatEUR(prizePool)}
+            <span className="font-mono font-bold text-primary">
+              {resolvedPrizePool === 0 ? 'Trophies' : formatEUR(resolvedPrizePool)}
             </span>
           </div>
         </div>
 
-        <Link href={`/tournaments/${id}`} className="block w-full">
+        <Link href={`/tournaments/${resolvedId}`} className="block w-full">
           <Button variant="secondary" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all">
             View Tournament Bracket
           </Button>

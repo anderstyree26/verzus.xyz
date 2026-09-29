@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '../../lib/supabase';
 import { CountrySelect } from '../../components/CountrySelect';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { UserPlus, Gift, AlertCircle, ShieldCheck } from 'lucide-react';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -26,7 +31,7 @@ export default function SignUpPage() {
     }
 
     if (!ageConfirmed) {
-      setError('You must confirm your age and agree to the VerzusXYZ competitive rules.');
+      setError('You must confirm your age and agree to the Verzus competitive rules.');
       return;
     }
 
@@ -57,112 +62,128 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 p-8 bg-surface-elevated border border-surface-border rounded-xl shadow-2xl">
-      <div className="flex items-center justify-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-lg bg-[#C86228] flex items-center justify-center font-black text-white text-base tracking-tighter shadow-sm">
-          VX
-        </div>
-        <h2 className="text-2xl font-black tracking-tight text-white">Join VerzusXYZ</h2>
-      </div>
-      <p className="text-xs text-gray-400 text-center">
-        The Global Competitive Esports & Skill Arena
-      </p>
-      <div className="mt-3 py-1.5 px-3 bg-[#C86228]/10 border border-[#C86228]/30 rounded-lg text-center">
-        <span className="text-xs text-[#D97736] font-semibold">
-          🎁 10,000 Free Demo POINTS credited upon registration
-        </span>
-      </div>
+    <div className="max-w-md mx-auto my-12 space-y-4">
+      <Card className="bg-card border-border shadow-2xl">
+        <CardHeader className="text-center pb-4 border-b border-border">
+          <div className="w-12 h-12 rounded-2xl bg-secondary border border-border mx-auto flex items-center justify-center text-primary mb-2 shadow-sm">
+            <UserPlus className="w-6 h-6" />
+          </div>
+          <CardTitle className="text-2xl font-black tracking-tight text-foreground">
+            Join Verzus Arena
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            The Global Competitive Esports & Skill-Gaming Arena
+          </CardDescription>
 
-      {error && (
-        <div className="mt-4 p-3 bg-red-950/60 border border-red-800 rounded text-xs text-red-300">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSignUp} className="mt-6 flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">
-            Gamer Tag / Username <span className="text-[#C86228]">*</span>
-          </label>
-          <input
-            type="text"
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="e.g. s1mple, ace_sniper"
-            className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-[#C86228]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">
-            Email Address <span className="text-[#C86228]">*</span>
-          </label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-[#C86228]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">
-            Password <span className="text-[#C86228]">*</span>
-          </label>
-          <input
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Minimum 6 characters"
-            className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-[#C86228]"
-          />
-        </div>
-
-        {/* Global Country & Nationality Selection */}
-        <CountrySelect
-          value={countryCode}
-          onChange={(c) => setCountryCode(c.code)}
-          label="Country / Nationality (for Regional & National Ladders)"
-          placeholder="Select your country..."
-          required
-        />
-
-        {/* Age & Terms Compliance */}
-        <div className="pt-2">
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-gray-300 select-none">
-            <input
-              type="checkbox"
-              checked={ageConfirmed}
-              onChange={(e) => setAgeConfirmed(e.target.checked)}
-              className="mt-0.5 rounded border-surface-border bg-surface text-[#C86228] focus:ring-[#C86228] focus:ring-offset-0 h-4 w-4 accent-[#C86228]"
-            />
-            <span>
-              I confirm I am at least <strong className="text-white">13 years old</strong> (18+ for real-money EUR competitions) and agree to the{' '}
-              <span className="text-[#D97736] hover:underline">VerzusXYZ Skill Gaming Terms</span> & Fair Play Standards.
+          <div className="mt-3 p-2.5 bg-primary/10 border border-primary/30 rounded-xl flex items-center justify-center gap-2">
+            <Gift className="w-4 h-4 text-primary flex-shrink-0" />
+            <span className="text-xs text-primary font-bold">
+              10,000 Free Demo POINTS credited upon signup
             </span>
-          </label>
-        </div>
+          </div>
+        </CardHeader>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 w-full py-3 bg-[#C86228] hover:bg-[#D97736] text-white font-bold text-sm uppercase tracking-wider rounded-lg transition-all shadow-md shadow-[#C86228]/20 disabled:opacity-50"
-        >
-          {loading ? 'Creating account...' : 'Create Account & Play'}
-        </button>
-      </form>
+        <CardContent className="pt-6">
+          {error && (
+            <div className="mb-5 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-      <p className="text-xs text-gray-400 text-center mt-6">
-        Already have an account?{' '}
-        <Link href="/login" className="text-[#D97736] hover:underline font-semibold">
-          Sign In
-        </Link>
-      </p>
+          <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">
+                Gamer Tag / Username <span className="text-primary">*</span>
+              </label>
+              <Input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. s1mple, ace_sniper"
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">
+                Email Address <span className="text-primary">*</span>
+              </label>
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">
+                Password <span className="text-primary">*</span>
+              </label>
+              <Input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimum 6 characters"
+                className="text-xs"
+              />
+            </div>
+
+            {/* Country & Nationality */}
+            <div className="space-y-2">
+              <CountrySelect
+                value={countryCode}
+                onChange={(c) => setCountryCode(c.code)}
+                label="Country / Nationality (for Regional & National Ladders)"
+                placeholder="Select your country..."
+                required
+              />
+            </div>
+
+            {/* Age & Terms Compliance */}
+            <div className="pt-1">
+              <label className="flex items-start gap-2.5 cursor-pointer text-xs text-muted-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={ageConfirmed}
+                  onChange={(e) => setAgeConfirmed(e.target.checked)}
+                  className="mt-0.5 rounded border-border bg-secondary text-primary focus:ring-primary h-4 w-4 accent-primary"
+                />
+                <span>
+                  I confirm I am at least <strong className="text-foreground">13 years old</strong> (18+ for cash EUR competitions) and agree to the{' '}
+                  <span className="text-primary hover:underline font-bold">Verzus Skill Gaming Terms</span> & Fair Play Standards.
+                </span>
+              </label>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              variant="default"
+              size="lg"
+              className="w-full font-bold text-xs uppercase tracking-wider shadow-md shadow-primary/20 gap-2 mt-2"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>{loading ? 'Creating account...' : 'Create Account & Play'}</span>
+            </Button>
+          </form>
+
+          <div className="text-center mt-6 pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              Already have an account?{' '}
+              <Link href="/login" className="text-primary hover:underline font-bold">
+                Sign In
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

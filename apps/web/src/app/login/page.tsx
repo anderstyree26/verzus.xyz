@@ -4,6 +4,11 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '../../lib/supabase';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { LogIn, AlertCircle, Swords, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,54 +40,77 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 p-8 bg-surface-elevated border border-surface-border rounded-xl">
-      <h2 className="text-2xl font-bold text-center">Sign In to VerzusXYZ</h2>
-      <p className="text-xs text-gray-400 text-center mt-1">Access your esports wallet and challenges</p>
+    <div className="max-w-md mx-auto my-12 space-y-4">
+      <Card className="bg-card border-border shadow-2xl">
+        <CardHeader className="text-center pb-4 border-b border-border">
+          <div className="w-12 h-12 rounded-2xl bg-secondary border border-border mx-auto flex items-center justify-center text-primary mb-2 shadow-sm">
+            <Swords className="w-6 h-6" />
+          </div>
+          <CardTitle className="text-2xl font-black tracking-tight text-foreground">
+            Sign In to Verzus
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Access your esports wallet, active matches, and tournaments.
+          </CardDescription>
+        </CardHeader>
 
-      {error && (
-        <div className="mt-4 p-3 bg-red-950/60 border border-red-800 rounded text-xs text-red-300">
-          {error}
-        </div>
-      )}
+        <CardContent className="pt-6">
+          {error && (
+            <div className="mb-5 p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-xs text-destructive flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-      <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-          />
-        </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-foreground block">Email Address</label>
+              <Input
+                type="email"
+                required
+                placeholder="player@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="text-xs"
+              />
+            </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1">Password</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 bg-surface border border-surface-border rounded-md text-sm text-white focus:outline-none focus:border-accent"
-          />
-        </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-foreground">Password</label>
+              </div>
+              <Input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="text-xs"
+              />
+            </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 w-full py-2.5 bg-accent hover:bg-accent-600 font-bold text-sm rounded-md transition disabled:opacity-50"
-        >
-          {loading ? 'Signing in...' : 'Sign In'}
-        </button>
-      </form>
+            <Button
+              type="submit"
+              disabled={loading}
+              variant="default"
+              size="lg"
+              className="w-full font-bold text-xs uppercase tracking-wider shadow-md shadow-primary/20 gap-2 mt-2"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+            </Button>
+          </form>
 
-      <p className="text-xs text-gray-400 text-center mt-6">
-        Don't have an account?{' '}
-        <Link href="/signup" className="text-accent hover:underline font-semibold">
-          Create Account
-        </Link>
-      </p>
+          <div className="text-center mt-6 pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              Don't have a competitor account?{' '}
+              <Link href="/signup" className="text-primary hover:underline font-bold">
+                Create Account
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

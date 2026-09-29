@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { Trophy, Plus, Globe, Filter, Users, Sparkles } from 'lucide-react';
 import { TournamentCard } from '../../components/TournamentCard';
 import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
@@ -67,12 +68,12 @@ export default function TournamentsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto min-w-0">
-      {/* VX Tournament Hero */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-6 sm:p-8 border border-border rounded-3xl shadow-xl">
+    <div className="space-y-6 max-w-7xl mx-auto min-w-0 pb-16">
+      {/* Tournament Hero */}
+      <Card className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 sm:p-8 border border-border bg-card shadow-xl">
         <div className="flex items-center gap-4 sm:gap-6 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-secondary border border-border flex items-center justify-center text-2xl font-black text-accent-400 flex-shrink-0 shadow-inner">
-            🏆
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0 shadow-sm">
+            <Trophy className="w-6 h-6" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -83,7 +84,7 @@ export default function TournamentsPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground truncate">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
               Tournaments & Championships
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -102,46 +103,49 @@ export default function TournamentsPage() {
           }}
           className="flex-shrink-0"
         >
-          <Button variant="default" size="lg" className="w-full sm:w-auto">
-            + Host Tournament
+          <Button variant="default" size="default" className="w-full sm:w-auto gap-2 font-bold shadow-sm">
+            <Plus className="w-4 h-4" />
+            <span>Create Tournament</span>
           </Button>
         </Link>
-      </div>
+      </Card>
 
-      {/* Active Game Arena Context Bar (Replaces horizontal scroll) */}
+      {/* Active Game Context Bar */}
       <GameContextBar
-        title={filterGameOnly ? `${activeGame?.displayName || 'Arena'} Cups & Tournaments` : 'All Esports Tournaments'}
-        subtitle={filterGameOnly ? `Single-elimination brackets & cash cups for ${activeGame?.displayName || 'Active Game'}` : 'Browse and register for tournaments across all supported titles'}
+        title={filterGameOnly ? `${activeGame?.displayName || 'Arena'} Cups` : 'All Tournament Cups'}
+        subtitle={filterGameOnly ? `Brackets and cups for ${activeGame?.displayName || 'Active Game'}` : 'Browsing official championships across all supported esports titles'}
         filterGameOnly={filterGameOnly}
         onToggleFilter={setFilterGameOnly}
       />
 
       {/* Filter Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-card border border-border rounded-2xl text-xs">
+      <Card className="p-4 border border-border bg-card flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-secondary border border-border rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-muted border border-border rounded-lg p-1 gap-1">
             {(['ALL', 'FREE', 'CASH'] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setFeeFilter(mode)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                className={`px-3 py-1 rounded-md text-xs font-bold transition ${
                   feeFilter === mode
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {mode === 'ALL' ? 'All Entry' : mode === 'FREE' ? 'Free (0€)' : 'Cash EUR (€)'}
+                {mode === 'ALL' ? 'All Stakes' : mode === 'FREE' ? 'Free (0€)' : 'Cash EUR (€)'}
               </button>
             ))}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-xs font-semibold">Region:</span>
+          <span className="text-muted-foreground text-xs font-semibold flex items-center gap-1">
+            <Globe className="w-3.5 h-3.5" /> Region:
+          </span>
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            className="px-3 py-2 bg-secondary border border-border text-foreground rounded-xl text-xs focus:outline-none focus:border-primary"
+            className="px-3 py-1.5 bg-muted border border-border text-foreground rounded-lg text-xs focus:outline-none focus:border-primary"
           >
             <option value="All">Global (All Regions)</option>
             {GLOBAL_REGIONS.map((r) => (
@@ -151,66 +155,74 @@ export default function TournamentsPage() {
             ))}
           </select>
         </div>
-      </div>
+      </Card>
 
-      {/* Tournament Cards Grid */}
+      {/* Tournaments Grid */}
       {isLoading ? (
-        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-2xl">
-          Fetching active championship brackets...
+        <div className="p-16 text-center text-muted-foreground font-mono text-sm animate-pulse bg-card border border-border rounded-xl">
+          Loading championships and tournament brackets...
         </div>
       ) : filteredTournaments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTournaments.map((t) => (
-            <TournamentCard
-              key={t.id}
-              id={t.id}
-              name={t.name}
-              format={t.format}
-              size={t.size}
-              entryFee={t.entry_fee}
-              prizePool={t.prize_pool}
-              status={t.status}
-              gameTitle={t.game_profiles?.display_name ?? activeGame?.displayName}
-              region={t.region}
-              countryCode={t.country_code}
-              enrolledCount={t.enrolled_count}
-            />
-          ))}
+          {filteredTournaments.map((t) => {
+            const catalogItem = OFFICIAL_GAMES.find((c) =>
+              c.displayName.toLowerCase().includes((t.game_profiles?.display_name || '').toLowerCase())
+            ) || OFFICIAL_GAMES[0];
+
+            return (
+              <TournamentCard
+                key={t.id}
+                tournament={{
+                  id: t.id,
+                  name: t.name,
+                  status: t.status as any,
+                  entryFee: t.entry_fee,
+                  prizePool: t.prize_pool,
+                  maxParticipants: t.size,
+                  currentParticipants: t.enrolled_count ?? 0,
+                  startsAt: new Date().toISOString(),
+                  gameProfileId: t.game_profiles?.id || 'cs2',
+                }}
+                game={catalogItem}
+              />
+            );
+          })}
         </div>
       ) : (
-        <Card className="p-16 text-center flex flex-col items-center justify-center gap-4">
-          <div className="text-4xl">🏆</div>
+        <Card className="p-16 text-center border border-border bg-card flex flex-col items-center justify-center gap-4">
+          <Trophy className="w-10 h-10 text-muted-foreground/60" />
           <CardTitle className="text-xl">No Tournaments Found</CardTitle>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             {filterGameOnly && activeGame
-              ? `There are currently no active tournament brackets scheduled for ${activeGame.displayName}.`
-              : 'There are currently no tournaments matching your filters.'}
+              ? `No cups are currently scheduled for ${activeGame.displayName}. Be the first organizer to launch a bracket!`
+              : 'No tournaments match your current filters. Host a cup now to invite competitors!'}
           </p>
           <div className="flex items-center justify-center gap-3 pt-2">
             {filterGameOnly && (
               <Button
                 variant="secondary"
-                size="default"
+                size="sm"
                 onClick={() => setFilterGameOnly(false)}
               >
                 View All Games
               </Button>
             )}
             <Link href={activeGame ? `/tournaments/new?profileId=${activeGame.id}` : '/tournaments/new'}>
-              <Button variant="default" size="default">
-                Host a Cup
+              <Button variant="default" size="sm" className="gap-1.5 font-bold">
+                <Plus className="w-4 h-4" />
+                <span>Create Tournament Cup</span>
               </Button>
             </Link>
           </div>
         </Card>
       )}
 
-      {/* Auth Prompt Modal for Unauthenticated Competitors */}
+      {/* Auth Prompt Modal */}
       <AuthPromptModal
         open={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        title="Sign In to Host Tournament"
-        description="Create an account or sign in to configure brackets, schedule match rounds, and set prize pools."
+        title="Sign In to Enter Tournaments"
+        description="Create an account or sign in to register for official brackets and win guaranteed prize pools."
       />
     </div>
   );

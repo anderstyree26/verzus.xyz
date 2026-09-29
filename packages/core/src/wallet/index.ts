@@ -2,33 +2,41 @@ import { createServiceClient } from '@antigravity/db';
 
 import { DemoWallet } from './DemoWallet';
 import { StubRealWallet } from './StubRealWallet';
+import { PaysafeWallet } from './PaysafeWallet';
 
 import type { WalletService } from './WalletService';
 
 export * from './WalletService';
+export * from './paysafe';
 export { DemoWallet } from './DemoWallet';
 export { StubRealWallet } from './StubRealWallet';
+export { PaysafeWallet } from './PaysafeWallet';
 
 let cached: WalletService | null = null;
 
 /**
  * Returns the process-wide wallet singleton.
- * WALLET_MODE=real switches to the stub until a real provider is wired in.
+ * WALLET_MODE=paysafe or WALLET_MODE=real switches to PaysafeWallet when Supabase credentials exist.
  */
 export function getWallet(): WalletService {
   if (cached) return cached;
 
   const mode = process.env.WALLET_MODE ?? 'demo';
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (mode === 'real') {
+  if (mode === 'real' || mode === 'paysafe') {
+    if (url && key) {
+      const client = createServiceClient(url, key);
+      cached = new PaysafeWallet({ client });
+      return cached;
+    }
     cached = new StubRealWallet();
     return cached;
   }
 
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for DemoWallet');
+    throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for Wallet');
   }
 
   const client = createServiceClient(url, key);

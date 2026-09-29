@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { Gamepad2, Plus, Sparkles, Trophy, Users, Shield } from 'lucide-react';
 import { GameProfileCard } from '../../components/GameProfileCard';
 import { apiClient } from '../../lib/api';
 import { useGameStore } from '../../lib/gameStore';
@@ -9,6 +10,7 @@ import { OFFICIAL_GAMES, type CatalogGame } from '../../lib/gamesCatalog';
 import type { GameProfile } from '@antigravity/core';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
 
 export default function GamesPage() {
   const { setActiveGame } = useGameStore();
@@ -24,37 +26,39 @@ export default function GamesPage() {
   const allGames = [...OFFICIAL_GAMES, ...customGames];
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-      {/* VX Game Catalog Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111319] p-6 sm:p-8 border border-[#202430] rounded-2xl shadow-xl">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto min-w-0">
+      {/* Game Catalog Hero Header */}
+      <Card className="p-6 sm:p-8 border border-border bg-card shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#161922] border border-[#202430] flex items-center justify-center text-3xl font-black text-[#D97736] shadow-inner">
-            🎮
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-sm flex-shrink-0">
+            <Gamepad2 className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <Badge variant="copper">
-                Official Esports Roster
+              <Badge variant="copper">Official Esports Roster</Badge>
+              <Badge variant="secondary" className="font-mono text-[10px]">
+                {allGames.length} Supported Titles
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
-              Supported Games & Titles
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mt-1">
+              Esports Arena Catalog
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               Select any game title to browse open duels, competitive ladders, and tournaments.
             </p>
           </div>
         </div>
 
         <Link href="/games/new">
-          <Button variant="secondary" size="default">
-            + Calibrate Custom Game
+          <Button variant="default" size="default" className="gap-2 font-bold shadow-sm">
+            <Plus className="w-4 h-4" />
+            <span>Calibrate Custom Game</span>
           </Button>
         </Link>
-      </div>
+      </Card>
 
       {isLoading && allGames.length === 0 ? (
-        <div className="p-12 text-center text-gray-400 font-mono text-xs bg-[#111319] border border-[#202430] rounded-2xl animate-pulse">
+        <div className="p-12 text-center text-muted-foreground font-mono text-xs bg-card border border-border rounded-xl animate-pulse">
           Loading game roster...
         </div>
       ) : (

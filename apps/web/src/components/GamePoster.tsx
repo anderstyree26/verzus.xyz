@@ -41,7 +41,7 @@ export function GamePoster({
 
   return (
     <div
-      className={`relative overflow-hidden bg-[#161922] select-none flex-shrink-0 ${aspectClasses[aspect]} ${className}`}
+      className={`relative overflow-hidden bg-secondary select-none flex-shrink-0 ${aspectClasses[aspect]} ${className}`}
     >
       {posterSrc && !imageError ? (
         <img
@@ -66,7 +66,7 @@ export function GamePoster({
               <span className="font-black text-xs sm:text-sm text-white uppercase tracking-wider drop-shadow-md">
                 {game.shortName || game.displayName}
               </span>
-              <span className="text-[9px] font-mono text-[#D97736] uppercase tracking-wider">
+              <span className="text-[9px] font-mono text-primary uppercase tracking-wider font-bold">
                 {game.platform || 'ESPORTS'}
               </span>
             </div>
@@ -77,7 +77,7 @@ export function GamePoster({
 
       {/* Subtle Vignette Gradient Overlay */}
       {showOverlay && (
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C10] via-[#0B0C10]/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none" />
       )}
     </div>
   );

@@ -2,8 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  BarChart3,
+  ShieldAlert,
+  Gamepad2,
+  Users,
+  Trophy,
+  Gem,
+} from 'lucide-react';
 import { Badge } from '../../components/ui/badge';
-import { Button } from '../../components/ui/button';
 
 export default function AdminLayout({
   children,
@@ -13,12 +20,12 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   const mobileTabs = [
-    { href: '/admin', label: 'Overview', icon: '📊', exact: true },
-    { href: '/admin/review', label: 'Review', icon: '🛡️' },
-    { href: '/admin/profiles', label: 'Profiles', icon: '🕹️' },
-    { href: '/admin/users', label: 'Users', icon: '👥' },
-    { href: '/admin/seasons', label: 'Seasons', icon: '🏆' },
-    { href: '/admin/sponsors', label: 'Sponsors', icon: '💎' },
+    { href: '/admin', label: 'Overview', icon: BarChart3, exact: true },
+    { href: '/admin/review', label: 'Review', icon: ShieldAlert },
+    { href: '/admin/profiles', label: 'Profiles', icon: Gamepad2 },
+    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/seasons', label: 'Seasons', icon: Trophy },
+    { href: '/admin/sponsors', label: 'Sponsors', icon: Gem },
   ];
 
   return (
@@ -27,7 +34,7 @@ export default function AdminLayout({
       <div className="lg:hidden bg-card border border-border rounded-2xl p-2.5 shadow-sm space-y-2">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <span className="text-base">🛡️</span>
+            <ShieldAlert className="w-4 h-4 text-primary" />
             <span className="text-xs font-black uppercase tracking-tight text-foreground">
               Admin Console
             </span>
@@ -42,6 +49,7 @@ export default function AdminLayout({
             const isActive = tab.exact
               ? pathname === tab.href
               : pathname === tab.href || pathname.startsWith(tab.href);
+            const Icon = tab.icon;
 
             return (
               <Link
@@ -53,7 +61,7 @@ export default function AdminLayout({
                     : 'bg-secondary/70 text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <span>{tab.icon}</span>
+                <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
               </Link>
             );

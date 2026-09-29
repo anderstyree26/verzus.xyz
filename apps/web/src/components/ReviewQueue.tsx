@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { apiClient } from '../lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { CheckCircle2, AlertTriangle, Check, X, Edit3 } from 'lucide-react';
 
 interface ReviewTaskItem {
   id: string;
@@ -47,14 +48,14 @@ export function ReviewQueue({ initialTasks }: ReviewQueueProps) {
   if (tasks.length === 0) {
     return (
       <Card className="p-12 text-center bg-card border-border">
-        <div className="w-12 h-12 rounded-2xl bg-secondary mx-auto flex items-center justify-center text-xl mb-3">
-          ✓
+        <div className="w-12 h-12 rounded-2xl bg-secondary mx-auto flex items-center justify-center text-emerald-400 mb-3">
+          <CheckCircle2 className="w-6 h-6" />
         </div>
         <h3 className="font-bold text-foreground text-sm uppercase tracking-wider">
           Review Queue is Cleared
         </h3>
         <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-          No low-confidence OCR scoreframes or disputed matches currently require human moderation.
+          No contested matches or low-confidence scoreframes currently require human moderation.
         </p>
       </Card>
     );
@@ -88,7 +89,7 @@ export function ReviewQueue({ initialTasks }: ReviewQueueProps) {
 
                 <div className="bg-secondary/60 p-3 rounded-xl border border-border font-mono text-xs space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Extracted OCR Text:</span>
+                    <span className="text-muted-foreground">Extracted Score Text:</span>
                     <span className="text-foreground font-bold">
                       {task.score_frames?.raw_text || 'N/A'}
                     </span>
@@ -121,8 +122,9 @@ export function ReviewQueue({ initialTasks }: ReviewQueueProps) {
                   size="sm"
                   disabled={isBusy}
                   onClick={() => handleAction(task.id, 'approve')}
-                  className="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-1"
                 >
+                  <Check className="w-3.5 h-3.5" />
                   Approve
                 </Button>
 
@@ -131,8 +133,9 @@ export function ReviewQueue({ initialTasks }: ReviewQueueProps) {
                   size="sm"
                   disabled={isBusy || !correctionValues[task.id]}
                   onClick={() => handleAction(task.id, 'correct')}
-                  className="text-xs font-bold"
+                  className="text-xs font-bold gap-1"
                 >
+                  <Edit3 className="w-3.5 h-3.5" />
                   Correct
                 </Button>
 
@@ -141,8 +144,9 @@ export function ReviewQueue({ initialTasks }: ReviewQueueProps) {
                   size="sm"
                   disabled={isBusy}
                   onClick={() => handleAction(task.id, 'reject')}
-                  className="text-xs font-bold"
+                  className="text-xs font-bold gap-1"
                 >
+                  <X className="w-3.5 h-3.5" />
                   Reject
                 </Button>
               </div>

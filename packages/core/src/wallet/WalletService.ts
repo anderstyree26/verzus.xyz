@@ -28,6 +28,7 @@ export interface WalletSnapshot {
 
 export type PayoutMethod =
   | { type: 'DEMO' }
+  | { type: 'PAYSAFE'; accountId?: string; iban?: string; email?: string }
   | { type: 'MPESA'; phone: string }
   | { type: 'PAYSTACK'; accountNumber: string; bankCode: string }
   | { type: 'CRYPTO'; address: string; network: 'polygon' | 'tron' | 'base' };
