@@ -34,6 +34,8 @@ import { AuthPromptModal } from '../components/AuthPromptModal';
 import { apiClient } from '../lib/api';
 import { formatEUR, formatPoints } from '../lib/currency';
 import { OFFICIAL_GAMES, getGameById, type CatalogGame } from '../lib/gamesCatalog';
+import { EmptyState } from '../components/EmptyState';
+import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '../components/ui/card';
@@ -44,6 +46,29 @@ interface UserProfile {
   display_name?: string;
   rating?: number;
   region?: string;
+}
+
+interface HomeTournament {
+  id: string;
+  name: string;
+  format: string;
+  size: number;
+  entry_fee: number;
+  prize_pool: number;
+  status: string;
+  game_profiles?: { display_name: string; id?: string };
+  region?: string;
+  enrolled_count?: number;
+}
+
+interface HomeLeaderboardEntry {
+  userId: string;
+  rating: number;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  username?: string;
+  countryCode?: string;
 }
 
 export default function HomePage() {
@@ -64,6 +89,20 @@ export default function HomePage() {
     staleTime: 30000,
   });
 
+  // Query real tournaments from API
+  const { data: tournaments, isLoading: loadingTournaments } = useQuery<HomeTournament[]>({
+    queryKey: ['home-tournaments'],
+    queryFn: () => apiClient<HomeTournament[]>('/tournaments').catch(() => []),
+    staleTime: 30000,
+  });
+
+  // Query real leaderboard champions from API
+  const { data: champions, isLoading: loadingChampions } = useQuery<HomeLeaderboardEntry[]>({
+    queryKey: ['home-champions'],
+    queryFn: () => apiClient<HomeLeaderboardEntry[]>('/leaderboard/HEAD_TO_HEAD').catch(() => []),
+    staleTime: 30000,
+  });
+
   const isAuthenticated = !!userProfile?.id;
   const currentCatalogGame = getGameById(activeGame?.id);
 
@@ -72,48 +111,6 @@ export default function HomePage() {
     if (selectedArenaTab === 'console') return g.platform === 'CONSOLE';
     return true;
   });
-
-  // Featured Tournaments preview
-  const featuredTournaments = [
-    {
-      id: 'tourn-major-1',
-      title: 'Counter-Strike 2 Winter Championship',
-      game: 'Counter-Strike 2',
-      platform: 'PC',
-      prize: '€1,000 EUR',
-      date: 'This Saturday, 18:00 UTC',
-      slots: '14/16 Teams',
-      badge: 'Major Cup',
-    },
-    {
-      id: 'tourn-fc25-cup',
-      title: 'EA FC 25 Weekend Showdown',
-      game: 'EA Sports FC 25',
-      platform: 'Console / Crossplay',
-      prize: '€500 EUR',
-      date: 'Sunday, 16:00 UTC',
-      slots: '28/32 Players',
-      badge: 'Weekly Duel Cup',
-    },
-    {
-      id: 'tourn-freeroll',
-      title: 'Daily Practice Free-Roll Challenge',
-      game: 'All Supported Arenas',
-      platform: 'Universal',
-      prize: '10,000 PTS',
-      date: 'Starts in 45m',
-      slots: '52/64 Players',
-      badge: 'Free Entry',
-    },
-  ];
-
-  // Hall of Fame Leaderboard Spotlights
-  const hallOfFame = [
-    { rank: 1, username: 's1mple_king', elo: 2450, winRate: '82%', won: '€3,420', game: 'CS2' },
-    { rank: 2, username: 'tekzkid_fc', elo: 2380, winRate: '79%', won: '€2,890', game: 'FC25' },
-    { rank: 3, username: 'zen_aerial', elo: 2290, winRate: '76%', won: '€2,150', game: 'Rocket League' },
-    { rank: 4, username: 'aspas_val', elo: 2210, winRate: '74%', won: '€1,980', game: 'Valorant' },
-  ];
 
   return (
     <div className="flex flex-col gap-16 sm:gap-24 max-w-7xl mx-auto min-w-0 pb-16">
@@ -496,46 +493,77 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredTournaments.map((t) => (
-            <Card key={t.id} className="p-5 sm:p-6 bg-card border border-border flex flex-col justify-between gap-4 hover:border-primary/50 transition">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Badge variant="copper" className="font-mono text-[10px]">
-                    {t.badge}
-                  </Badge>
-                  <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-primary" /> {t.date}
-                  </span>
+        {loadingTournaments ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-6 bg-card border border-border space-y-4">
+                <div className="flex justify-between">
+                  <Skeleton className="h-5 w-20 rounded-md" />
+                  <Skeleton className="h-4 w-24 rounded-md" />
                 </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-3/4 rounded-md" />
+                  <Skeleton className="h-4 w-1/2 rounded-md" />
+                </div>
+                <div className="pt-3 border-t border-border flex justify-between items-center">
+                  <Skeleton className="h-8 w-20 rounded-md" />
+                  <Skeleton className="h-8 w-24 rounded-md" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : tournaments && tournaments.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {tournaments.slice(0, 3).map((t) => (
+              <Card key={t.id} className="p-5 sm:p-6 bg-card border border-border flex flex-col justify-between gap-4 hover:border-primary/50 transition">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="copper" className="font-mono text-[10px]">
+                      {t.status || 'Active Cup'}
+                    </Badge>
+                    <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
+                      <Users className="w-3 h-3 text-primary" /> {t.enrolled_count ?? 0}/{t.size} Players
+                    </span>
+                  </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground">
-                    {t.title}
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
-                    <span>{t.game}</span>
-                    <span>·</span>
-                    <span>{t.platform}</span>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-bold text-foreground">
+                      {t.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
+                      <span>{t.game_profiles?.display_name || 'Esports Arena'}</span>
+                      <span>·</span>
+                      <span>{t.format}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="pt-3 border-t border-border flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold block">Prize Pool</span>
-                  <span className="font-mono font-bold text-emerald-400 text-sm">{t.prize}</span>
+                <div className="pt-3 border-t border-border flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">Prize Pool</span>
+                    <span className="font-mono font-bold text-emerald-400 text-sm">
+                      {t.prize_pool > 0 ? formatEUR(t.prize_pool) : 'Free Entry'}
+                    </span>
+                  </div>
+
+                  <Link href={`/tournaments/${t.id}`}>
+                    <Button variant="default" size="sm" className="font-bold text-xs">
+                      View Bracket
+                    </Button>
+                  </Link>
                 </div>
-
-                <Link href="/tournaments">
-                  <Button variant="default" size="sm" className="font-bold text-xs">
-                    Register Now
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={Trophy}
+            title="Championship Cups Launching Soon"
+            description="New tournament brackets with cash prize pools are announced regularly. In the meantime, challenge players in instant 1v1 duels or create your own custom tournament bracket."
+            actionLabel="Play 1v1 Duels"
+            actionHref="/challenges"
+          />
+        )}
       </section>
 
       {/* 7. HALL OF CHAMPIONS / LEADERBOARD SPOTLIGHT */}
@@ -562,33 +590,66 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {hallOfFame.map((champ) => (
-            <div
-              key={champ.rank}
-              className="p-4 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-black font-mono text-xs flex items-center justify-center flex-shrink-0">
-                  #{champ.rank}
-                </span>
-                <div className="min-w-0">
-                  <span className="font-bold text-xs text-foreground block truncate">
-                    @{champ.username}
-                  </span>
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    {champ.game} · {champ.winRate} Win
-                  </span>
+        {loadingChampions ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="p-4 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-7 h-7 rounded-lg" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-20 rounded-md" />
+                    <Skeleton className="h-3 w-16 rounded-md" />
+                  </div>
+                </div>
+                <div className="space-y-1 text-right">
+                  <Skeleton className="h-4 w-12 rounded-md ml-auto" />
+                  <Skeleton className="h-3 w-8 rounded-md ml-auto" />
                 </div>
               </div>
+            ))}
+          </div>
+        ) : champions && champions.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {champions.slice(0, 4).map((champ, index) => {
+              const winRate = champ.gamesPlayed > 0
+                ? `${Math.round((champ.wins / champ.gamesPlayed) * 100)}%`
+                : '0%';
+              return (
+                <div
+                  key={champ.userId}
+                  className="p-4 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-black font-mono text-xs flex items-center justify-center flex-shrink-0">
+                      #{index + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <span className="font-bold text-xs text-foreground block truncate">
+                        @{champ.username || 'Competitor'}
+                      </span>
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {champ.gamesPlayed} Matches · {winRate} Win
+                      </span>
+                    </div>
+                  </div>
 
-              <div className="text-right flex-shrink-0">
-                <span className="text-xs font-mono font-bold text-emerald-400 block">{champ.won}</span>
-                <span className="text-[10px] font-mono text-muted-foreground">{champ.elo} Elo</span>
-              </div>
-            </div>
-          ))}
-        </div>
+                  <div className="text-right flex-shrink-0">
+                    <span className="text-xs font-mono font-bold text-primary block">{champ.rating} Elo</span>
+                    <span className="text-[10px] font-mono text-emerald-400">{champ.wins}W - {champ.losses}L</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            icon={Award}
+            title="Season 1 Ladder Initializing"
+            description="Be the first competitor to log ranked head-to-head match victories and claim the #1 spot in the global Hall of Champions."
+            actionLabel="Queue Ranked Match"
+            actionHref="/challenges"
+          />
+        )}
       </section>
 
       {/* 8. HIGH-CONVERTING BOTTOM CALL TO ACTION */}

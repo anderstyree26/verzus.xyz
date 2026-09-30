@@ -28,7 +28,7 @@ interface PlatformStats {
 export default function AdminDashboardPage() {
   const { data: stats, isLoading } = useQuery<PlatformStats>({
     queryKey: ['admin-stats'],
-    queryFn: () => apiClient<PlatformStats>('/admin/stats').catch(() => ({ users: 48, matches: 124, tournaments: 12 })),
+    queryFn: () => apiClient<PlatformStats>('/admin/stats').catch(() => ({ users: 0, matches: 0, tournaments: 0 })),
   });
 
   const { data: reviewTasks } = useQuery<Array<{ id: string }>>({

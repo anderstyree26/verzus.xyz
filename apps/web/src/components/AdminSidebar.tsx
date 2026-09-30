@@ -42,6 +42,15 @@ interface AdminSidebarProps {
 export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) {
   const pathname = usePathname();
 
+  // Fetch current user profile to determine clearance level
+  const { data: profile } = useQuery<{ id: string; role?: string; username?: string } | null>({
+    queryKey: ['admin-sidebar-profile'],
+    queryFn: () => apiClient<{ id: string; role?: string; username?: string }>('/profile/me').catch(() => null),
+    staleTime: 30000,
+  });
+
+  const isReviewer = profile?.role === 'REVIEWER';
+
   // Fetch pending review count for live HITL badge
   const { data: reviewTasks } = useQuery<Array<{ id: string }>>({
     queryKey: ['admin-sidebar-review-count'],
@@ -52,68 +61,85 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
 
   const pendingCount = reviewTasks?.length ?? 0;
 
-  const navSections: AdminNavSection[] = [
-    {
-      group: 'Core Operations',
-      items: [
+  // Filter navigation sections based on RBAC clearance
+  const navSections: AdminNavSection[] = isReviewer
+    ? [
         {
-          href: '/admin',
-          label: 'Overview',
-          icon: BarChart3,
-          badge: null,
-          exact: true,
+          group: 'Moderation & Audit',
+          items: [
+            {
+              href: '/admin/review',
+              label: 'Audit & Review Queue',
+              icon: ShieldAlert,
+              badge: pendingCount > 0 ? `${pendingCount}` : null,
+              badgeVariant: 'warning',
+              exact: true,
+            },
+          ],
+        },
+      ]
+    : [
+        {
+          group: 'Core Operations',
+          items: [
+            {
+              href: '/admin',
+              label: 'Overview',
+              icon: BarChart3,
+              badge: null,
+              exact: true,
+            },
+            {
+              href: '/admin/review',
+              label: 'Audit & Review Queue',
+              icon: ShieldAlert,
+              badge: pendingCount > 0 ? `${pendingCount}` : null,
+              badgeVariant: 'warning',
+            },
+          ],
         },
         {
-          href: '/admin/review',
-          label: 'Audit & Review Queue',
-          icon: ShieldAlert,
-          badge: pendingCount > 0 ? `${pendingCount}` : null,
-          badgeVariant: 'warning',
-        },
-      ],
-    },
-    {
-      group: 'Game Registry & Calibration',
-      items: [
-        {
-          href: '/admin/profiles',
-          label: 'Game Profiles',
-          icon: Gamepad2,
-          badge: null,
-        },
-        {
-          href: '/games/new?mode=admin',
-          label: 'Automated Calibration',
-          icon: Zap,
-          badge: 'NEW',
-          badgeVariant: 'copper' as const,
-        },
-      ],
-    },
-    {
-      group: 'Governance & Liquidity',
-      items: [
-        {
-          href: '/admin/users',
-          label: 'Users & Anti-Cheat',
-          icon: Users,
-          badge: null,
+          group: 'Game Registry & Calibration',
+          items: [
+            {
+              href: '/admin/profiles',
+              label: 'Game Profiles',
+              icon: Gamepad2,
+              badge: null,
+            },
+            {
+              href: '/games/new?mode=admin',
+              label: 'Automated Calibration',
+              icon: Zap,
+              badge: 'NEW',
+              badgeVariant: 'copper' as const,
+            },
+          ],
         },
         {
-          href: '/admin/seasons',
-          label: 'Seasons & Resets',
-          icon: Trophy,
-          badge: null,
+          group: 'Governance & Liquidity',
+          items: [
+            {
+              href: '/admin/users',
+              label: 'Users & Anti-Cheat',
+              icon: Users,
+              badge: null,
+            },
+            {
+              href: '/admin/seasons',
+              label: 'Seasons & Resets',
+              icon: Trophy,
+              badge: null,
+            },
+            {
+              href: '/admin/sponsors',
+              label: 'Sponsor Liquidity',
+              icon: Gem,
+              badge: null,
+            },
+          ],
         },
-        {
-          href: '/admin/sponsors',
-          label: 'Sponsor Liquidity',
-          icon: Gem,
-          badge: null,
-        },
-      ],
-    },
-  ];
+      ];
 
   return (
     <aside
@@ -218,8 +244,8 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
 
         <div className="px-2 text-[10px] text-muted-foreground flex items-center justify-between font-mono">
           <span>Security Level</span>
-          <Badge variant="secondary" className="text-[9px] font-mono px-1 py-0">
-            ROOT ADMIN
+          <Badge variant={isReviewer ? 'warning' : 'secondary'} className="text-[9px] font-mono px-1 py-0">
+            {profile?.role === 'SUPER_ADMIN' ? 'SUPER ADMIN' : isReviewer ? 'REVIEWER' : 'ROOT ADMIN'}
           </Badge>
         </div>
       </div>

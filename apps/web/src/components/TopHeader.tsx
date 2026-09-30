@@ -45,6 +45,7 @@ interface HeaderProfile {
   username: string;
   display_name?: string;
   rating?: number;
+  role?: 'PLAYER' | 'REVIEWER' | 'ADMIN' | 'SUPER_ADMIN';
 }
 
 function getPageContext(pathname: string): { title: string; subtitle?: string } {
@@ -105,6 +106,8 @@ export function TopHeader() {
   const eloRating = me?.rating ?? 1000;
   const avatarLetter = me?.username ? me.username.slice(0, 1).toUpperCase() : 'U';
 
+  const isStaff = me?.role === 'ADMIN' || me?.role === 'SUPER_ADMIN' || me?.role === 'REVIEWER';
+
   const mobileNavLinks = [
     { href: '/', label: 'Overview', icon: LayoutDashboard },
     { href: '/challenges', label: 'Play Duels', icon: Swords },
@@ -112,7 +115,15 @@ export function TopHeader() {
     { href: '/leaderboards', label: 'Ladders & Rank', icon: BarChart3 },
     { href: '/games', label: 'Explore Games', icon: Gamepad2 },
     { href: '/dashboard', label: 'Wallet & Cashier', icon: Wallet },
-    { href: '/admin', label: 'Operations Admin', icon: Shield },
+    ...(isStaff
+      ? [
+          {
+            href: me?.role === 'REVIEWER' ? '/admin/review' : '/admin',
+            label: me?.role === 'REVIEWER' ? 'Audit Queue' : 'Operations Admin',
+            icon: Shield,
+          },
+        ]
+      : []),
   ];
 
   return (

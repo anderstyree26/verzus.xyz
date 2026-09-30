@@ -43,6 +43,14 @@ export function GameRail() {
     queryFn: () => apiClient<GameProfile[]>('/games'),
   });
 
+  const { data: me } = useQuery<{ id: string; role?: string } | null>({
+    queryKey: ['gamerail-me'],
+    queryFn: () => apiClient<{ id: string; role?: string }>('/profile/me').catch(() => null),
+    staleTime: 30000,
+  });
+
+  const isStaff = me?.role === 'ADMIN' || me?.role === 'SUPER_ADMIN' || me?.role === 'REVIEWER';
+
   useEffect(() => {
     if (games && games.length > 0) {
       initializeDefaultGame(games);
@@ -197,21 +205,23 @@ export function GameRail() {
         </div>
 
         {/* Bottom Utility Links */}
-        <div className="pt-3 border-t border-border flex items-center justify-between px-2 text-xs">
-          <Link
-            href="/admin"
-            className={`flex items-center gap-1.5 transition ${
-              pathname.startsWith('/admin') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Admin</span>
-          </Link>
+        <div className={`pt-3 border-t border-border flex items-center ${isStaff ? 'justify-between' : 'justify-center'} px-2 text-xs`}>
+          {isStaff && (
+            <Link
+              href={me?.role === 'REVIEWER' ? '/admin/review' : '/admin'}
+              className={`flex items-center gap-1.5 transition ${
+                pathname.startsWith('/admin') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>{me?.role === 'REVIEWER' ? 'Audit' : 'Admin'}</span>
+            </Link>
+          )}
           <Link
             href="/settings"
             className={`flex items-center gap-1.5 transition ${
               pathname.startsWith('/settings') ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
-            }`}
+            } ${!isStaff ? 'w-full justify-center py-1 rounded-lg hover:bg-muted' : ''}`}
           >
             <Settings className="w-3.5 h-3.5" />
             <span>Settings</span>
