@@ -5,6 +5,10 @@ import {
   type WalletService as IWalletService,
   PaysafeClient,
   DEFAULT_PAYSAFE_CONFIG,
+  MIN_DEPOSIT_EUR,
+  MAX_DEPOSIT_EUR,
+  MIN_WITHDRAWAL_EUR,
+  MAX_WITHDRAWAL_EUR,
 } from '@antigravity/core';
 
 @Injectable()
@@ -19,10 +23,32 @@ export class WalletService {
 
   async getBalance(userId: string) {
     try {
-      return await this.wallet.getBalance(userId);
+      const snap = await this.wallet.getBalance(userId);
+      const isEur = snap.currency === 'EUR';
+      return {
+        balance: isEur ? 1000 : snap.balance,
+        locked: isEur ? 0 : snap.locked,
+        cashEur: isEur ? snap.balance : 0,
+        lockedCashEur: isEur ? snap.locked : 0,
+        currency: snap.currency || 'EUR',
+        minDepositEur: MIN_DEPOSIT_EUR,
+        maxDepositEur: MAX_DEPOSIT_EUR,
+        minWithdrawalEur: MIN_WITHDRAWAL_EUR,
+        maxWithdrawalEur: MAX_WITHDRAWAL_EUR,
+      };
     } catch {
       // Graceful fallback for brand-new users or network delays
-      return { balance: 1000, locked: 0, cashEur: 0, currency: 'EUR' };
+      return {
+        balance: 1000,
+        locked: 0,
+        cashEur: 0,
+        lockedCashEur: 0,
+        currency: 'EUR',
+        minDepositEur: MIN_DEPOSIT_EUR,
+        maxDepositEur: MAX_DEPOSIT_EUR,
+        minWithdrawalEur: MIN_WITHDRAWAL_EUR,
+        maxWithdrawalEur: MAX_WITHDRAWAL_EUR,
+      };
     }
   }
 
@@ -42,24 +68,28 @@ export class WalletService {
       throw new BadRequestException('Please enter a valid withdrawal amount greater than zero.');
     }
 
-    if (amount < 10) {
-      throw new BadRequestException('The minimum withdrawal threshold is €10.00.');
+    const roundedAmount = Math.round(amount * 100) / 100;
+
+    if (roundedAmount < MIN_WITHDRAWAL_EUR) {
+      throw new BadRequestException(`The minimum withdrawal threshold is €${MIN_WITHDRAWAL_EUR.toFixed(2)}.`);
     }
 
-    if (amount > 5000) {
-      throw new BadRequestException('The maximum single withdrawal limit is €5,000.00. For higher volumes, please contact VIP support.');
+    if (roundedAmount > MAX_WITHDRAWAL_EUR) {
+      throw new BadRequestException(
+        `The maximum single withdrawal limit is €${MAX_WITHDRAWAL_EUR.toLocaleString('en-US', { minimumFractionDigits: 2 })}. For higher volumes, please contact VIP support.`,
+      );
     }
 
     try {
       const snap = await this.wallet.getBalance(userId);
-      const available = snap.balance - snap.locked;
-      if (amount > available) {
+      const available = Math.max(0, Math.round((snap.balance - snap.locked) * 100) / 100);
+      if (roundedAmount > available) {
         throw new BadRequestException(
           `Insufficient available balance. Your current withdrawable balance is €${available.toFixed(2)}.`,
         );
       }
 
-      return await this.wallet.payout(userId, amount, method);
+      return await this.wallet.payout(userId, roundedAmount, method);
     } catch (err) {
       if (err instanceof BadRequestException) throw err;
       const msg = err instanceof Error ? err.message : String(err);
@@ -84,12 +114,16 @@ export class WalletService {
       throw new BadRequestException('Please enter a valid deposit amount greater than zero.');
     }
 
-    if (amount < 5) {
-      throw new BadRequestException('The minimum deposit amount is €5.00.');
+    const roundedAmount = Math.round(amount * 100) / 100;
+
+    if (roundedAmount < MIN_DEPOSIT_EUR) {
+      throw new BadRequestException(`The minimum deposit amount is €${MIN_DEPOSIT_EUR.toFixed(2)}.`);
     }
 
-    if (amount > 5000) {
-      throw new BadRequestException('The maximum deposit limit per transaction is €5,000.00.');
+    if (roundedAmount > MAX_DEPOSIT_EUR) {
+      throw new BadRequestException(
+        `The maximum deposit limit per transaction is €${MAX_DEPOSIT_EUR.toLocaleString('en-US', { minimumFractionDigits: 2 })}.`,
+      );
     }
 
     const allowedCurrencies = ['EUR', 'USD', 'GBP'];
@@ -178,6 +212,10 @@ export class WalletService {
     return {
       ...this.paysafe.getPublicConfig(),
       supportedCurrencies: ['EUR', 'USD', 'GBP'],
+      minDepositEur: MIN_DEPOSIT_EUR,
+      maxDepositEur: MAX_DEPOSIT_EUR,
+      minWithdrawalEur: MIN_WITHDRAWAL_EUR,
+      maxWithdrawalEur: MAX_WITHDRAWAL_EUR,
     };
   }
 }

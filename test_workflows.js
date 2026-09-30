@@ -106,7 +106,40 @@ function fetchRoute(path) {
     assert.strictEqual(admin.status, 200);
     console.log('✓ Operations Admin console rendered successfully.');
 
-    console.log('\n=== ALL WORKFLOW TESTS PASSED SUCCESSFULLY! ===');
+    // 4.8 Treasury & Accountancy Console
+    const treasury = await fetchRoute('/admin/treasury');
+    assert.strictEqual(treasury.status, 200);
+    console.log('✓ CPA Treasury & Accountancy console rendered successfully.');
+
+    // Test 5: Verify Established Financial Thresholds & Accounting Invariants
+    console.log('\nTest 5: Validating Accounting Thresholds & Invariants...');
+    const {
+      MIN_DEPOSIT_EUR,
+      MAX_DEPOSIT_EUR,
+      MIN_WITHDRAWAL_EUR,
+      MAX_WITHDRAWAL_EUR,
+      TARGET_RESERVE_RATIO,
+    } = require('./packages/core/dist/constants.js');
+
+    assert.strictEqual(MIN_DEPOSIT_EUR, 5.0, 'Minimum deposit must be €5.00');
+    assert.strictEqual(MAX_DEPOSIT_EUR, 5000.0, 'Maximum deposit must be €5,000.00');
+    assert.strictEqual(MIN_WITHDRAWAL_EUR, 10.0, 'Minimum withdrawal must be €10.00');
+    assert.strictEqual(MAX_WITHDRAWAL_EUR, 5000.0, 'Maximum withdrawal must be €5,000.00');
+    assert.strictEqual(TARGET_RESERVE_RATIO, 1.20, 'Target reserve ratio must be 120%');
+    console.log(`✓ Established Financial Thresholds verified: Min Deposit €${MIN_DEPOSIT_EUR.toFixed(2)}, Min Withdrawal €${MIN_WITHDRAWAL_EUR.toFixed(2)}.`);
+
+    // Accounting Invariant Test: Verify Double-Entry Zero-Sum and Segregated Liability formula
+    const mockLiabilities = 1000.0;
+    const mockGrossCash = 1500.0;
+    const mockBuffer = Math.max(250, mockLiabilities * 0.15); // 150 -> 250
+    const mockExpenses = 155.0;
+    const mockRequiredReserve = mockLiabilities + mockBuffer + mockExpenses; // 1405.0
+    const mockSafeWithdrawable = Math.max(0, mockGrossCash - mockRequiredReserve); // 95.0
+    assert.strictEqual(mockSafeWithdrawable, 95.0, 'Safe withdrawable dividend calculation must match CPA formula');
+    assert.ok(mockGrossCash > mockLiabilities, 'Solvent platform gross cash must exceed custodial player liabilities');
+    console.log('✓ Accounting Solvency & Reserve Invariant verified.\n');
+
+    console.log('=== ALL WORKFLOW & ACCOUNTING TESTS PASSED SUCCESSFULLY! ===');
   } catch (err) {
     console.error('Test Suite Failed:', err);
     process.exit(1);

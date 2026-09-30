@@ -71,3 +71,17 @@ export const ROOM_CODE_LENGTH = 6;
 
 /** Max candidates per queue match window. */
 export const QUICK_MATCH_ELO_WINDOW = 150;
+
+/** Financial & Treasury Accounting Thresholds (EUR) */
+export const MIN_DEPOSIT_EUR = 5.0;
+export const MAX_DEPOSIT_EUR = 5000.0;
+export const MIN_WITHDRAWAL_EUR = 10.0;
+export const MAX_WITHDRAWAL_EUR = 5000.0;
+
+/** Match stakes & fees */
+export const MIN_DUEL_STAKE_EUR = 1.0;
+export const MIN_DUEL_STAKE_POINTS = 50;
+export const PLATFORM_RAKE_PERCENT = 5.0; // 5% platform fee on cash matches
+
+/** Treasury Liquidity Reserve Ratio Target (120% coverage of custodial liabilities) */
+export const TARGET_RESERVE_RATIO = 1.20;

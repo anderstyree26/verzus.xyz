@@ -18,6 +18,7 @@ import {
   Gem,
   Activity,
   ArrowLeft,
+  Landmark,
 } from 'lucide-react';
 
 interface AdminNavItem {
@@ -119,6 +120,13 @@ export function AdminSidebar({ onNavClick, className = '' }: AdminSidebarProps) 
         {
           group: 'Governance & Liquidity',
           items: [
+            {
+              href: '/admin/treasury',
+              label: 'Treasury & Accountancy',
+              icon: Landmark,
+              badge: 'CPA AUDIT',
+              badgeVariant: 'copper' as const,
+            },
             {
               href: '/admin/users',
               label: 'Users & Anti-Cheat',

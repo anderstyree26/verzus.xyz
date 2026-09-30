@@ -52,4 +52,9 @@ export class AdminController {
   ) {
     return this.adminService.createSponsor(body.name, body.websiteUrl, body.fundedAmount);
   }
+
+  @Get('treasury')
+  async treasury() {
+    return this.adminService.getTreasuryReport();
+  }
 }

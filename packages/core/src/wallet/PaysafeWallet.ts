@@ -2,6 +2,12 @@ import type { TypedSupabaseClient } from '@antigravity/db';
 import { WalletError } from '../errors';
 import { namedLogger } from '../logger';
 import { PaysafeClient } from './paysafe';
+import {
+  MIN_DEPOSIT_EUR,
+  MAX_DEPOSIT_EUR,
+  MIN_WITHDRAWAL_EUR,
+  MAX_WITHDRAWAL_EUR,
+} from '../constants';
 import type {
   CreditOptions,
   Lock,
@@ -39,6 +45,7 @@ interface DbLock {
 /**
  * Real cash wallet service powered by Paysafe Payment Engine.
  * Operates primarily in EUR with real-money escrow locks and payouts.
+ * Implements strict Double-Entry and Segregated Client Asset accounting principles.
  */
 export class PaysafeWallet implements WalletService {
   private readonly client: TypedSupabaseClient;
@@ -78,8 +85,10 @@ export class PaysafeWallet implements WalletService {
   async credit(userId: string, amount: number, reason: string, opts?: CreditOptions): Promise<Transaction> {
     if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Credit amount must be positive');
 
+    // Financial rounding to exact 2 decimal cents to avoid floating point drift
+    const roundedAmount = Math.round(amount * 100) / 100;
     const snap = await this.getBalance(userId);
-    const newBalance = snap.balance + amount;
+    const newBalance = Math.round((snap.balance + roundedAmount) * 100) / 100;
 
     const { error: updateError } = await this.client
       .from('wallets')
@@ -92,7 +101,7 @@ export class PaysafeWallet implements WalletService {
       .from('transactions')
       .insert({
         user_id: userId,
-        amount,
+        amount: roundedAmount,
         balance_after: newBalance,
         reason,
         metadata: opts?.metadata ?? {},
@@ -118,12 +127,18 @@ export class PaysafeWallet implements WalletService {
   async debit(userId: string, amount: number, reason: string, opts?: CreditOptions): Promise<Transaction> {
     if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Debit amount must be positive');
 
+    const roundedAmount = Math.round(amount * 100) / 100;
     const snap = await this.getBalance(userId);
-    if (snap.balance < amount) {
-      throw new WalletError('INSUFFICIENT_FUNDS', `Insufficient EUR balance: available ${snap.balance}, requested ${amount}`);
+    const available = Math.max(0, Math.round((snap.balance - snap.locked) * 100) / 100);
+
+    if (available < roundedAmount) {
+      throw new WalletError(
+        'INSUFFICIENT_FUNDS',
+        `Insufficient available EUR balance: available €${available.toFixed(2)}, requested €${roundedAmount.toFixed(2)}`,
+      );
     }
 
-    const newBalance = snap.balance - amount;
+    const newBalance = Math.round((snap.balance - roundedAmount) * 100) / 100;
 
     const { error: updateError } = await this.client
       .from('wallets')
@@ -136,7 +151,7 @@ export class PaysafeWallet implements WalletService {
       .from('transactions')
       .insert({
         user_id: userId,
-        amount: -amount,
+        amount: -roundedAmount,
         balance_after: newBalance,
         reason,
         metadata: opts?.metadata ?? {},
@@ -162,17 +177,23 @@ export class PaysafeWallet implements WalletService {
   async lock(userId: string, amount: number, ctx: LockContext): Promise<Lock> {
     if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Lock amount must be positive');
 
+    const roundedAmount = Math.round(amount * 100) / 100;
     const snap = await this.getBalance(userId);
-    if (snap.balance < amount) {
-      throw new WalletError('INSUFFICIENT_FUNDS', `Cannot lock EUR ${amount}: balance is only EUR ${snap.balance}`);
+    const available = Math.max(0, Math.round((snap.balance - snap.locked) * 100) / 100);
+
+    if (available < roundedAmount) {
+      throw new WalletError(
+        'INSUFFICIENT_FUNDS',
+        `Cannot lock EUR ${roundedAmount.toFixed(2)}: available balance is only EUR ${available.toFixed(2)}`,
+      );
     }
 
-    // Move from balance to locked
+    // Move from available to locked in escrow
+    const newLocked = Math.round((snap.locked + roundedAmount) * 100) / 100;
     const { error: updateError } = await this.client
       .from('wallets')
       .update({
-        balance: snap.balance - amount,
-        locked: snap.locked + amount,
+        locked: newLocked,
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', userId);
@@ -291,9 +312,29 @@ export class PaysafeWallet implements WalletService {
   async payout(userId: string, amount: number, method: PayoutMethod): Promise<PayoutResult> {
     if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Payout amount must be positive');
 
+    const roundedAmount = Math.round(amount * 100) / 100;
+    if (roundedAmount < MIN_WITHDRAWAL_EUR) {
+      throw new WalletError(
+        'INVALID_AMOUNT',
+        `The minimum withdrawal threshold is €${MIN_WITHDRAWAL_EUR.toFixed(2)}.`,
+      );
+    }
+
+    if (roundedAmount > MAX_WITHDRAWAL_EUR) {
+      throw new WalletError(
+        'INVALID_AMOUNT',
+        `The maximum withdrawal limit is €${MAX_WITHDRAWAL_EUR.toFixed(2)}.`,
+      );
+    }
+
     const snap = await this.getBalance(userId);
-    if (snap.balance < amount) {
-      throw new WalletError('INSUFFICIENT_FUNDS', `Cannot withdraw EUR ${amount}: balance is EUR ${snap.balance}`);
+    const available = Math.max(0, Math.round((snap.balance - snap.locked) * 100) / 100);
+
+    if (available < roundedAmount) {
+      throw new WalletError(
+        'INSUFFICIENT_FUNDS',
+        `Cannot withdraw EUR ${roundedAmount.toFixed(2)}: available balance is only EUR ${available.toFixed(2)} (EUR ${snap.locked.toFixed(2)} locked in active contests)`,
+      );
     }
 
     const merchantRefNum = `payout-${userId.slice(0, 8)}-${Date.now()}`;
@@ -301,7 +342,7 @@ export class PaysafeWallet implements WalletService {
     // Execute Paysafe standalone credit payout
     const paysafeRes = await this.paysafe.processPayout({
       merchantRefNum,
-      amount: Math.round(amount * 100), // in cents
+      amount: Math.round(roundedAmount * 100), // in cents
       currencyCode: 'EUR',
       destination: {
         type: 'BANK_ACCOUNT',

@@ -15,6 +15,7 @@ import {
   Lock,
   ArrowLeft,
   AlertTriangle,
+  Landmark,
 } from 'lucide-react';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -50,6 +51,7 @@ export default function AdminLayout({
 
   const fullAdminTabs = [
     { href: '/admin', label: 'Overview', icon: BarChart3, exact: true },
+    { href: '/admin/treasury', label: 'Treasury & Audit', icon: Landmark },
     { href: '/admin/review', label: 'Review', icon: ShieldAlert },
     { href: '/admin/profiles', label: 'Profiles', icon: Gamepad2 },
     { href: '/admin/users', label: 'Users', icon: Users },

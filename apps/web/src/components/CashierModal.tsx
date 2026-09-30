@@ -69,7 +69,7 @@ export function CashierModal({
 
   const presetAmounts = actionTab === 'deposit'
     ? ['10', '25', '50', '100', '250']
-    : ['20', '50', '100', '250', '500'];
+    : ['10', '25', '50', '100', '250'];
 
   // Handle Demo Practice Coins Reload
   const handleClaimDemo = async () => {
@@ -287,7 +287,7 @@ export function CashierModal({
                 className="flex-1 font-bold text-xs gap-1.5"
               >
                 <ArrowDownLeft className="w-4 h-4" />
-                <span>Deposit Funds</span>
+                <span>Deposit Funds (Min €5)</span>
               </Button>
               <Button
                 type="button"
@@ -301,7 +301,7 @@ export function CashierModal({
                 className="flex-1 font-bold text-xs gap-1.5"
               >
                 <ArrowUpRight className="w-4 h-4" />
-                <span>Withdraw Cash</span>
+                <span>Withdraw Cash (Min €10)</span>
               </Button>
             </div>
 
@@ -422,12 +422,27 @@ export function CashierModal({
                 </span>
                 <Input
                   type="number"
-                  min="5"
+                  min={actionTab === 'deposit' ? '5' : '10'}
+                  max="5000"
+                  step="0.01"
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
                   className="pl-9 font-mono font-bold text-base h-10 bg-background"
-                  placeholder="Enter custom amount..."
+                  placeholder={actionTab === 'deposit' ? 'Min €5.00' : 'Min €10.00'}
                 />
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1">
+                <span>
+                  {actionTab === 'deposit'
+                    ? 'Minimum deposit: €5.00 · Maximum: €5,000.00'
+                    : 'Minimum withdrawal: €10.00 · Maximum: €5,000.00'}
+                </span>
+                <span className="font-mono">
+                  {actionTab === 'withdraw'
+                    ? `Available: €${userBalanceEur.toFixed(2)}`
+                    : 'Instant Credit'}
+                </span>
               </div>
             </div>
 
