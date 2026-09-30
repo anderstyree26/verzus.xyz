@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from './providers';
 import { GameRail } from '../components/GameRail';
@@ -10,6 +10,13 @@ import { NotificationToastContainer } from '../components/NotificationToastConta
 export const metadata: Metadata = {
   title: 'VerzusXYZ — Universal Esports Arena',
   description: 'Skill-based esports matchmaking, party duels, and tournaments with automated instant match verification and anti-cheat.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#0B0C10',
 };
 
 export default function RootLayout({
