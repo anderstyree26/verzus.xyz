@@ -1,6 +1,6 @@
 import { PHYSICAL_STABLE_READ } from '../constants';
 
-import { parseIntLoose, type TypeEngine } from './TypeEngine';
+import { parseIntLoose, safeRegExp, type TypeEngine } from './TypeEngine';
 
 import type { GameProfile, MatchContext, ParsedResult, ValidationResult, WinnerDecision } from '../types';
 import type { MatchFormat } from '../constants';
@@ -13,7 +13,7 @@ export class PhysicalEngine implements TypeEngine {
   readonly type = 'PHYSICAL' as const;
 
   parse(rawText: string, profile: GameProfile): ParsedResult | null {
-    const regex = profile.regexPattern ? new RegExp(profile.regexPattern) : /(\d+)/;
+    const regex = safeRegExp(profile.regexPattern, /(\d+)/);
     const m = rawText.match(regex);
     if (!m) return null;
     const v = parseIntLoose(m[1] ?? '');
@@ -50,6 +50,9 @@ export class PhysicalEngine implements TypeEngine {
   compare(a: ParsedResult, b: ParsedResult, _format: MatchFormat): WinnerDecision {
     const av = Number(a.primary);
     const bv = Number(b.primary);
+    if (!Number.isFinite(av) || !Number.isFinite(bv)) {
+      return { winnerId: null, reason: 'uncomparable: invalid physical challenge read' };
+    }
     if (av === bv) return { winnerId: null, reason: 'tie' };
     return av > bv
       ? { winnerId: 'A', reason: `${av} > ${bv}` }

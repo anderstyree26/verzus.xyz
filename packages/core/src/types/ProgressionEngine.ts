@@ -1,4 +1,4 @@
-import { parseIntLoose, type TypeEngine } from './TypeEngine';
+import { parseIntLoose, safeRegExp, type TypeEngine } from './TypeEngine';
 
 import type { GameProfile, MatchContext, ParsedResult, ValidationResult, WinnerDecision } from '../types';
 import type { MatchFormat } from '../constants';
@@ -22,7 +22,7 @@ export class ProgressionEngine implements TypeEngine {
       }
     }
 
-    const regex = profile.regexPattern ? new RegExp(profile.regexPattern) : /(\d+)/;
+    const regex = safeRegExp(profile.regexPattern, /(\d+)/);
     const numMatch = rawText.match(regex);
     const num = numMatch ? parseIntLoose(numMatch[1] ?? '') : null;
 

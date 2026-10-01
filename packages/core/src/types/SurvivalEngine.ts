@@ -1,4 +1,4 @@
-import { parseTimeToMs, type TypeEngine } from './TypeEngine';
+import { parseTimeToMs, safeRegExp, type TypeEngine } from './TypeEngine';
 
 import type { GameProfile, MatchContext, ParsedResult, ValidationResult, WinnerDecision } from '../types';
 import type { MatchFormat } from '../constants';
@@ -8,9 +8,7 @@ export class SurvivalEngine implements TypeEngine {
   readonly type = 'SURVIVAL' as const;
 
   parse(rawText: string, profile: GameProfile): ParsedResult | null {
-    const regex = profile.regexPattern
-      ? new RegExp(profile.regexPattern)
-      : /(\d{1,3}:\d{2}(?:[.:]\d{1,3})?)/;
+    const regex = safeRegExp(profile.regexPattern, /(\d{1,3}:\d{2}(?:[.:]\d{1,3})?)/);
     const m = rawText.match(regex);
     if (!m) return null;
     const ms = parseTimeToMs(m[1] ?? '');
@@ -30,6 +28,9 @@ export class SurvivalEngine implements TypeEngine {
   compare(a: ParsedResult, b: ParsedResult, _format: MatchFormat): WinnerDecision {
     const av = Number(a.primary);
     const bv = Number(b.primary);
+    if (!Number.isFinite(av) || !Number.isFinite(bv)) {
+      return { winnerId: null, reason: 'uncomparable: invalid duration' };
+    }
     if (av === bv) return { winnerId: null, reason: 'tie' };
     return av > bv
       ? { winnerId: 'A', reason: `${av}ms > ${bv}ms` }

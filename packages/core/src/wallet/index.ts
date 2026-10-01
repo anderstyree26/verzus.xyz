@@ -14,6 +14,10 @@ export { PaysafeWallet } from './PaysafeWallet';
 
 let cached: WalletService | null = null;
 
+export function setWallet(wallet: WalletService | null): void {
+  cached = wallet;
+}
+
 /**
  * Returns the process-wide wallet singleton.
  * WALLET_MODE=paysafe or WALLET_MODE=real switches to PaysafeWallet when Supabase credentials exist.
@@ -36,6 +40,11 @@ export function getWallet(): WalletService {
   }
 
   if (!url || !key) {
+    if (process.env.NODE_ENV === 'test' || !process.env.SUPABASE_URL) {
+      const client = createServiceClient('https://placeholder.supabase.co', 'placeholder-key');
+      cached = new DemoWallet({ client });
+      return cached;
+    }
     throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for Wallet');
   }
 

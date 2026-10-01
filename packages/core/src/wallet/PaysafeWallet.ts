@@ -83,7 +83,9 @@ export class PaysafeWallet implements WalletService {
   }
 
   async credit(userId: string, amount: number, reason: string, opts?: CreditOptions): Promise<Transaction> {
-    if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Credit amount must be positive');
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+      throw new WalletError('INVALID_AMOUNT', 'Credit amount must be a positive valid number');
+    }
 
     // Financial rounding to exact 2 decimal cents to avoid floating point drift
     const roundedAmount = Math.round(amount * 100) / 100;
@@ -125,7 +127,9 @@ export class PaysafeWallet implements WalletService {
   }
 
   async debit(userId: string, amount: number, reason: string, opts?: CreditOptions): Promise<Transaction> {
-    if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Debit amount must be positive');
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+      throw new WalletError('INVALID_AMOUNT', 'Debit amount must be a positive valid number');
+    }
 
     const roundedAmount = Math.round(amount * 100) / 100;
     const snap = await this.getBalance(userId);
@@ -175,7 +179,9 @@ export class PaysafeWallet implements WalletService {
   }
 
   async lock(userId: string, amount: number, ctx: LockContext): Promise<Lock> {
-    if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Lock amount must be positive');
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+      throw new WalletError('INVALID_AMOUNT', 'Lock amount must be a positive valid number');
+    }
 
     const roundedAmount = Math.round(amount * 100) / 100;
     const snap = await this.getBalance(userId);
@@ -227,6 +233,10 @@ export class PaysafeWallet implements WalletService {
   }
 
   async settle(matchId: string, winnerId: string, amount?: number): Promise<void> {
+    if (amount !== undefined && (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0)) {
+      throw new WalletError('INVALID_AMOUNT', 'Settlement award amount must be a positive valid number');
+    }
+
     const { data: locks, error } = await this.client
       .from('locks')
       .select('*')
@@ -310,7 +320,9 @@ export class PaysafeWallet implements WalletService {
   }
 
   async payout(userId: string, amount: number, method: PayoutMethod): Promise<PayoutResult> {
-    if (amount <= 0) throw new WalletError('INVALID_AMOUNT', 'Payout amount must be positive');
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+      throw new WalletError('INVALID_AMOUNT', 'Payout amount must be a positive valid number');
+    }
 
     const roundedAmount = Math.round(amount * 100) / 100;
     if (roundedAmount < MIN_WITHDRAWAL_EUR) {

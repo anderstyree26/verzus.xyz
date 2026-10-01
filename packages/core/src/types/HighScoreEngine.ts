@@ -1,6 +1,6 @@
 import { CONFIDENCE } from '../constants';
 
-import { parseIntLoose, type TypeEngine } from './TypeEngine';
+import { parseIntLoose, safeRegExp, type TypeEngine } from './TypeEngine';
 
 import type { GameProfile, MatchContext, ParsedResult, ValidationResult, WinnerDecision } from '../types';
 import type { MatchFormat } from '../constants';
@@ -13,9 +13,7 @@ export class HighScoreEngine implements TypeEngine {
   readonly type = 'HIGH_SCORE' as const;
 
   parse(rawText: string, profile: GameProfile): ParsedResult | null {
-    const regex = profile.regexPattern
-      ? new RegExp(profile.regexPattern)
-      : /([0-9][0-9,\.]*)/;
+    const regex = safeRegExp(profile.regexPattern, /([0-9][0-9,\.]*)/);
     const match = rawText.match(regex);
     if (!match) return null;
     const value = parseIntLoose(match[1] ?? '');
@@ -50,6 +48,9 @@ export class HighScoreEngine implements TypeEngine {
   compare(a: ParsedResult, b: ParsedResult, _format: MatchFormat): WinnerDecision {
     const av = Number(a.primary);
     const bv = Number(b.primary);
+    if (!Number.isFinite(av) || !Number.isFinite(bv)) {
+      return { winnerId: null, reason: 'uncomparable: invalid numeric score' };
+    }
     if (av === bv) return { winnerId: null, reason: 'tie' };
     return av > bv
       ? { winnerId: 'A', reason: `${av} > ${bv}` }

@@ -1,4 +1,4 @@
-import type { TypeEngine } from './TypeEngine';
+import { safeRegExp, type TypeEngine } from './TypeEngine';
 
 import type { GameProfile, MatchContext, ParsedResult, ValidationResult, WinnerDecision } from '../types';
 import type { MatchFormat } from '../constants';
@@ -13,7 +13,7 @@ export class CompositeStatEngine implements TypeEngine {
 
   parse(rawText: string, profile: GameProfile): ParsedResult | null {
     if (!profile.regexPattern) return null;
-    const regex = new RegExp(profile.regexPattern);
+    const regex = safeRegExp(profile.regexPattern, /(?:)/);
     const m = rawText.match(regex);
     if (!m?.groups) return null;
 
@@ -56,6 +56,9 @@ export class CompositeStatEngine implements TypeEngine {
   compare(a: ParsedResult, b: ParsedResult, _format: MatchFormat): WinnerDecision {
     const av = Number(a.primary);
     const bv = Number(b.primary);
+    if (!Number.isFinite(av) || !Number.isFinite(bv)) {
+      return { winnerId: null, reason: 'uncomparable: invalid composite stat' };
+    }
     if (av === bv) return { winnerId: null, reason: 'tie' };
     return av > bv
       ? { winnerId: 'A', reason: `${av} > ${bv}` }

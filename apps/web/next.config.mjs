@@ -17,6 +17,12 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.r2.dev' },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/wallet', destination: '/dashboard?cashier=open', permanent: false },
+      { source: '/arena', destination: '/matches/new', permanent: false },
+    ];
+  },
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       config.plugins.push(

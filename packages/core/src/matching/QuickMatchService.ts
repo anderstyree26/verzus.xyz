@@ -58,6 +58,8 @@ export class QuickMatchService {
         const a = sorted[i]!;
         const b = sorted[j]!;
         if (a.userId === b.userId) continue;
+        if (a.profileId !== b.profileId) continue;
+        if (a.format !== b.format) continue;
         if (Math.abs(a.rating - b.rating) > QUICK_MATCH_ELO_WINDOW) continue;
 
         await this.deps.matchService.create({

@@ -16,6 +16,19 @@ export class BinaryResultEngine implements TypeEngine {
       ? profile.endKeywords.map((k) => k.toLowerCase())
       : [...WIN_KEYWORDS, ...LOSE_KEYWORDS];
 
+    const hasWin = WIN_KEYWORDS.some((w) => lower.includes(w));
+    const hasLoss = LOSE_KEYWORDS.some((w) => lower.includes(w));
+
+    if (hasWin && hasLoss) {
+      // Ambiguous OCR text containing conflicting keywords
+      const isWin = lower.includes('victory') && !lower.includes('you lose');
+      return {
+        primary: isWin ? 'WIN' : 'LOSS',
+        raw: rawText,
+        confidence: 0.6, // Flags for human review
+      };
+    }
+
     for (const kw of keywords) {
       if (lower.includes(kw)) {
         const isWin = WIN_KEYWORDS.some((w) => kw.includes(w)) || kw === 'victory';

@@ -15,7 +15,8 @@ export function analyzeScoreStream(
 ): AntiCheatResult {
   const reasons: string[] = [];
 
-  const sorted = [...frames].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  const validFrames = frames.filter((f) => f && f.createdAt && !Number.isNaN(f.createdAt.getTime()));
+  const sorted = [...validFrames].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
   // 1. Impossible velocity.
   const maxJump = profile.constraints.maxJumpPerSec;
@@ -44,6 +45,10 @@ export function analyzeScoreStream(
   const { min = -Infinity, max = Infinity } = profile.constraints;
   for (const f of sorted) {
     if (typeof f.parsed?.primary !== 'number') continue;
+    if (!Number.isFinite(f.parsed.primary)) {
+      reasons.push('non-finite score detected');
+      break;
+    }
     if (f.parsed.primary < min || f.parsed.primary > max) {
       reasons.push(`value ${f.parsed.primary} outside [${min}, ${max}]`);
       break;

@@ -34,7 +34,10 @@ export class TournamentEngine {
 
   /** Generate the first round of a single-elimination bracket. */
   generateSingleElim(entries: Entry[]): MatchDraft[] {
-    const ordered = this.order(entries);
+    const uniqueEntries = this.sanitizeEntries(entries);
+    if (uniqueEntries.length < 2) return [];
+
+    const ordered = this.order(uniqueEntries);
     const size = 1 << Math.ceil(Math.log2(Math.max(2, ordered.length)));
     const padded: (string | null)[] = [...ordered.map((e) => e.userId)];
     while (padded.length < size) padded.push(null);
@@ -73,7 +76,10 @@ export class TournamentEngine {
 
   /** Double elimination - Winners + Losers brackets drafts. */
   generateDoubleElim(entries: Entry[]): MatchDraft[] {
-    const winnersDrafts = this.generateSingleElim(entries);
+    const uniqueEntries = this.sanitizeEntries(entries);
+    if (uniqueEntries.length < 2) return [];
+
+    const winnersDrafts = this.generateSingleElim(uniqueEntries);
     const count = winnersDrafts.length;
     const losersDrafts: MatchDraft[] = winnersDrafts.map((m, idx) => ({
       ...m,
@@ -87,7 +93,10 @@ export class TournamentEngine {
 
   /** Round robin — every pair plays once. */
   generateRoundRobin(entries: Entry[]): MatchDraft[] {
-    const ordered = this.order(entries);
+    const uniqueEntries = this.sanitizeEntries(entries);
+    if (uniqueEntries.length < 2) return [];
+
+    const ordered = this.order(uniqueEntries);
     const drafts: MatchDraft[] = [];
     let position = 0;
     for (let i = 0; i < ordered.length; i++) {
@@ -106,7 +115,10 @@ export class TournamentEngine {
 
   /** Swiss pairing for the given round (assumes previous rounds already played). */
   generateSwiss(entries: Entry[], round = 1): MatchDraft[] {
-    const ordered = this.order(entries);
+    const uniqueEntries = this.sanitizeEntries(entries);
+    if (uniqueEntries.length < 2) return [];
+
+    const ordered = this.order(uniqueEntries);
     const drafts: MatchDraft[] = [];
     for (let i = 0; i < ordered.length - 1; i += 2) {
       drafts.push({
@@ -179,14 +191,24 @@ export class TournamentEngine {
     }
 
     const pool = Number(t.prize_pool ?? 0);
+    if (pool <= 0) return;
+
     const dist = (t.prize_distribution ?? {}) as Record<string, number>;
     const wallet = getWallet();
+    let totalAwarded = 0;
 
     for (const e of entries ?? []) {
       const placement = String(e.final_placement);
       const fraction = dist[placement] ?? 0;
-      const amount = Math.floor(pool * fraction);
+      let amount = Math.floor(pool * fraction);
       if (amount <= 0) continue;
+
+      if (totalAwarded + amount > pool) {
+        amount = Math.max(0, pool - totalAwarded);
+      }
+      if (amount <= 0) break;
+
+      totalAwarded += amount;
       await wallet.credit(e.user_id as string, amount, 'tournament_prize', {
         metadata: { tournamentId, placement },
         idempotencyKey: `tournament:${tournamentId}:prize:${e.user_id}`,
@@ -231,6 +253,16 @@ export class TournamentEngine {
       .eq('id', matchId);
 
     log.info({ matchId, winner }, 'no-show forfeited');
+  }
+
+  private sanitizeEntries(entries: Entry[]): Entry[] {
+    const uniqueMap = new Map<string, Entry>();
+    for (const e of entries) {
+      if (e.userId && !uniqueMap.has(e.userId)) {
+        uniqueMap.set(e.userId, e);
+      }
+    }
+    return Array.from(uniqueMap.values());
   }
 
   private order(entries: Entry[]): Entry[] {

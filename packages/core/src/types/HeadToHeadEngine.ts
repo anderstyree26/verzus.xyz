@@ -1,4 +1,4 @@
-import { parseIntLoose, type TypeEngine } from './TypeEngine';
+import { parseIntLoose, safeRegExp, type TypeEngine } from './TypeEngine';
 
 import type { GameProfile, MatchContext, ParsedResult, ValidationResult, WinnerDecision } from '../types';
 import type { MatchFormat } from '../constants';
@@ -13,7 +13,7 @@ export class HeadToHeadEngine implements TypeEngine {
 
   parse(rawText: string, profile: GameProfile): ParsedResult | null {
     if (!profile.regexPattern) return null;
-    const regex = new RegExp(profile.regexPattern);
+    const regex = safeRegExp(profile.regexPattern, /(?:)/);
     const m = rawText.match(regex);
     if (!m) return null;
     const a = parseIntLoose(m.groups?.a ?? m[1] ?? '');

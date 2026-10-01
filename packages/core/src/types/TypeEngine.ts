@@ -40,3 +40,14 @@ export function parseTimeToMs(input: string): number | null {
   if (seconds >= 60) return null;
   return (minutes * 60 + seconds) * 1000 + ms;
 }
+
+/** Safely compiles a regular expression, falling back to a default if the pattern is malformed. */
+export function safeRegExp(pattern: string | null | undefined, defaultPattern: RegExp): RegExp {
+  if (!pattern) return defaultPattern;
+  try {
+    return new RegExp(pattern);
+  } catch {
+    return defaultPattern;
+  }
+}
+
