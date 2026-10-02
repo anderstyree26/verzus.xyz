@@ -5,3 +5,4 @@ export * from './AntiCheat';
 export * from './OCRClient';
 export * from './OCRServer';
 export * from './VotingOCR';
+export * from './TelemetrySigner';

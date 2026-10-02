@@ -25,11 +25,26 @@ export class WalletService {
     try {
       const snap = await this.wallet.getBalance(userId);
       const isEur = snap.currency === 'EUR';
+
+      let rollover = { remainingRollover: 0, withdrawableBalance: Math.max(0, snap.balance - snap.locked) };
+      if (typeof this.wallet.getRolloverStatus === 'function') {
+        try {
+          rollover = await this.wallet.getRolloverStatus(userId);
+        } catch {
+          // Fallback if DB query fails
+        }
+      }
+
+      const availableCash = isEur ? snap.balance - snap.locked : 0;
+      const withdrawable = Math.max(0, Math.min(availableCash, rollover.withdrawableBalance));
+
       return {
         balance: isEur ? 1000 : snap.balance,
         locked: isEur ? 0 : snap.locked,
         cashEur: isEur ? snap.balance : 0,
         lockedCashEur: isEur ? snap.locked : 0,
+        withdrawableEur: withdrawable,
+        remainingRolloverEur: rollover.remainingRollover,
         currency: snap.currency || 'EUR',
         minDepositEur: MIN_DEPOSIT_EUR,
         maxDepositEur: MAX_DEPOSIT_EUR,
@@ -43,6 +58,8 @@ export class WalletService {
         locked: 0,
         cashEur: 0,
         lockedCashEur: 0,
+        withdrawableEur: 0,
+        remainingRolloverEur: 0,
         currency: 'EUR',
         minDepositEur: MIN_DEPOSIT_EUR,
         maxDepositEur: MAX_DEPOSIT_EUR,
@@ -93,6 +110,9 @@ export class WalletService {
     } catch (err) {
       if (err instanceof BadRequestException) throw err;
       const msg = err instanceof Error ? err.message : String(err);
+      if (msg.toLowerCase().includes('rollover') || msg.toLowerCase().includes('laundering')) {
+        throw new BadRequestException(msg);
+      }
       if (msg.toLowerCase().includes('insufficient')) {
         throw new BadRequestException('Insufficient withdrawable balance for this payout request.');
       }

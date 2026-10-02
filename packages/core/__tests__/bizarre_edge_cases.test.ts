@@ -13,6 +13,18 @@ import {
   MAX_WITHDRAWAL_EUR,
   MIN_DEPOSIT_EUR,
   MAX_DEPOSIT_EUR,
+  computeDHashFromGrayscale,
+  hammingDistance,
+  isPerceptualMatch,
+  ImagePreprocessor,
+  computeTemporalConfidence,
+  runEngines,
+  generateSessionSecret,
+  signTelemetry,
+  verifyTelemetry,
+  verifyGamertagBinding,
+  validateParsed,
+  QuickMatchService,
 } from '../src';
 import { getEngine, TypeRegistry } from '../src/types/TypeRegistry';
 import { safeRegExp, parseIntLoose, parseTimeToMs } from '../src/types/TypeEngine';
@@ -31,18 +43,28 @@ function createMockWalletSupabase(initialBalance = 100, initialLocked = 0) {
   const mockClient = {
     from: (table: string) => ({
       select: (_cols?: string) => ({
-        eq: (col: string, val: any) => ({
-          maybeSingle: async () => {
-            if (table === 'wallets') {
-              return { data: { balance, locked, currency: 'EUR' }, error: null };
-            }
-            return { data: null, error: null };
-          },
-          single: async () => ({ data: null, error: null }),
-          order: () => ({
-            range: async () => ({ data: transactions, error: null }),
-          }),
-        }),
+        eq: (col: string, val: any) => {
+          const res = {
+            data: table === 'transactions' ? transactions : table === 'locks' ? locks : null,
+            error: null,
+            maybeSingle: async () => {
+              if (table === 'wallets') {
+                return { data: { balance, locked, currency: 'EUR' }, error: null };
+              }
+              return { data: null, error: null };
+            },
+            single: async () => ({ data: null, error: null }),
+            order: () => ({
+              range: async () => ({ data: transactions, error: null }),
+            }),
+            then: (resolve: any) =>
+              resolve({
+                data: table === 'transactions' ? transactions : table === 'locks' ? locks : null,
+                error: null,
+              }),
+          };
+          return res;
+        },
       }),
       insert: (record: any) => ({
         select: () => ({
@@ -72,7 +94,13 @@ function createMockWalletSupabase(initialBalance = 100, initialLocked = 0) {
       }),
     }),
     _getState: () => ({ balance, locked, transactions, locks }),
-  } as unknown as TypedSupabaseClient & { _getState: () => any };
+    _seedTransaction: (tx: any) => transactions.push(tx),
+    _seedLock: (lk: any) => locks.push(lk),
+  } as unknown as TypedSupabaseClient & {
+    _getState: () => any;
+    _seedTransaction: (tx: any) => void;
+    _seedLock: (lk: any) => void;
+  };
 
   return mockClient;
 }
@@ -541,6 +569,484 @@ describe('Master Bizarre & Edge Case Audit Suite', () => {
         set.add(generateRoomCode());
       }
       expect(set.size).toBe(50);
+    });
+  });
+
+  describe('9. Advanced Anti-Cheat, AML & Vision Defenses', () => {
+    describe('Perceptual Hashing & Hamming Distance', () => {
+      it('calculates Hamming distance accurately across 64-bit hex strings', () => {
+        const hashA = '0000000000000000';
+        const hashB = '0000000000000001'; // 1 bit diff
+        const hashC = '000000000000000f'; // 4 bits diff (1111)
+        const hashD = 'ffffffffffffffff'; // 64 bits diff
+
+        expect(hammingDistance(hashA, hashA)).toBe(0);
+        expect(hammingDistance(hashA, hashB)).toBe(1);
+        expect(hammingDistance(hashA, hashC)).toBe(4);
+        expect(hammingDistance(hashA, hashD)).toBe(64);
+        expect(hammingDistance(hashA, 'short')).toBe(64);
+      });
+
+      it('evaluates perceptual match within threshold <= 4', () => {
+        const base = '1234567890abcdef';
+        // Same hash
+        expect(isPerceptualMatch(base, base, 4)).toBe(true);
+        // Bit diff within 4
+        expect(isPerceptualMatch('0000000000000000', '0000000000000007', 4)).toBe(true); // 3 bits diff
+        // Bit diff exceeding 4
+        expect(isPerceptualMatch('0000000000000000', '000000000000001f', 4)).toBe(false); // 5 bits diff
+      });
+
+      it('computes deterministic dHash from 9x8 grayscale pixels', () => {
+        const flatPixels = new Uint8Array(72);
+        // Fill with a horizontal gradient
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 9; x++) {
+            flatPixels[y * 9 + x] = x * 25;
+          }
+        }
+        const dHash = computeDHashFromGrayscale(flatPixels);
+        expect(dHash).toHaveLength(16);
+        // Gradient left < right across all rows produces all bits 1
+        expect(dHash).toBe('ffffffffffffffff');
+      });
+
+      it('flags replay attack when consecutive frames have matching perceptual hashes despite compression noise', () => {
+        const profile: GameProfile = {
+          id: 'test_game',
+          displayName: 'Test Game',
+          gameType: 'HIGH_SCORE',
+          platform: 'PC',
+          roi: { x: 0, y: 0, w: 1, h: 1 },
+          constraints: { min: 0, max: 10000 },
+          endKeywords: [],
+          approved: true,
+          isOfficial: true,
+        };
+
+        // 5 frames where SHA-256 imageHash differs due to compression, but perceptualHash has hamming distance <= 2
+        const frames: ScoreFrame[] = [
+          {
+            id: 'f1',
+            matchId: 'm1',
+            playerId: 'p1',
+            rawText: '100',
+            parsed: { primary: 100, raw: '100', confidence: 0.9 },
+            confidence: 0.9,
+            isVerified: true,
+            isFinal: false,
+            imageHash: 'sha256_noise_111',
+            perceptualHash: '0000000000000000',
+            source: 'CLIENT_OCR',
+            createdAt: new Date(1000),
+          },
+          {
+            id: 'f2',
+            matchId: 'm1',
+            playerId: 'p1',
+            rawText: '100',
+            parsed: { primary: 100, raw: '100', confidence: 0.9 },
+            confidence: 0.9,
+            isVerified: true,
+            isFinal: false,
+            imageHash: 'sha256_noise_222',
+            perceptualHash: '0000000000000001', // 1 bit diff
+            source: 'CLIENT_OCR',
+            createdAt: new Date(2000),
+          },
+          {
+            id: 'f3',
+            matchId: 'm1',
+            playerId: 'p1',
+            rawText: '100',
+            parsed: { primary: 100, raw: '100', confidence: 0.9 },
+            confidence: 0.9,
+            isVerified: true,
+            isFinal: false,
+            imageHash: 'sha256_noise_333',
+            perceptualHash: '0000000000000003', // 2 bits diff
+            source: 'CLIENT_OCR',
+            createdAt: new Date(3000),
+          },
+          {
+            id: 'f4',
+            matchId: 'm1',
+            playerId: 'p1',
+            rawText: '100',
+            parsed: { primary: 100, raw: '100', confidence: 0.9 },
+            confidence: 0.9,
+            isVerified: true,
+            isFinal: false,
+            imageHash: 'sha256_noise_444',
+            perceptualHash: '0000000000000001',
+            source: 'CLIENT_OCR',
+            createdAt: new Date(4000),
+          },
+          {
+            id: 'f5',
+            matchId: 'm1',
+            playerId: 'p1',
+            rawText: '100',
+            parsed: { primary: 100, raw: '100', confidence: 0.9 },
+            confidence: 0.9,
+            isVerified: true,
+            isFinal: true,
+            imageHash: 'sha256_noise_555',
+            perceptualHash: '0000000000000000',
+            source: 'CLIENT_OCR',
+            createdAt: new Date(5000),
+          },
+        ];
+
+        const report = analyzeScoreStream(frames, profile);
+        expect(report.suspicious).toBe(true);
+        expect(report.reasons.some((r) => r.includes('video replay') || r.includes('replay'))).toBe(true);
+      });
+    });
+
+    describe('Anchor Geometry & Aspect Ratio Adaptation', () => {
+      it('centers 16:9 game viewport on 21:9 ultrawide monitor', () => {
+        const preprocessor = new ImagePreprocessor({
+          x: 0,
+          y: 0,
+          w: 0.5,
+          h: 0.2,
+          aspectRatioConstraint: '16:9',
+          anchor: 'TOP_LEFT',
+        });
+
+        // 2560x1080 ultrawide monitor: 16:9 viewport is 1920x1080 centered at x = 320
+        const box = preprocessor.calculateCropBox(2560, 1080);
+        expect(box.left).toBe(320);
+        expect(box.top).toBe(0);
+        expect(box.width).toBe(Math.round(0.5 * 1920)); // 960
+        expect(box.height).toBe(Math.round(0.2 * 1080)); // 216
+      });
+
+      it('applies TOP_RIGHT anchor correctly on ultrawide display', () => {
+        const preprocessor = new ImagePreprocessor({
+          x: 0.05, // 5% inset from right edge
+          y: 0.02,
+          w: 0.15,
+          h: 0.08,
+          aspectRatioConstraint: '16:9',
+          anchor: 'TOP_RIGHT',
+        });
+
+        const box = preprocessor.calculateCropBox(2560, 1080);
+        const gameX = 320;
+        const gameW = 1920;
+        const roiW = Math.round(0.15 * 1920); // 288
+        const expectedLeft = Math.round(gameX + gameW - 0.05 * gameW - roiW);
+        expect(box.left).toBe(expectedLeft);
+      });
+    });
+
+    describe('Temporal Persistence Voting', () => {
+      it('boosts confidence proportionally for stable consecutive reads', () => {
+        expect(computeTemporalConfidence('Score: 42', 0.85, []).effectiveConfidence).toBe(0.85);
+        expect(
+          computeTemporalConfidence('Score: 42', 0.85, [{ rawText: 'Score: 42' }]).effectiveConfidence
+        ).toBeCloseTo(0.935, 3);
+        expect(
+          computeTemporalConfidence('Score: 42', 0.85, [
+            { rawText: 'Score: 42' },
+            { rawText: 'Score: 42' },
+          ]).effectiveConfidence
+        ).toBeCloseTo(1.0, 3);
+      });
+
+      it('promotes dual engine consensus with temporal persistence above auto-settle threshold', async () => {
+        const runners = [
+          { name: 'tesseract', run: async () => ({ text: 'Score: 42', confidence: 0.9 }) },
+          { name: 'paddleocr', run: async () => ({ text: 'Score: 42', confidence: 0.9 }) },
+        ];
+
+        const recentHistory = [
+          { rawText: 'Score: 42' },
+          { rawText: 'Score: 42' },
+        ];
+
+        const result = await runEngines(runners, { recentHistory });
+
+        // Combined (0.9) + 2 consecutive frames (+20%) = 1.0 (capped), needsReview: false
+        expect(result.confidence).toBeGreaterThanOrEqual(0.95);
+        expect(result.needsReview).toBe(false);
+        expect(result.consecutiveStableFrames).toBe(2);
+      });
+    });
+
+    describe('Telemetry HMAC Signing & Anti-Tamper', () => {
+      const secret = generateSessionSecret();
+
+      it('generates valid HMAC signature that verifies cleanly', () => {
+        const payload = {
+          matchId: 'm-1234',
+          playerId: 'p-5678',
+          seq: 1,
+          timestamp: Date.now(),
+          perceptualHash: '1234567890abcdef',
+          rawText: 'Score 100',
+        };
+
+        const sig = signTelemetry(secret, payload);
+        const res = verifyTelemetry(secret, sig, payload);
+        expect(res.valid).toBe(true);
+      });
+
+      it('rejects sequence regression (replay / out-of-order packets)', () => {
+        const payload = {
+          matchId: 'm-1234',
+          playerId: 'p-5678',
+          seq: 5,
+          timestamp: Date.now(),
+        };
+
+        const sig = signTelemetry(secret, payload);
+        // Last verified seq was 5; receiving seq 5 or lower must fail
+        const res = verifyTelemetry(secret, sig, payload, 5);
+        expect(res.valid).toBe(false);
+        expect(res.reason).toContain('Sequence regression');
+      });
+
+      it('rejects packets with clock skew exceeding allowable window', () => {
+        const stalePayload = {
+          matchId: 'm-1234',
+          playerId: 'p-5678',
+          seq: 10,
+          timestamp: Date.now() - 30_000, // 30s ago (exceeds default 15s)
+        };
+
+        const sig = signTelemetry(secret, stalePayload);
+        const res = verifyTelemetry(secret, sig, stalePayload);
+        expect(res.valid).toBe(false);
+        expect(res.reason).toContain('Timestamp skew');
+      });
+
+      it('rejects tampered telemetry payloads', () => {
+        const payload = {
+          matchId: 'm-1234',
+          playerId: 'p-5678',
+          seq: 1,
+          timestamp: Date.now(),
+          rawText: 'Score 10',
+        };
+
+        const sig = signTelemetry(secret, payload);
+        // Malicious user modifies rawText to 9999 in DevTools
+        const tampered = { ...payload, rawText: 'Score 9999' };
+        const res = verifyTelemetry(secret, sig, tampered);
+        expect(res.valid).toBe(false);
+        expect(res.reason).toContain('Invalid telemetry signature');
+      });
+    });
+
+    describe('Gamertag OCR HUD Binding', () => {
+      it('verifies exact gamertags on HUD', () => {
+        const check = verifyGamertagBinding('TEAM A [PRO] NinjaX Score: 5', 'NinjaX');
+        expect(check.matched).toBe(true);
+        expect(check.confidence).toBeGreaterThanOrEqual(0.9);
+      });
+
+      it('handles common OCR glyph confusions (0/O, 1/L, 5/S)', () => {
+        // OCR misreads 'ProGamer01' as 'Pr0GameROl'
+        const check = verifyGamertagBinding('Match Victory - Pr0GameROl', 'ProGamer01');
+        expect(check.matched).toBe(true);
+      });
+
+      it('flags missing gamertag indicating possible stream hijack', () => {
+        const check = verifyGamertagBinding('Tournament Finals: Shroud vs S1mple', 'MyPlayerTag');
+        expect(check.matched).toBe(false);
+        expect(check.confidence).toBeLessThanOrEqual(0.3);
+      });
+
+      it('integrates gamertag validation into validateParsed', () => {
+        const ctx: MatchContext = {
+          matchId: 'm1',
+          playerA: 'p1',
+          playerB: 'p2',
+          profile: {
+            id: 'g1',
+            displayName: 'G',
+            gameType: 'HIGH_SCORE',
+            platform: 'PC',
+            roi: { x: 0, y: 0, w: 1, h: 1 },
+            constraints: {},
+            endKeywords: [],
+            approved: true,
+            isOfficial: true,
+          },
+          format: 'BEST_OF_1',
+          previousFrames: [],
+          gamertags: { playerA: 'ApexLegend99' },
+          activePlayerId: 'p1',
+        };
+
+        const parsed = {
+          primary: 500,
+          raw: 'Score: 500 - Opponent: Faker',
+          confidence: 0.95,
+        };
+
+        const result = validateParsed(parsed, ctx);
+        expect(result.ok).toBe(false);
+        expect(result.errors.some((e) => e.includes('ApexLegend99'))).toBe(true);
+      });
+    });
+
+    describe('Financial AML 1x Rollover Wagering Invariant', () => {
+      it('calculates 1x rollover requirement correctly on deposits and wagers', async () => {
+        const mockClient = createMockWalletSupabase(100, 0);
+        // Seed a deposit transaction of €100
+        mockClient._seedTransaction({
+          amount: 100,
+          reason: 'Deposit via PAYSAFE',
+          metadata: { provider: 'PAYSAFE' },
+        });
+
+        const wallet = new PaysafeWallet({ client: mockClient });
+        const rollover = await wallet.getRolloverStatus('u1');
+
+        expect(rollover.totalDeposited).toBe(100);
+        expect(rollover.totalWagered).toBe(0);
+        expect(rollover.remainingRollover).toBe(100);
+        expect(rollover.withdrawableBalance).toBe(0); // Cannot withdraw deposited money without wagering
+      });
+
+      it('blocks payout when withdrawable balance is restricted by 1x rollover', async () => {
+        const mockClient = createMockWalletSupabase(100, 0);
+        mockClient._seedTransaction({
+          amount: 100,
+          reason: 'Deposit via PAYSAFE',
+          metadata: { provider: 'PAYSAFE' },
+        });
+
+        const wallet = new PaysafeWallet({ client: mockClient });
+        await expect(
+          wallet.payout('u1', 50, { type: 'PAYSAFE', iban: 'DE1234567890' })
+        ).rejects.toThrowError(/anti-money laundering/i);
+      });
+
+      it('releases withdrawable balance as matches are completed', async () => {
+        const mockClient = createMockWalletSupabase(100, 0);
+        mockClient._seedTransaction({
+          amount: 100,
+          reason: 'Deposit via PAYSAFE',
+          metadata: { provider: 'PAYSAFE' },
+        });
+        // Seed €60 in completed match wagers
+        mockClient._seedLock({
+          amount: 60,
+          status: 'RELEASED',
+        });
+
+        const wallet = new PaysafeWallet({ client: mockClient });
+        const rollover = await wallet.getRolloverStatus('u1');
+
+        expect(rollover.totalDeposited).toBe(100);
+        expect(rollover.totalWagered).toBe(60);
+        expect(rollover.remainingRollover).toBe(40);
+        expect(rollover.withdrawableBalance).toBe(60); // €60 is now eligible for withdrawal
+      });
+    });
+
+    describe('Anti-Collusion Matchmaking Defense', () => {
+      it('blocks pairing players with identical device fingerprints', async () => {
+        const matchesCreated: any[] = [];
+        const mockMatchService = {
+          create: async (data: any) => {
+            matchesCreated.push(data);
+            return data;
+          },
+        } as any;
+
+        const mockClient = {
+          from: () => ({
+            select: () => ({
+              eq: () => ({
+                eq: () => ({
+                  maybeSingle: async () => ({ data: { rating: 1200 }, error: null }),
+                }),
+              }),
+            }),
+          }),
+        } as any;
+
+        const qms = new QuickMatchService({
+          client: mockClient,
+          matchService: mockMatchService,
+        });
+
+        // Enqueue Player A and Player B with identical device fingerprint (multi-accounting / self-trading)
+        await qms.enqueue('u1', 'prof1', 'HIGH_SCORE', 'BEST_OF_1', {
+          deviceFingerprint: 'canvas-fp-abc-123',
+        });
+        await qms.enqueue('u2', 'prof1', 'HIGH_SCORE', 'BEST_OF_1', {
+          deviceFingerprint: 'canvas-fp-abc-123',
+        });
+
+        expect(matchesCreated).toHaveLength(0); // Collusion guard blocked match
+      });
+
+      it('blocks pairing players with identical IP subnets', async () => {
+        const matchesCreated: any[] = [];
+        const mockMatchService = {
+          create: async (data: any) => {
+            matchesCreated.push(data);
+            return data;
+          },
+        } as any;
+
+        const mockClient = {
+          from: () => ({
+            select: () => ({
+              eq: () => ({
+                eq: () => ({
+                  maybeSingle: async () => ({ data: { rating: 1200 }, error: null }),
+                }),
+              }),
+            }),
+          }),
+        } as any;
+
+        const qms = new QuickMatchService({
+          client: mockClient,
+          matchService: mockMatchService,
+        });
+
+        // Enqueue Player A and Player B from same local subnet (e.g. 192.168.1.0/24)
+        await qms.enqueue('u1', 'prof1', 'HIGH_SCORE', 'BEST_OF_1', {
+          ipSubnet: '192.168.1.0/24',
+        });
+        await qms.enqueue('u2', 'prof1', 'HIGH_SCORE', 'BEST_OF_1', {
+          ipSubnet: '192.168.1.0/24',
+        });
+
+        expect(matchesCreated).toHaveLength(0);
+      });
+
+      it('detects when 24h rematch frequency limit (>=3) has been reached', async () => {
+        const mockClient = {
+          from: () => ({
+            select: () => ({
+              or: () => ({
+                gte: async () => ({
+                  data: [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }], // 3 matches already in 24h
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        } as any;
+
+        const qms = new QuickMatchService({
+          client: mockClient,
+          matchService: {} as any,
+        });
+
+        const isCapped = await qms.checkRematchLimit('p1', 'p2', 3);
+        expect(isCapped).toBe(true);
+      });
     });
   });
 });

@@ -26,6 +26,13 @@ export interface WalletSnapshot {
   currency: string;
 }
 
+export interface RolloverStatus {
+  totalDeposited: number;
+  totalWagered: number;
+  remainingRollover: number;
+  withdrawableBalance: number;
+}
+
 export type PayoutMethod =
   | { type: 'DEMO' }
   | { type: 'PAYSAFE'; accountId?: string; iban?: string; email?: string }
@@ -59,6 +66,7 @@ export interface WalletService {
   refundTournament(tournamentId: string): Promise<void>;
   payout(userId: string, amount: number, method: PayoutMethod): Promise<PayoutResult>;
   history(userId: string, limit?: number, offset?: number): Promise<Transaction[]>;
+  getRolloverStatus?(userId: string): Promise<RolloverStatus>;
 }
 
 export interface WalletServiceDeps {

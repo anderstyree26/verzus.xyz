@@ -1,5 +1,14 @@
 import type { MatchFormat, MatchStatus, Platform, GameType } from './constants';
 
+export type AnchorPosition =
+  | 'TOP_LEFT'
+  | 'TOP_CENTER'
+  | 'TOP_RIGHT'
+  | 'CENTER'
+  | 'BOTTOM_LEFT'
+  | 'BOTTOM_CENTER'
+  | 'BOTTOM_RIGHT';
+
 export interface ROI {
   /** Relative left offset, 0..1 */
   x: number;
@@ -9,6 +18,10 @@ export interface ROI {
   w: number;
   /** Relative height, 0..1 */
   h: number;
+  /** Anchor alignment for non-16:9 displays (e.g. 21:9 ultrawide) */
+  anchor?: AnchorPosition;
+  /** Viewport aspect ratio constraint, default 'AUTO' */
+  aspectRatioConstraint?: '16:9' | 'AUTO';
 }
 
 export interface GameProfile {
@@ -43,6 +56,8 @@ export interface MatchContext {
   profile: GameProfile;
   format: MatchFormat;
   previousFrames: ScoreFrame[];
+  gamertags?: { playerA?: string; playerB?: string };
+  activePlayerId?: string;
 }
 
 export interface ScoreFrame {
@@ -55,6 +70,7 @@ export interface ScoreFrame {
   isVerified: boolean;
   isFinal: boolean;
   imageHash: string | null;
+  perceptualHash?: string | null;
   source: 'CLIENT_OCR' | 'SERVER_OCR' | 'STREAM_INGEST' | 'MANUAL';
   createdAt: Date;
 }

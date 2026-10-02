@@ -18,6 +18,7 @@ import type {
   WalletService,
   WalletServiceDeps,
   WalletSnapshot,
+  RolloverStatus,
 } from './WalletService';
 
 const log = namedLogger('PaysafeWallet');
@@ -349,6 +350,14 @@ export class PaysafeWallet implements WalletService {
       );
     }
 
+    const rollover = await this.getRolloverStatus(userId);
+    if (roundedAmount > rollover.withdrawableBalance) {
+      throw new WalletError(
+        'INSUFFICIENT_FUNDS',
+        `Under regulatory anti-money laundering (AML) standards, deposited funds must be wagered at least 1x before withdrawal. You currently have €${rollover.remainingRollover.toFixed(2)} in un-wagered deposits. Your withdrawable balance is €${rollover.withdrawableBalance.toFixed(2)}.`,
+      );
+    }
+
     const merchantRefNum = `payout-${userId.slice(0, 8)}-${Date.now()}`;
 
     // Execute Paysafe standalone credit payout
@@ -404,6 +413,60 @@ export class PaysafeWallet implements WalletService {
       metadata: (row.metadata as Record<string, unknown>) ?? {},
       createdAt: new Date(row.created_at),
     }));
+  }
+
+  /**
+   * Computes 1x rollover wagering compliance status for AML and anti-fraud enforcement.
+   * Deposited funds must be wagered at least once in competitive matches before withdrawal.
+   */
+  async getRolloverStatus(userId: string): Promise<RolloverStatus> {
+    const snap = await this.getBalance(userId);
+    const available = Math.max(0, Math.round((snap.balance - snap.locked) * 100) / 100);
+
+    // Sum deposits from transactions table
+    const { data: txs, error: txError } = await this.client
+      .from('transactions')
+      .select('amount, reason, metadata')
+      .eq('user_id', userId);
+
+    let totalDeposited = 0;
+    if (!txError && txs) {
+      for (const tx of txs) {
+        const amt = Number(tx.amount);
+        const reason = (tx.reason || '').toLowerCase();
+        const meta = tx.metadata as Record<string, unknown> | null;
+        if (amt > 0 && (reason.includes('deposit') || meta?.provider === 'PAYSAFE' || meta?.paymentId)) {
+          totalDeposited += amt;
+        }
+      }
+    }
+    totalDeposited = Math.round(totalDeposited * 100) / 100;
+
+    // Sum completed wagers from locks table
+    const { data: locks, error: lockError } = await this.client
+      .from('locks')
+      .select('amount, status')
+      .eq('user_id', userId);
+
+    let totalWagered = 0;
+    if (!lockError && locks) {
+      for (const l of locks) {
+        if (l.status === 'RELEASED') {
+          totalWagered += Number(l.amount);
+        }
+      }
+    }
+    totalWagered = Math.round(totalWagered * 100) / 100;
+
+    const remainingRollover = Math.max(0, Math.round((totalDeposited - totalWagered) * 100) / 100);
+    const withdrawableBalance = Math.max(0, Math.round((available - remainingRollover) * 100) / 100);
+
+    return {
+      totalDeposited,
+      totalWagered,
+      remainingRollover,
+      withdrawableBalance,
+    };
   }
 
   getPaysafeClient(): PaysafeClient {

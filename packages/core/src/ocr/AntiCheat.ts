@@ -1,4 +1,5 @@
 import type { GameProfile, ScoreFrame } from '../types';
+import { hammingDistance } from './FrameHasher';
 
 export interface AntiCheatResult {
   suspicious: boolean;
@@ -7,7 +8,7 @@ export interface AntiCheatResult {
 
 /**
  * Analyses a score stream for patterns consistent with cheating.
- * Cheap heuristics — no ML required.
+ * Combines temporal velocity physics, perceptual hashing replay detection, and boundary checks.
  */
 export function analyzeScoreStream(
   frames: ScoreFrame[],
@@ -34,11 +35,20 @@ export function analyzeScoreStream(
     }
   }
 
-  // 2. Repeated identical frames (replay detection).
-  const hashes = sorted.map((f) => f.imageHash).filter((h): h is string => !!h);
-  const uniqueHashes = new Set(hashes);
-  if (hashes.length >= 5 && uniqueHashes.size === 1) {
-    reasons.push('identical frames across window — likely replay');
+  // 2. Repeated identical or near-identical frames (perceptual replay detection).
+  const pHashes = sorted.map((f) => f.perceptualHash).filter((h): h is string => !!h);
+  if (pHashes.length >= 5) {
+    const first = pHashes[0]!;
+    const isPerceptualReplay = pHashes.slice(1, 5).every((h) => hammingDistance(first, h) <= 4);
+    if (isPerceptualReplay) {
+      reasons.push('near-identical frames across window (Hamming distance <= 4) — likely video replay');
+    }
+  } else {
+    const hashes = sorted.map((f) => f.imageHash).filter((h): h is string => !!h);
+    const uniqueHashes = new Set(hashes);
+    if (hashes.length >= 5 && uniqueHashes.size === 1) {
+      reasons.push('identical frames across window — likely replay');
+    }
   }
 
   // 3. Values outside allowed range.
