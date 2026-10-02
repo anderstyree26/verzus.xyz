@@ -27,9 +27,9 @@ Antigravity operates strictly on games governed by the **Predominance Test**:
 - **Esports Exemption Rationale**: Genuine contests of skill where participants compete directly against one another for prizes do not meet the statutory definition of gaming under Cap 131, provided no house odds are offered and entry fees fund direct prize pools or platform administration fees.
 - **Demo Mode**: Because Antigravity operates in `WALLET_MODE=demo` (POINTS have no cash value and cannot be converted to KES), no gaming license is required during initial rollout.
 
-### 2. Kenya Data Protection Act (2019)
-- **Principle of Minimization**: Antigravity enforces a strict **Zero Permanent Screenshot Storage Policy**. Match frames captured by the player are analyzed transiently in volatile client/server memory. Only SHA-256 hashes and alphanumeric score strings are persisted.
-- **Consent**: Explicit terms of service agree to OCR scanning of screen regions during active match sessions.
+### 2. Kenya Data Protection Act (2019) & GDPR Compliance
+- **Principle of Minimization**: Verzus enforces an authoritative **Zero Video Storage Policy**. Match frames and visual feeds submitted for verification are analyzed transiently in volatile device/server memory. Only verified numeric match results and mathematical integrity signatures are permanently persisted.
+- **Consent**: Explicit terms of service agree to automated visual telemetry analysis of designated game HUD regions during active match sessions.
 
 ### 3. Consumer Protection Act (2012)
 - Transparent match rules and deterministic scoring engines ensure clear, unmanipulated outcomes.
@@ -52,8 +52,8 @@ Antigravity operates strictly on games governed by the **Predominance Test**:
 
 ## 🛡️ Anti-Cheat & Fair Play Compliance
 
-To maintain legitimacy as a pure skill platform, Antigravity implements:
-- Rate limit thresholds on score increments.
-- Optical bounding box verification preventing edited screen insertions.
-- Hardware/device fingerprinting to prevent multi-accounting.
-- Automated forfeiture of entry fees and banishment for users caught tampering with OCR feeds.
+To maintain legitimacy as a pure skill platform, Verzus implements:
+- Rate limit thresholds on score increments and temporal sanity checks.
+- Proprietary visual validation preventing pre-recorded video or edited screen insertions.
+- Hardware/device fingerprinting and network subnet collision guards to prevent multi-accounting.
+- Automated forfeiture of entry fees and permanent banishment for users caught tampering with game visual feeds or match telemetry.

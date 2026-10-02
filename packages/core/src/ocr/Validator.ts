@@ -116,7 +116,7 @@ export function validateParsed(
   if (expectedTag) {
     const binding = verifyGamertagBinding(parsed.raw, expectedTag);
     if (!binding.matched) {
-      errors.push(binding.reason || `Gamertag '${expectedTag}' missing from OCR stream`);
+      errors.push(binding.reason || `Gamertag '${expectedTag}' missing from live match feed`);
       finalConfidence = Math.min(finalConfidence, binding.confidence);
     }
   }

@@ -38,7 +38,7 @@ export function useCapturePipeline(matchId: string, profile: GameProfile | null)
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        setState((prev) => ({ ...prev, error: `OCR init failed: ${message}` }));
+        setState((prev) => ({ ...prev, error: `Match verification engine initialization failed: ${message}` }));
       }
     })();
 

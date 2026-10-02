@@ -367,7 +367,7 @@ export default function AdminTreasuryPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">4. Cloud Infrastructure & OCR Verification:</span>
+                <span className="text-muted-foreground">4. Cloud Infrastructure & Match Verification Engine:</span>
                 <span className="font-mono font-bold text-foreground">
                   {formatEUR(report.recommendations.estimatedExpensesEur.serverInfraEstimate)}
                 </span>

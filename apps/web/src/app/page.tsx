@@ -716,9 +716,9 @@ export default function HomePage() {
             <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">Banking & FairPlay</h4>
             <ul className="space-y-1 text-[11px]">
               <li><Link href="/dashboard" className="hover:text-foreground">Cashier Ledger</Link></li>
+              <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-foreground">Player Privacy Policy</Link></li>
               <li><span className="text-muted-foreground/80">Paysafe Banking Hub</span></li>
-              <li><span className="text-muted-foreground/80">Anti-Cheat Verification</span></li>
-              <li><span className="text-muted-foreground/80">Terms & Player Privacy</span></li>
             </ul>
           </div>
 

@@ -157,7 +157,13 @@ export default function SignUpPage() {
                 />
                 <span>
                   I confirm I am at least <strong className="text-foreground">13 years old</strong> (18+ for cash EUR competitions) and agree to the{' '}
-                  <span className="text-primary hover:underline font-bold">Verzus Skill Gaming Terms</span> & Fair Play Standards.
+                  <Link href="/terms" target="_blank" className="text-primary hover:underline font-bold">
+                    Terms of Service
+                  </Link>{' '}
+                  &{' '}
+                  <Link href="/privacy" target="_blank" className="text-primary hover:underline font-bold">
+                    Privacy Policy
+                  </Link>.
                 </span>
               </label>
             </div>
